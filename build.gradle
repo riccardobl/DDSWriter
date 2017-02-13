@@ -1,0 +1,19 @@
+
+apply plugin: 'java'
+def jme_version ="v3.1-SNAPSHOT"
+def jme_group =  "com.github.jMonkeyEngine.jmonkeyengine"
+
+	
+repositories {
+    mavenLocal()
+  	mavenCentral()	
+	maven {  
+		url "https://jitpack.io" 
+	}
+}	
+
+dependencies {
+    compileOnly "${jme_group}:jme3-core:${jme_version}"
+    compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
+    compileOnly "${jme_group}:jme3-desktop:${jme_version}"    
+}
