@@ -35,15 +35,15 @@ public class Main{
 		System.out.println("   --out <FILE.dds>: Output file");
 		System.out.println("   --in <FILE>: Input file");
 		System.out.println("   --compress: Enable s2tc compression");
+		System.out.println("   --mipmaps: Generate mipmaps [Works only with 2d textures]");
 		System.out.println("   --exit: Exit interactive console");
-		//		System.out.println("   --console: Interactive console");
 	}
 
 	static void run(String[] _args) throws Exception {
+		DDSWriter.Options options=new DDSWriter.Options();
 
 		String in=null;
 		String out=null;
-		boolean compress=false;
 		for(int i=0;i<_args.length;i++){
 			String cmd=_args[i];
 			switch(cmd){
@@ -60,7 +60,11 @@ public class Main{
 					break;
 				}
 				case "--compress":{
-					compress=true;
+					options.compress=true;
+					break;
+				}
+				case "--mipmaps":{
+					options.gen_mipmaps=true;
 					break;
 				}
 				case "--close":{
@@ -74,8 +78,6 @@ public class Main{
 			System.exit(1);
 		}
 
-		DDSWriter.Options options=new DDSWriter.Options();
-		options.compress=compress;
 
 		Texture tx=null;
 

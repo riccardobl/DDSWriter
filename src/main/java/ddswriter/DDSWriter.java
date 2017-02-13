@@ -11,6 +11,7 @@ import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.delegators.UncompressedRGBADelegator;
+import jme3tools.converters.MipMapGenerator;
 
 /**
  * 
@@ -18,8 +19,7 @@ import ddswriter.delegators.UncompressedRGBADelegator;
  */
 public class DDSWriter{
 	public static class Options{
-		// public boolean flip_y=false;
-		// public boolean gen_mipmaps=false;
+		public boolean gen_mipmaps=false;
 		public boolean compress=false;
 	}
 
@@ -91,6 +91,9 @@ public class DDSWriter{
 	public void doExport(Texture tx, OutputStream output, Options options) throws Exception {
 		// TODO: Add support for RGB 
 		// TODO: Add support for DX10 HEADER
+		// TODO: Add mipmap generation for texture 3d and texture cubemap
+
+		if(options.gen_mipmaps&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) MipMapGenerator.generateMipMaps(tx.getImage());
 
 		OSTREAM=new DataOutputStream(output);
 
@@ -132,11 +135,11 @@ public class DDSWriter{
 			DWORD(DDPF_ALPHAPIXELS|(options.compress?DDPF_FOURCC:DDPF_RGB)); // dwFlags
 
 			{// dwFourCC 
-				if(options.compress){
-					// TODO: Add for compressed
-					/*
-					 * Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5.
-					 */
+				if(options.compress){					
+					BYTE('D');
+					BYTE('X');
+					BYTE('T');
+					BYTE('5'); // TODO: Make a setting or smth
 				}else{
 					DWORD(0);
 				}
