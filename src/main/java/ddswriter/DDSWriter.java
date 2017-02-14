@@ -15,8 +15,8 @@ import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.delegators.S2tcARGBDelegator;
 import ddswriter.delegators.MipmapGenDelegator;
+import ddswriter.delegators.S2tcARGBDelegator;
 import ddswriter.delegators.UncompressedARGBDelegator;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
