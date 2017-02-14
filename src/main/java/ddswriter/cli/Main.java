@@ -102,48 +102,7 @@ public class Main{
 			}
 			case "dds":{
 				InputStream is=new BufferedInputStream(new FileInputStream(new File(in)));
-
-				byte type[]={0}; // 0=2d 1=3d 2=cube
-
-				TextureKey key=new TextureKey(){
-					public boolean isFlipY() {
-						//						return options.flip_y; FIXME
-						return false;
-					}
-
-					public void setTextureTypeHint(Type textureTypeHint) {
-						if(textureTypeHint==Type.ThreeDimensional){
-							type[0]=1;
-						}else if(textureTypeHint==Type.CubeMap){
-							type[0]=2;
-						}
-					}
-				};
-
-				AssetInfo ai=new AssetInfo(null,key){
-					@Override
-					public InputStream openStream() {
-						return is;
-					}
-
-				};
-
-				DDSLoader loader=new DDSLoader();
-				Image img=(Image)loader.load(ai);
-				switch(type[0]){
-					default:{
-						tx=new Texture2D(img);
-						break;
-					}
-					case 1:{
-						tx=new Texture3D(img);
-						break;
-					}
-					case 2:{
-						tx=new TextureCubeMap(img);
-						break;
-					}
-				}
+				tx=DDSLoaderI.load(is);
 				is.close();
 			}
 		}
