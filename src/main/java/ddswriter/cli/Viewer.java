@@ -14,6 +14,11 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 
+
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class Viewer extends SimpleApplication{
 	private static File IMAGEF;
 	private static Texture IMAGE;

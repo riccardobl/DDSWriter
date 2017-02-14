@@ -123,7 +123,6 @@ public class DDSWriter{
 
 		{// dwPitchOrLinearSize 			
 			if(options.compress){
-				// TODO: Calculate for compressed
 				/*
 				 * For block-compressed formats, compute the pitch as: max( 1, ((width+3)/4) ) * block-size
 				 */

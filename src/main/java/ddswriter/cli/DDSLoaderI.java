@@ -13,6 +13,10 @@ import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.Texture.Type;
 import com.jme3.texture.plugins.DDSLoader;
 
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class DDSLoaderI{
 	public static Texture load(InputStream is) throws IOException {
 		return load(is,false);
