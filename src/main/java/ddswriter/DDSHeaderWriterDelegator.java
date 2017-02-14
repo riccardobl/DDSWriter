@@ -15,6 +15,6 @@ import ddswriter.format.DDS_HEADER;
  *
  */
 public interface DDSHeaderWriterDelegator extends DDSDelegator{
-	public void header(Texture tx,ImageRaster ir,Map<String,Object>  options,DDS_HEADER header)throws Exception ; 
+	public void header(Texture tx,ImageRaster ir,int mipmap,int slice,Map<String,Object>  options,DDS_HEADER header)throws Exception ; 
 
 }

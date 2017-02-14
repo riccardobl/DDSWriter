@@ -35,24 +35,26 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 				COLOR_C1=0b01;
 	
 	@Override
-	public void header(Texture tx,ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
-		super.header(tx,ir,options,header);
-		header.dwFlags|=DDSD_LINEARSIZE;
-		header.ddspf.dwFlags|=DDPF_FOURCC;
-		header.ddspf.dwFourCC[0]='D';
-		header.ddspf.dwFourCC[1]='X';
-		header.ddspf.dwFourCC[2]='T';
-		header.ddspf.dwFourCC[3]='5';	
-		
-		header.dwPitchOrLinearSize=(short) (Math.max(1, ((tx.getImage().getWidth()+3)/4) )* IMAGE_BLOCK_SIZE);
+	public void header(Texture tx,ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
+		super.header(tx,ir,mipmap,slice,options,header);
+		if(mipmap==0&&slice==0){
+			header.dwFlags|=DDSD_LINEARSIZE;
+			header.ddspf.dwFlags|=DDPF_FOURCC;
+			header.ddspf.dwFourCC[0]='D';
+			header.ddspf.dwFourCC[1]='X';
+			header.ddspf.dwFourCC[2]='T';
+			header.ddspf.dwFourCC[3]='5';	
+			
+			header.dwPitchOrLinearSize=(short) (Math.max(1, ((tx.getImage().getWidth()+3)/4) )* IMAGE_BLOCK_SIZE);
+		}
 	}
 	
 	@Override
-	public void body(Texture tx, ImageRaster ir, Map<String, Object> options, DDS_HEADER header, DDS_BODY body) throws Exception {
+	public void body(Texture tx, ImageRaster ir,int mipmap,int slice ,Map<String, Object> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 		int w=ir.getWidth();
 		int h=ir.getHeight();
 		
-		for(int x=0, y=0; x<h && y<w; x+=IMAGE_BLOCK_SIZE*2, y+=IMAGE_BLOCK_SIZE*2) { 						
+		for(int x=0, y=0; x<w && y<h; x+=IMAGE_BLOCK_SIZE*2, y+=IMAGE_BLOCK_SIZE*2) { 						
 			//// First ////
 			elaborateBlock(ir,body,
 					x,y,
@@ -77,7 +79,7 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 		ColorRGBA sample1=ir.getPixel(x+size-1, y+size-1);
 		
 		byte a0,a1;
-		long alphaData = 0xF; // has to contain 48 bits
+//		long alphaData = 0xF; // has to contain 48 bits
 		
 		short c0,c1;
 		int colorData = 0xFFFF; // has to contain 32 bits
@@ -92,8 +94,8 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 			a1=aux;
 		}
 		
-		for(int i=0; i < 16; i++)
-			alphaData=(alphaData>>i*3) & ALPHA_OPAQUE;
+//		for(int i=0; i < 16; i++)
+//			alphaData=(alphaData>>i*3) & ALPHA_OPAQUE;
 		
 		// Color //
 		c0=(short) ((byte) sample0.b | ((byte)  sample0.g )<<5 | ((byte) sample0.r)<<11);
@@ -117,14 +119,14 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 				",\n	c0="+shortToBinary(c0)+", c1="+shortToBinary(c1)+
 				",\n	colorData="+colorData
 		);*/
-		writeBlock(body,a0,a1,alphaData,c0,c1,colorData);
+		writeBlock(body,a0,a1,/*alphaData,*/c0,c1,colorData);
 	}	
 	
-	private void writeBlock(DDS_BODY body,byte a0,byte a1,long alphaData,short c0,short c1,int colorData) throws Exception {		
+	private void writeBlock(DDS_BODY body,byte a0,byte a1,/*long alphaData,*/short c0,short c1,int colorData) throws Exception {		
 		// Writing
 		body.writeByte(a0);
 		body.writeByte(a1);
-		for(int i=0; i < 6; i++) body.writeByte( (byte) (alphaData>>i*8) );
+		for(int i=0; i < 6; i++) body.writeByte( 0xFFFF);//(byte) (alphaData>>i*8) );
 		
 		body.writeByte((byte) c0);
 		body.writeByte((byte) c0>>8);

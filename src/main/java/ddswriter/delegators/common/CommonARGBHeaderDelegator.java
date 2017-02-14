@@ -20,8 +20,8 @@ import ddswriter.format.DDS_HEADER;
 public abstract class CommonARGBHeaderDelegator extends CommonHeaderDelegator{
 
 	@Override
-	public void header(Texture tx, ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
-		super.header(tx,ir,options,header);
+	public void header(Texture tx, ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
+		super.header(tx,ir,mipmap,slice,options,header);
 		
 		header.ddspf.dwFlags|=DDPF_ALPHAPIXELS;
 

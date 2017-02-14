@@ -39,10 +39,10 @@ public class DDSWriter{
 			for(int mipmap=0;mipmap<mipmaps;mipmap++){
 				ImageRaster ir=ImageRaster.create(tx.getImage(),0,mipmap,false);
 				if(is_header&&delegator instanceof DDSHeaderWriterDelegator){
-					((DDSHeaderWriterDelegator)delegator).header(tx,ir,options,header);
+					((DDSHeaderWriterDelegator)delegator).header(tx,ir,mipmap,0,options,header);
 
 				}else if(delegator instanceof DDSBodyWriterDelegator){
-					((DDSBodyWriterDelegator)delegator).body(tx,ir,options,header,body);
+					((DDSBodyWriterDelegator)delegator).body(tx,ir,mipmap,0,options,header,body);
 				}
 			}
 		}else if(tx instanceof TextureCubeMap){
@@ -50,10 +50,10 @@ public class DDSWriter{
 				for(int mipmap=0;mipmap<mipmaps;mipmap++){
 					ImageRaster ir=ImageRaster.create(tx.getImage(),slice,mipmap,false);
 					if(is_header&&delegator instanceof DDSHeaderWriterDelegator){
-						((DDSHeaderWriterDelegator)delegator).header(tx,ir,options,header);
+						((DDSHeaderWriterDelegator)delegator).header(tx,ir,mipmap,slice,options,header);
 
 					}else if(delegator instanceof DDSBodyWriterDelegator){
-						((DDSBodyWriterDelegator)delegator).body(tx,ir,options,header,body);
+						((DDSBodyWriterDelegator)delegator).body(tx,ir,mipmap,slice,options,header,body);
 					}
 				}
 			}
@@ -62,10 +62,10 @@ public class DDSWriter{
 				for(int mipmap=0;mipmap<mipmaps;mipmap++){
 					ImageRaster ir=ImageRaster.create(tx.getImage(),slice,mipmap,false);
 					if(is_header&&delegator instanceof DDSHeaderWriterDelegator){
-						((DDSHeaderWriterDelegator)delegator).header(tx,ir,options,header);
+						((DDSHeaderWriterDelegator)delegator).header(tx,ir,mipmap,slice,options,header);
 
 					}else if(delegator instanceof DDSBodyWriterDelegator){
-						((DDSBodyWriterDelegator)delegator).body(tx,ir,options,header,body);
+						((DDSBodyWriterDelegator)delegator).body(tx,ir,mipmap,slice,options,header,body);
 					}
 				}
 			}

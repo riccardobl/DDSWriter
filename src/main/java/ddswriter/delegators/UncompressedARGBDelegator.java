@@ -26,19 +26,18 @@ import static ddswriter.format.DDS_PIXELFORMAT.*;
 public class UncompressedARGBDelegator extends CommonARGBHeaderDelegator implements DDSBodyWriterDelegator{
 
 	@Override
-	public void header(Texture tx,ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
-		super.header(tx,ir,options,header);
-
-		header.dwFlags|=DDSD_PITCH;
-		header.dwPitchOrLinearSize=(tx.getImage().getWidth()*32+7)/8;
-
-		header.ddspf.dwFlags|=DDPF_RGB;
-//		header.ddspf.dwFourCC
-
+	public void header(Texture tx,ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
+		super.header(tx,ir,mipmap,slice,options,header);
+		if(mipmap==0&&slice==0){
+			header.dwFlags|=DDSD_PITCH;
+			header.dwPitchOrLinearSize=(tx.getImage().getWidth()*32+7)/8;
+	
+			header.ddspf.dwFlags|=DDPF_RGB;
+		}
 	}
 
 	@Override
-	public void body(Texture tx,ImageRaster ir, Map<String,Object> options,DDS_HEADER header, DDS_BODY body) throws Exception {
+	public void body(Texture tx,ImageRaster ir,int mipmap,int slice, Map<String,Object> options,DDS_HEADER header, DDS_BODY body) throws Exception {
 		int w=ir.getWidth();
 		int h=ir.getHeight();
 		for(int y=0;y<h;y++){

@@ -27,7 +27,7 @@ import static ddswriter.format.DDS_PIXELFORMAT.*;
 public abstract class CommonHeaderDelegator implements DDSHeaderWriterDelegator{
 
 	@Override
-	public void header(Texture tx, ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
+	public void header(Texture tx, ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
 
 		if(tx.getImage().hasMipmaps()) header.dwFlags|=DDSD_MIPMAPCOUNT;
 		if(tx instanceof Texture3D) header.dwFlags|=DDSD_DEPTH;

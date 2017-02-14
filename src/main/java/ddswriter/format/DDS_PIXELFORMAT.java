@@ -10,6 +10,7 @@ import ddswriter.format.dumper.DumpableBitfield;
  * @author Riccardo Balbo
  *
  */
+// Ref: https://msdn.microsoft.com/en-us/library/windows/desktop/bb943984(v=vs.85).aspx
 public class DDS_PIXELFORMAT extends WritableStruct{
 	DDS_PIXELFORMAT(){}
 

@@ -14,6 +14,7 @@ import ddswriter.format.dumper.DumpableBitfield;
  * @author Riccardo Balbo
  *
  */
+// Ref: https://msdn.microsoft.com/en-us/library/windows/desktop/bb943991(v=vs.85).aspx
 public class DDS_HEADER extends WritableStruct{
 
 
@@ -102,9 +103,9 @@ public class DDS_HEADER extends WritableStruct{
 		ddspf.write(os);
 		os.writeDWord(dwCaps);
 		os.writeDWord(dwCaps2);
-		os.writeDWord(dwCaps3); // dwCaps3
-		os.writeDWord(dwCaps4); // dwCaps4
-		os.writeDWord(dwReserved2); // dwReserved2	
+		os.writeDWord(dwCaps3); 
+		os.writeDWord(dwCaps4);
+		os.writeDWord(dwReserved2); 
 	}
 	
 	protected void dumpField(Field f,Collection<Field> flags,StringBuilder sb) throws IllegalArgumentException, IllegalAccessException{

@@ -29,7 +29,7 @@ public class MipmapGenDelegator implements DDSHeaderWriterDelegator{
 
 
 	@Override
-	public void header(Texture tx,ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
+	public void header(Texture tx,ImageRaster ir, int mipmap,int slice,Map<String,Object> options, DDS_HEADER header) throws Exception {
 		if((boolean)options.getOrDefault("options",false)&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) MipMapGenerator.generateMipMaps(tx.getImage());
 
 	}
