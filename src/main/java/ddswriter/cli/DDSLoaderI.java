@@ -14,15 +14,17 @@ import com.jme3.texture.Texture.Type;
 import com.jme3.texture.plugins.DDSLoader;
 
 public class DDSLoaderI{
-
 	public static Texture load(InputStream is) throws IOException {
+		return load(is,false);
+	}
+
+	public static Texture load(InputStream is,boolean flip) throws IOException {
 
 		byte type[]={0}; // 0=2d 1=3d 2=cube
 
 		TextureKey key=new TextureKey(){
 			public boolean isFlipY() {
-				//						return options.flip_y; FIXME
-				return false;
+				return flip;
 			}
 
 			public void setTextureTypeHint(Type textureTypeHint) {
