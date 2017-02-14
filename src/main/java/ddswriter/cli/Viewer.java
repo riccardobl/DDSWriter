@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
@@ -19,6 +20,7 @@ import com.jme3.ui.Picture;
  * 
  * @author Riccardo Balbo
  */
+
 public class Viewer extends SimpleApplication{
 	private static File IMAGEF;
 	private static Texture IMAGE;
@@ -79,6 +81,7 @@ public class Viewer extends SimpleApplication{
 	@Override
 	public void simpleInitApp() {
 		try{
+			viewPort.setBackgroundColor(ColorRGBA.Red);
 			setDisplayStatView(false);
 			setDisplayFps(false);
 			flyCam.setEnabled(false);
