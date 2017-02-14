@@ -10,6 +10,7 @@ import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
+import ddswriter.delegators.CompressedRGBADelegator;
 import ddswriter.delegators.UncompressedRGBADelegator;
 
 /**
@@ -178,7 +179,7 @@ public class DDSWriter{
 
 		// ################# BODY #####################		
 
-		UncompressedRGBADelegator urgba=new UncompressedRGBADelegator();
+		CompressedRGBADelegator urgba=new CompressedRGBADelegator();
 
 		int mipmaps=!tx.getImage().hasMipmaps()?1:tx.getImage().getMipMapSizes().length;
 
