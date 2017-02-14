@@ -7,5 +7,5 @@ import com.jme3.texture.image.ImageRaster;
  */
 public interface DDSDelegator{
 	public byte[] process(ImageRaster ir,DDSWriter writer) throws Exception ; 
-	
+	public short dwPitchOrLinearSize(int width) throws Exception ;
 }

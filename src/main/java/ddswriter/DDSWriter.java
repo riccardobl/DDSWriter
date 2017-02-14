@@ -11,6 +11,7 @@ import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
+import ddswriter.delegators.CompressedRGBADelegator;
 import ddswriter.delegators.UncompressedRGBADelegator;
 import jme3tools.converters.MipMapGenerator;
 
@@ -30,6 +31,7 @@ public class DDSWriter{
 	}
 
 	protected DataOutputStream OSTREAM;
+	protected DDSDelegator delegator=new CompressedRGBADelegator();
 
 	// ################# FLAGS #####################
 	// Required in every .dds file.
@@ -119,6 +121,7 @@ public class DDSWriter{
 				/*
 				 * For block-compressed formats, compute the pitch as: max( 1, ((width+3)/4) ) * block-size
 				 */
+				DWORD(delegator.dwPitchOrLinearSize(tx.getImage().getWidth()));
 			}else{
 				/*
 				 * For other formats, compute the pitch as: ( width * bits-per-pixel + 7 ) / 8 				
@@ -183,7 +186,8 @@ public class DDSWriter{
 
 		// ################# BODY #####################		
 
-		UncompressedRGBADelegator urgba=new UncompressedRGBADelegator();
+		CompressedRGBADelegator urgba=new CompressedRGBADelegator();
+		//UncompressedRGBADelegator urgba=new UncompressedRGBADelegator();
 
 		int mipmaps=!tx.getImage().hasMipmaps()?1:tx.getImage().getMipMapSizes().length;
 
