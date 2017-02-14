@@ -25,8 +25,6 @@ import static ddswriter.format.DDS_PIXELFORMAT.*;
  */
 public class UncompressedARGBDelegator extends CommonARGBHeaderDelegator implements DDSBodyWriterDelegator{
 
-
-
 	@Override
 	public void header(Texture tx,ImageRaster ir, Map<String,Object> options, DDS_HEADER header) throws Exception {
 		super.header(tx,ir,options,header);
