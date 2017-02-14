@@ -1,6 +1,6 @@
 
 apply plugin: 'java'
-def jme_version ="v3.1-SNAPSHOT"
+def jme_version ="v3.1.0-alpha4"
 def jme_group =  "com.github.jMonkeyEngine.jmonkeyengine"
 
 	
@@ -10,6 +10,9 @@ repositories {
 	maven {  
 		url "https://jitpack.io" 
 	}
+    maven {
+         url "http://dl.bintray.com/jmonkeyengine/com.jme3" 
+    }
 }	
 
 dependencies {

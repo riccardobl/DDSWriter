@@ -6,5 +6,5 @@ bin/
 *.so
 *.dll
 *.dylib
-
+build/
 hs_err_pid*.log
