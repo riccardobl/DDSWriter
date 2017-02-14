@@ -1,5 +1,7 @@
 package ddswriter;
+
 import java.util.HashMap;
+import java.util.Map;
 
 import com.jme3.texture.Texture;
 import com.jme3.texture.image.ImageRaster;
@@ -10,6 +12,9 @@ import ddswriter.format.DDS_HEADER;
 /**
  * 
  * @author Riccardo Balbo
+ *
  */
-public interface DDSDelegator{
+public interface DDSBodyWriterDelegator extends DDSDelegator{
+	public void body(Texture tx,ImageRaster ir,Map<String,Object>  options, DDS_HEADER header,DDS_BODY body)throws Exception ; 
+
 }

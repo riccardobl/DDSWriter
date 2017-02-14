@@ -6,6 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
@@ -16,7 +19,9 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.texture.plugins.TGALoader;
 
+import ddswriter.DDSDelegator;
 import ddswriter.DDSWriter;
+import ddswriter.delegators.CompressedRGBADelegator;
 
 /**
  * 
@@ -35,12 +40,14 @@ public class Main{
 	}
 
 	static void run(String[] _args) throws Exception {
-		DDSWriter.Options options=new DDSWriter.Options();
-
+		Map<String,Object> options=new HashMap<String,Object>();
+		options.put("debug",true);
+		
 		String in=null;
 		String out=null;
 		for(int i=0;i<_args.length;i++){
 			String cmd=_args[i];
+		
 			switch(cmd){
 				case "--help":{
 					help();
@@ -55,11 +62,11 @@ public class Main{
 					break;
 				}
 				case "--compress":{
-					options.compress=true;
+					options.put("compress",true);
 					break;
 				}
 				case "--mipmaps":{
-					options.gen_mipmaps=true;
+					options.put("gen_mipmaps",true);
 					break;
 				}
 				case "--close":{
@@ -108,7 +115,7 @@ public class Main{
 		}
 
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(out)));
-		DDSWriter.write(tx,fo,options);
+		DDSWriter.write(tx,options,fo);
 		fo.close();
 	}
 

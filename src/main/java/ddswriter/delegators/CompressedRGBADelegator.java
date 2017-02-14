@@ -12,7 +12,7 @@ import ddswriter.DDSWriter;
 
 // Ref: https://github.com/divVerent/s2tc/wiki
 
-public class CompressedRGBADelegator implements DDSDelegator {
+public class CompressedRGBADelegator implements DDSDelegator { 
 	protected static final int IMAGE_BLOCK_SIZE = 4;
 	
 	protected static final int
