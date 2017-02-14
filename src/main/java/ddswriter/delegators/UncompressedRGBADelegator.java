@@ -18,10 +18,9 @@ public class UncompressedRGBADelegator implements DDSDelegator{
 		for(int y=0;y<h;y++){
 			for(int x=0;x<w;x++){
 				ColorRGBA c=ir.getPixel(x,y);
-				writer.BYTE((int)(c.a*255f));
-				writer.BYTE((int)(c.b*255f));
-				writer.BYTE((int)(c.g*255f));
-				writer.BYTE((int)(c.r*255f));
+				writer.PIXEL(c);
+			
+
 			}
 		}
 		return null;
