@@ -31,7 +31,7 @@ public class DDSWriter{
 	}
 
 	protected DataOutputStream OSTREAM;
-	protected DDSDelegator delegator=new CompressedRGBADelegator();
+	protected DDSDelegator DELEGATOR;
 
 	// ################# FLAGS #####################
 	// Required in every .dds file.
@@ -100,6 +100,12 @@ public class DDSWriter{
 
 		OSTREAM=new DataOutputStream(output);
 
+		if(options.compress){
+			DELEGATOR=new CompressedRGBADelegator();
+		}else{
+			DELEGATOR=new UncompressedRGBADelegator();
+		}
+		
 		// ################# HEADER #####################
 		DWORD(0x20534444); // dwMagic
 		DWORD(124); // dwSize
@@ -121,7 +127,7 @@ public class DDSWriter{
 				/*
 				 * For block-compressed formats, compute the pitch as: max( 1, ((width+3)/4) ) * block-size
 				 */
-				DWORD(delegator.dwPitchOrLinearSize(tx.getImage().getWidth()));
+				DWORD(DELEGATOR.dwPitchOrLinearSize(tx.getImage().getWidth()));
 			}else{
 				/*
 				 * For other formats, compute the pitch as: ( width * bits-per-pixel + 7 ) / 8 				
@@ -139,7 +145,7 @@ public class DDSWriter{
 			DWORD(DDPF_ALPHAPIXELS|(options.compress?DDPF_FOURCC:DDPF_RGB)); // dwFlags
 
 			{// dwFourCC 
-				if(options.compress){					
+				if(options.compress){
 					BYTE('D');
 					BYTE('X');
 					BYTE('T');
@@ -186,7 +192,7 @@ public class DDSWriter{
 
 		// ################# BODY #####################		
 
-		CompressedRGBADelegator urgba=new CompressedRGBADelegator();
+		//		CompressedRGBADelegator urgba=new CompressedRGBADelegator();
 		//UncompressedRGBADelegator urgba=new UncompressedRGBADelegator();
 
 		int mipmaps=!tx.getImage().hasMipmaps()?1:tx.getImage().getMipMapSizes().length;
@@ -194,20 +200,20 @@ public class DDSWriter{
 		if(tx instanceof Texture2D){
 			for(int mipmap=0;mipmap<mipmaps;mipmap++){
 				ImageRaster ir=ImageRaster.create(tx.getImage(),0,mipmap,false);
-				urgba.process(ir,this);
+				DELEGATOR.process(ir,this);
 			}
 		}else if(tx instanceof TextureCubeMap){
 			for(int slice=0;slice<6;slice++){
 				for(int mipmap=0;mipmap<mipmaps;mipmap++){
 					ImageRaster ir=ImageRaster.create(tx.getImage(),slice,mipmap,false);
-					urgba.process(ir,this);
+					DELEGATOR.process(ir,this);
 				}
 			}
 		}else if(tx instanceof Texture3D){
 			for(int slice=0;slice<tx.getImage().getDepth();slice++){
 				for(int mipmap=0;mipmap<mipmaps;mipmap++){
 					ImageRaster ir=ImageRaster.create(tx.getImage(),slice,mipmap,false);
-					urgba.process(ir,this);
+					DELEGATOR.process(ir,this);
 				}
 			}
 
@@ -246,8 +252,8 @@ public class DDSWriter{
 	public void BYTE(int i) throws IOException {
 		OSTREAM.writeByte((byte)i);
 	}
-	
-	public void PIXEL(int r,int g,int b, int a) throws IOException{
+
+	public void PIXEL(int r, int g, int b, int a) throws IOException {
 		// argb TODO: make a setting for this
 		BYTE(b);
 		BYTE(g);
@@ -255,11 +261,11 @@ public class DDSWriter{
 		BYTE(a);
 	}
 
-	public void PIXEL(ColorRGBA c) throws IOException {		
+	public void PIXEL(ColorRGBA c) throws IOException {
 		int b=(int)(c.b*255f);
 		int g=(int)(c.g*255f);
 		int r=(int)(c.r*255f);
-		int a=(int)(c.a*255f);		
+		int a=(int)(c.a*255f);
 		PIXEL(r,g,b,a);
 	}
 
