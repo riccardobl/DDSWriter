@@ -3,6 +3,7 @@ package ddswriter.delegators;
 import static ddswriter.format.DDS_HEADER.*;
 import static ddswriter.format.DDS_PIXELFORMAT.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import com.jme3.math.ColorRGBA;
@@ -22,7 +23,7 @@ import ddswriter.format.DDS_HEADER;
 // Ref: https://github.com/divVerent/s2tc/wiki
 
 public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSBodyWriterDelegator {
-	protected static final int IMAGE_BLOCK_SIZE = 16;
+	protected static final int IMAGE_BLOCK_SIZE = 4;
 	
 	protected static final int
 				ALPHA_A0=0b000,
@@ -33,6 +34,16 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 				
 				COLOR_C0=0b00,
 				COLOR_C1=0b01;
+	
+	private ArrayList<Block> blocks;
+ 	
+	class Block {
+		public ColorRGBA[][] pixels;
+		
+		public Block(int size) {
+			pixels=new ColorRGBA[size][size];
+		}
+	}
 	
 	@Override
 	public void header(Texture tx,ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
@@ -45,7 +56,8 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 			header.ddspf.dwFourCC[2]='T';
 			header.ddspf.dwFourCC[3]='5';	
 			
-			header.dwPitchOrLinearSize=(short) (Math.max(1, ((tx.getImage().getWidth()+3)/4) )* IMAGE_BLOCK_SIZE);
+			//header.dwPitchOrLinearSize=(short) (Math.max(1, ((tx.getImage().getWidth()+3)/4) )* IMAGE_BLOCK_SIZE);
+			header.dwPitchOrLinearSize=Math.max(1, ((tx.getImage().getWidth()+3)/4) * 16);
 		}
 	}
 	
@@ -54,35 +66,36 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 		int w=ir.getWidth();
 		int h=ir.getHeight();
 		
-		for(int x=0, y=0; x<w && y<h; x+=IMAGE_BLOCK_SIZE*2, y+=IMAGE_BLOCK_SIZE*2) { 						
-			//// First ////
-			elaborateBlock(ir,body,
-					x,y,
-			IMAGE_BLOCK_SIZE);
-
-			elaborateBlock(ir,body,
-					x, y+IMAGE_BLOCK_SIZE,
-			IMAGE_BLOCK_SIZE);
-			
-			elaborateBlock(ir,body,
-					x+IMAGE_BLOCK_SIZE, y,
-			IMAGE_BLOCK_SIZE);
-			
-			elaborateBlock(ir,body,
-					x+IMAGE_BLOCK_SIZE, y+IMAGE_BLOCK_SIZE,
-			IMAGE_BLOCK_SIZE);
+		blocks=new ArrayList<Block>();
+		
+		for(int y=0; y<h; y+=IMAGE_BLOCK_SIZE) { 
+			for(int x=0; x<w; x+=IMAGE_BLOCK_SIZE) {
+				Block block=new Block(IMAGE_BLOCK_SIZE);
+				
+				for(int blockY=0; blockY<IMAGE_BLOCK_SIZE; blockY++) {
+					for(int blockX=0; blockX<IMAGE_BLOCK_SIZE; blockX++) {
+						block.pixels[blockX][blockY]=ir.getPixel(x+blockX, y+blockY);
+					}
+				}
+				
+				blocks.add(block);
+			}
+		}
+		
+		for(Block block:blocks) {
+			elaborateBlock(block,body,IMAGE_BLOCK_SIZE);
 		}
 	}
 
-	private void elaborateBlock(ImageRaster ir,DDS_BODY body,int x,int y,int size) throws Exception {
-		ColorRGBA sample0=ir.getPixel(x, y);
-		ColorRGBA sample1=ir.getPixel(x+size-1, y+size-1);
+	private void elaborateBlock(Block block,DDS_BODY body,int size) throws Exception {
+		ColorRGBA sample0 = ColorRGBA.White; //block.pixels[0][0];
+		ColorRGBA sample1 = ColorRGBA.White; //block.pixels[size-1][size-1];
 		
 		byte a0,a1;
-//		long alphaData = 0xF; // has to contain 48 bits
+		long alphaData = 0; // has to contain 48 bits
 		
 		short c0,c1;
-		int colorData = 0xFFFF; // has to contain 32 bits
+		int colorData = 0; // has to contain 32 bits 0xFFFFFFFF
 		
 		// Alpha //
 		a0=(byte) (Integer.reverseBytes((int) (sample0.a*255f) & 0xff));
@@ -94,8 +107,13 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 			a1=aux;
 		}
 		
-//		for(int i=0; i < 16; i++)
-//			alphaData=(alphaData>>i*3) & ALPHA_OPAQUE;
+		//System.out.println("ALPHA DATA");
+		for(int i=0; i < 16; i++) {
+			alphaData|= ( ((ALPHA_OPAQUE >> 2)&1) << (i*3) )     |
+						( ((ALPHA_OPAQUE >> 1)&1) << ((i*3)+1) ) |
+						( ((ALPHA_OPAQUE	 )&1) << ((i*3)+2) );
+			//System.out.println("i="+i+" - "+Long.toBinaryString(alphaData));
+		}
 		
 		// Color //
 		c0=(short) ((byte) sample0.b | ((byte)  sample0.g )<<5 | ((byte) sample0.r)<<11);
@@ -107,22 +125,24 @@ public class S2tcARGBDelegator extends CommonARGBHeaderDelegator implements DDSB
 			c1=aux;
 		}
 		
-		System.out.println("COLOR DATA");
+		//System.out.println("COLOR DATA");
 		for(int i=0; i < 16; i++) {
-			colorData=(colorData>>i*2) & COLOR_C1;
-			System.out.println(Integer.toBinaryString(colorData));
+			colorData |= ( ((COLOR_C1 >> 1)&1) << (i*2) ) |
+						 ( ((COLOR_C1	  )&1) << ((i*2)+1) );
+			//System.out.println(Integer.toBinaryString(colorData));
 		}
 		
-		/*System.out.println("Writing block:\nx=" + x + ", y= " + y +
+		/*System.out.println("Writing block:\n index=" + blocks.indexOf(block) +
 				",\n	a0=" + byteToBinary(a0) + ", a1=" + byteToBinary(a1) +
 				",\n	alphaData=" + Long.toBinaryString(alphaData) + 
 				",\n	c0="+shortToBinary(c0)+", c1="+shortToBinary(c1)+
-				",\n	colorData="+colorData
+				",\n	colorData="+Integer.toBinaryString(colorData)
 		);*/
-		writeBlock(body,a0,a1,/*alphaData,*/c0,c1,colorData);
+		
+		writeBlock(body,a0,a1,alphaData,c0,c1,colorData);
 	}	
 	
-	private void writeBlock(DDS_BODY body,byte a0,byte a1,/*long alphaData,*/short c0,short c1,int colorData) throws Exception {		
+	private void writeBlock(DDS_BODY body,byte a0,byte a1,long alphaData,short c0,short c1,int colorData) throws Exception {		
 		// Writing
 		body.writeByte(a0);
 		body.writeByte(a1);
