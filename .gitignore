@@ -2,9 +2,9 @@
 .classpath
 bin/
 .settings/
-gradle/
 .gradle/
-gradlew
-gradlew.bat
 *.so
 *.dll
+*.dylib
+
+hs_err_pid*.log

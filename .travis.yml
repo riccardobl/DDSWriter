@@ -5,9 +5,4 @@ os:
 notifications:
   email: true
 script:
-- gradle build
-before_install:
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository -y ppa:cwchien/gradle ; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -qq update ; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get remove -y gradle ; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y gradle-ppa ; fi
+- ./gradlew build
