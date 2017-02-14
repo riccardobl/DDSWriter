@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture3D;
@@ -146,10 +147,11 @@ public class DDSWriter{
 			}
 
 			DWORD(32); // dwRGBBitCount
-			DWORD(0xFF000000); // dwRBitMask
-			DWORD(0x00FF0000); // dwGBitMask
-			DWORD(0x0000FF00); // dwBBitMask
-			DWORD(0x000000FF); // dwABitMask
+			// argb TODO: make a setting for this
+			DWORD(0x00FF0000); // dwRBitMask
+			DWORD(0x0000FF00); // dwGBitMask
+			DWORD(0x000000FF); // dwBBitMask
+			DWORD(0xFF000000); // dwABitMask
 		}
 
 		{// dwCaps
@@ -239,6 +241,22 @@ public class DDSWriter{
 
 	public void BYTE(int i) throws IOException {
 		OSTREAM.writeByte((byte)i);
+	}
+	
+	public void PIXEL(int r,int g,int b, int a) throws IOException{
+		// argb TODO: make a setting for this
+		BYTE(b);
+		BYTE(g);
+		BYTE(r);
+		BYTE(a);
+	}
+
+	public void PIXEL(ColorRGBA c) throws IOException {		
+		int b=(int)(c.b*255f);
+		int g=(int)(c.g*255f);
+		int r=(int)(c.r*255f);
+		int a=(int)(c.a*255f);		
+		PIXEL(r,g,b,a);
 	}
 
 }
