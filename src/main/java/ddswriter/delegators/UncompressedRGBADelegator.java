@@ -26,4 +26,10 @@ public class UncompressedRGBADelegator implements DDSDelegator{
 		return null;
 	}
 
+	@Override
+	public short dwPitchOrLinearSize(int width) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

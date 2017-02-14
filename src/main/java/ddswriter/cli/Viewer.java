@@ -33,8 +33,6 @@ public class Viewer extends SimpleApplication{
 	@Override
 	public void simpleInitApp() {
 		try{
-
-
 			viewPort.setBackgroundColor(ColorRGBA.Pink);
 			flyCam.setEnabled(false);
 			InputStream is=new BufferedInputStream(new FileInputStream(IMAGE));
