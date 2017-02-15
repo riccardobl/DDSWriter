@@ -31,7 +31,14 @@ public class UncompressedARGBDelegator extends CommonARGBHeaderDelegator impleme
 		if(mipmap==0&&slice==0){
 			header.dwFlags|=DDSD_PITCH;
 			header.dwPitchOrLinearSize=(tx.getImage().getWidth()*32+7)/8;
-	
+
+			header.ddspf.dwRGBBitCount=32;
+
+			header.ddspf.dwRBitMask=0x00FF0000;
+			header.ddspf.dwGBitMask=0x0000FF00;
+			header.ddspf.dwBBitMask=0x000000FF;
+			header.ddspf.dwABitMask=0xFF000000;
+			
 			header.ddspf.dwFlags|=DDPF_RGB;
 		}
 	}

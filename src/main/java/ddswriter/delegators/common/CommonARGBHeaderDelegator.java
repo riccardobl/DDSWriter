@@ -25,12 +25,6 @@ public abstract class CommonARGBHeaderDelegator extends CommonHeaderDelegator{
 		
 		header.ddspf.dwFlags|=DDPF_ALPHAPIXELS;
 
-		header.ddspf.dwRGBBitCount=32;
-
-		header.ddspf.dwRBitMask=0x00FF0000;
-		header.ddspf.dwGBitMask=0x0000FF00;
-		header.ddspf.dwBBitMask=0x000000FF;
-		header.ddspf.dwABitMask=0xFF000000;
 	}
 
 }
