@@ -121,22 +121,22 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 		// Step 3 - Palette-Reduce The Blocks		
 		for(int x=0;x<blocks.length;x++){
 			for(int y=0;y<blocks[0].length;y++){
-				System.out.println("Before reduce");
+//				System.out.println("Before reduce");
 				Texel texel=blocks[x][y];
-				for(int xx=0;xx<texel.getWidth();xx++){
-					for(int xy=0;xy<texel.getHeight();xy++){
-						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
-						
-					}
-				}
+//				for(int xx=0;xx<texel.getWidth();xx++){
+//					for(int xy=0;xy<texel.getHeight();xy++){
+//						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
+//						
+//					}
+//				}
 				TexelReducer.reduce(texel);
-				System.out.println("After reduce");
-				for(int xx=0;xx<texel.getWidth();xx++){
-					for(int xy=0;xy<texel.getHeight();xy++){
-						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
-						
-					}
-				}
+//				System.out.println("After reduce");
+//				for(int xx=0;xx<texel.getWidth();xx++){
+//					for(int xy=0;xy<texel.getHeight();xy++){
+//						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
+//						
+//					}
+//				}
 			}
 		}
 
@@ -186,7 +186,7 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 				if(ct==c0)color_data|=C0;
 				else if(ct==c1)color_data|=C1;
 				else {
-					System.err.print("WTF "+ct+" "+c0+" "+c1);
+					System.err.print("Palette generation is wrong! "+ct+" "+c0+" "+c1);
 					System.exit(1);					
 				}
 				color_data<<=2;
