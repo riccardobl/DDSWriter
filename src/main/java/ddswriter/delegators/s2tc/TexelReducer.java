@@ -135,7 +135,10 @@ public class TexelReducer{
 			
 			for(int j=i; j<temp_palette.length; j++) {
 				Vector4f c1=temp_palette[j];
-				float diff=diff(c,c1);
+				float diff;
+				
+				if(i>0) diff=diff(temp_palette[i-1],c1);
+				else diff=diff(temp_palette[0],c1);
 				
 				if(diff < mediumDiff) { //CHECK THE DIFFERENCE
 					Vector4f aux=temp_palette[i];
