@@ -1,6 +1,8 @@
 package ddswriter.format;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collection;
 
 import ddswriter.DDSOutputStream;
 import ddswriter.format.dumper.DumpableBitfield;
@@ -40,6 +42,15 @@ public class DDS_PIXELFORMAT extends WritableStruct{
 	public int dwBBitMask;
 	public int dwABitMask;
 
+	
+	protected void dumpField(Field f,Collection<Field> flags,StringBuilder sb) throws IllegalArgumentException, IllegalAccessException{
+		if(f.getName().equals("dwFourCC")){
+			sb.append("dwFourCC =  ");
+			sb.append(new String(dwFourCC));
+		}else{
+			super.dumpField(f,flags,sb);
+		}
+	}
 	@Override
 	public void write(DDSOutputStream os) throws IOException {
 		os.writeDWord(dwSize);

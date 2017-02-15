@@ -21,7 +21,7 @@ import com.jme3.texture.plugins.TGALoader;
 
 import ddswriter.DDSDelegator;
 import ddswriter.DDSWriter;
-import ddswriter.delegators.S2tcARGBDelegator;
+import ddswriter.delegators.s2tc.S2tcDelegator;
 
 /**
  * 
