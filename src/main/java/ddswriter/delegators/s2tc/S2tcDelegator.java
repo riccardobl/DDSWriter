@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
 import com.jme3.texture.image.ImageRaster;
@@ -21,6 +22,7 @@ import com.jme3.texture.image.ImageRaster;
 import ddswriter.DDSBodyWriterDelegator;
 import ddswriter.delegators.common.CommonARGBHeaderDelegator;
 import ddswriter.delegators.common.CommonHeaderDelegator;
+import ddswriter.delegators.s2tc.Texel.PixelFormat;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
 import jme3tools.converters.ImageToAwt;
@@ -100,21 +102,10 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 		int h=ir.getHeight();
 		int pxXblock[]=new int[]{4,4};
 
-//		Texel txl=new Texel(ir,new int[]{0,0},new int[]{w,h});
+		Texel txl=Texel.fromImageRaster(ir,new Vector2f(0,0),new Vector2f(ir.getWidth(),ir.getHeight()));
 
-//		// Step 1 - Convert To RGB565 (16bpp)
-//		for(int x=0;x<w;x++){
-//			for(int y=0;y<h;y++){
-//				int rgba[]=txl.getIntPixelRGBA(x,y);
-//				rgba[0]=((rgba[0]>>3)<<11);
-//				rgba[1]=((rgba[1]>>2)<<5);
-//				rgba[2]=(rgba[2]>>3);
-//				txl.setIntPixelRGBA(x,y,rgba);
-//			}
-//		}
-//		
-
-	
+		// Step 1 - Convert To RGB565 (16bpp)
+//		txl.convertFormat(PixelFormat.RGBA5658_INT);
 
 		// Step 2 - Divide The Image Into Blocks
 		Texel blocks[][]=new Texel[(int)FastMath.ceil((float)w/pxXblock[0])][(int)FastMath.ceil((float)h/pxXblock[1])];
@@ -123,63 +114,59 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 			for(int y=0;y<blocks[0].length;y++){
 				int xl=x*pxXblock[0];
 				int yl=y*pxXblock[1];
-				
-				Texel texel=new Texel(ir,new int[]{xl,yl},new int[]{xl+pxXblock[0],yl+pxXblock[1]});
-				blocks[x][y]=texel;
+				blocks[x][y]=Texel.fromTexel(PixelFormat.RGBA5658_INT,txl,new Vector2f(xl,yl),new Vector2f(xl+pxXblock[0],yl+pxXblock[1]));
 			}
 		}
 
 		// Step 3 - Palette-Reduce The Blocks		
 		for(int x=0;x<blocks.length;x++){
 			for(int y=0;y<blocks[0].length;y++){
-				TexelReducer.reduce(blocks[x][y]);
-//				blocks[x][y].write(ir);
+				System.out.println("Before reduce");
+				Texel texel=blocks[x][y];
+				for(int xx=0;xx<texel.getWidth();xx++){
+					for(int xy=0;xy<texel.getHeight();xy++){
+						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
+						
+					}
+				}
+				TexelReducer.reduce(texel);
+				System.out.println("After reduce");
+				for(int xx=0;xx<texel.getWidth();xx++){
+					for(int xy=0;xy<texel.getHeight();xy++){
+						System.out.println(texel.get(PixelFormat.RGBA8_FLOAT,xx,xy));
+						
+					}
+				}
 			}
 		}
-//		
-//		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/block_red.jpg"));
-//		BufferedImage bimg=ImageToAwt.convert(tx.getImage(),false,true,0);
-//		ImageIO.write(bimg,"jpg",out);
-//		out.close();
-//		
-		
-		
 
 		// Step 4 - Encode The Blocks
 		for(int x=0;x<blocks.length;x++){
 			for(int y=0;y<blocks[0].length;y++){
 				if(FORMAT==Format.DXT1)writeDXT1(blocks[x][y],body);
 			}
-
 		}
 
 	}
 
 
 	private void writeDXT1(Texel texel, DDS_BODY body) throws Exception {
-//		Vector4f sample0c=null;
-//		Vector4f sample1c=null;
-//		
-//		int[] sample0=texel.getIntPixelRGBA(0,0);
-//		int[] sample1=sample0;
-//		sample1c=texel.getPixelRGBA(0,0);
-//		for(int x=1;x<texel.getWidth();x++){
-//			for(int y=0;y<texel.getHeight();y++){
-//				sample1=texel.getIntPixelRGBA(x,y);
-//				sample1c=texel.getPixelRGBA(x,y);
-//				if(!sample1c.equals(sample0c)){
-//					break;
-//				}
-//			}
-//		}		
+		
+		
+		short c0=(short)texel.get(PixelFormat.RGBA565_PACKED,0,0).x;
+		short c1=-1;
+		for(int x=1;x<texel.getWidth();x++){
+			for(int y=0;y<texel.getHeight();y++){
+				c1=(short)texel.get(PixelFormat.RGBA565_PACKED,x,y).x;
+				
+				if(c1!=c0){
+					break;
+				}
+			}
+		}		
 			
 		
-		// Color RGB565
-//		short c0=(short)((sample0[0] << 11) | (sample0[1] << 5) | sample0[2]);
-//		short c1=(short)((sample1[0] << 11) | (sample1[1] << 5) | sample1[2]);
-		
-		short c0=(short)(0x33743b74);
-		short c1=(short)(0xebffffef);
+		System.out.println("Palette: c0="+c0+"; c1="+c1);
 		 
 		// c1 must be always <=c0
 		if(c1>c0){
@@ -192,16 +179,17 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 		body.writeWord(c1);
 		
 		
-		int j=0;
 		int color_data=0;
 		for(int y=0;y<texel.getHeight();y++){
 			for(int x=0;x<texel.getWidth();x++){
-//				if(texel.getPixelRGBA(x,y).equals(sample0c))color_data|=C0;
-//				else color_data|=C1;
-				if(j%2==0)	color_data|=C0;
-				else color_data|=C1;
+				short ct=(short)texel.get(PixelFormat.RGBA565_PACKED,x,y).x;
+				if(ct==c0)color_data|=C0;
+				else if(ct==c1)color_data|=C1;
+				else {
+					System.err.print("WTF "+ct+" "+c0+" "+c1);
+					System.exit(1);					
+				}
 				color_data<<=2;
-				j++;
 			}
 		}
 		body.writeDWord(color_data);
@@ -263,3 +251,5 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 //	}
 
 }
+
+
