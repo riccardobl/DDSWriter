@@ -69,7 +69,7 @@ public class TexelReducer{
 		// weight for v: ???
 	}
 
-	public static void reduce(Texel texel, int uid) {
+	public static void reduce(Texel texel) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
 
@@ -174,7 +174,7 @@ public class TexelReducer{
 		for(int x=0;x<=ir.getWidth()-subsample[0];x+=subsample[0]){
 			for(int y=0;y<=ir.getHeight()-subsample[1];y+=subsample[1]){
 				Texel tx=new Texel(ir,new int[]{x,y},new int[]{x+subsample[0],y+subsample[1]});
-				reduce(tx,j);
+				reduce(tx);
 				enqueue_write.add(tx);
 			}
 		}
