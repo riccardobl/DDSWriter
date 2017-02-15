@@ -81,8 +81,8 @@ public class TexelReducer{
 		Vector4f[] temp_palette=new Vector4f[colors];
 		
 		for(int x=0; x<w; x++) {
-			temp_palette[x]=texel.get(PixelFormat.RGBA8_FLOAT,x, x);				//FIRST BIAS
-			temp_palette[x+w-1]=texel.get(PixelFormat.RGBA8_FLOAT,w-x-1, h-x-1);	//SECOND BIAS
+			temp_palette[x]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x, x);				//FIRST BIAS
+			temp_palette[x+w-1]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,w-x-1, h-x-1);	//SECOND BIAS
 		}
 		
 		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
@@ -148,7 +148,7 @@ public class TexelReducer{
 	
 		for(int x=0;x<w;x++){
 			for(int y=0;y<h;y++){
-				Vector4f px=texel.get(PixelFormat.RGBA8_FLOAT,x,y);
+				Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
 				Vector4f nearest_palette=palette[0];
 				
 				float d=diff(px,nearest_palette);
@@ -163,7 +163,7 @@ public class TexelReducer{
 
 				Vector4f npx=nearest_palette.clone();
 				npx.w=px.w;
-				texel.set(PixelFormat.RGBA8_FLOAT,x,y,nearest_palette);
+				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
 
 			}
 		}
@@ -187,11 +187,11 @@ public class TexelReducer{
 				reduce(tx);
 				
 				
-				Vector4f ca=tx.get(PixelFormat.RGBA8_FLOAT,0,0);
+				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
 				Vector4f cb=null;
 				for(int xx=0;xx<tx.getWidth();xx++){
 					for(int yx=0;yx<tx.getHeight();yx++){
-						Vector4f xyt=tx.get(PixelFormat.RGBA8_FLOAT,xx,yx);
+						Vector4f xyt=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,xx,yx);
 						if(!xyt.equals(ca)){
 							if(cb==null)cb=xyt;
 							else if(!cb.equals(xyt)){
