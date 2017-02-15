@@ -29,9 +29,9 @@ public class TexelReducer{
 
 	public static float diff(Vector4f a, Vector4f b) {
 		//		return val(b)-val(a);
-		int ia[]={(int)(a.x*255f),(int)(a.y*255f),(int)(a.z*255f)};
-
-		int ib[]={(int)(b.x*255f),(int)(b.y*255f),(int)(b.z*255f)};
+		int ia[]={(int)(a.x*255f), (int)(a.y*255f), (int)(a.z*255f)};
+		int ib[]={(int)(b.x*255f), (int)(b.y*255f), (int)(b.z*255f)};
+		
 		return color_dist_srgb_mixed(ia,ib);
 	}
 
@@ -75,21 +75,26 @@ public class TexelReducer{
 
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 
-		int loop=2;
-		for(int l_id=0;l_id<loop;l_id++){
-			for(int palette_i=0;palette_i<palette.length;palette_i++){
+		/*int loop=2;
+		
+		for(int l_id=0; l_id<loop; l_id++){
+			for(int palette_i=0; palette_i<palette.length; palette_i++) {	
+				
 				int a_i=palette_i-1;
 				if(a_i<0) a_i=palette.length+a_i;
 
 				Vector4f base=palette[a_i];
 				Vector4f best_pick=palette[palette_i];
+				
 				float d;
+				
 				if(base==null||best_pick==null) d=0;
 				else d=diff(base,best_pick);
 
 				for(int x=0;x<w;x++){
 					for(int y=0;y<h;y++){
 						Vector4f px=texel.getPixelRGBA(x,y);
+						
 						if(base==null){
 							base=px;
 							best_pick=px;
@@ -97,16 +102,84 @@ public class TexelReducer{
 						}
 
 						float d1=diff(px,base);
-						if(d1>d||best_pick==null){
+						
+						if(d1>d || best_pick==null) {
 							d=d1;
 							best_pick=px;
+						} else if(best_pick!=null) {
+							
 						}
 					}
 				}
 
 				palette[palette_i]=best_pick;
 			}
+		}*/
+		
+		int colors = w + h -1;
+		Vector4f[] temp_palette=new Vector4f[colors];
+		
+		for(int x=0; x<w; x++) {
+			temp_palette[x]=texel.getPixelRGBA(x, x);				//FIRST BIAS
+			temp_palette[x+w-1]=texel.getPixelRGBA(w-x-1, h-x-1);	//SECOND BIAS
 		}
+		
+		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
+		/** those 2 groups will be interpolated into 2 single colors to form the palette 		**/
+		for(int i=0; i<temp_palette.length/2; i++) {
+			Vector4f c=temp_palette[i];
+			float mediumDiff;	//MEDIUM DIFFERENCE BETWEEN THE CURRENT COLOR AND THE LAST COLOR THAT WAS SORTED
+			
+			if(i>0) mediumDiff=diff(c,temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
+			else mediumDiff=diff(c,temp_palette[0]);	  //CONSIDER THE COLOR ITSELF IF IT IS THE FIRST OF THE ARRAY
+			
+			for(int j=i; j<temp_palette.length; j++) {
+				Vector4f c1=temp_palette[j];
+				float diff=diff(c,c1);
+				
+				if(diff < mediumDiff) { //CHECK THE DIFFERENCE
+					Vector4f aux=temp_palette[i];
+					temp_palette[i]=temp_palette[j];
+					temp_palette[j]=aux;
+				}
+			}
+		}		
+		
+		palette[0]=temp_palette[0];
+		palette[1]=temp_palette[temp_palette.length/2];
+		
+		float totalDiff=diff(palette[0], palette[1]);
+		
+		//BALANCE FIRST PALETTE COLOR
+		for(int i=1; i<temp_palette.length/2; i++) {
+			if(diff(palette[0],temp_palette[i]) > totalDiff)
+				palette[0]=palette[0].add(temp_palette[i]).divide(2);
+		}
+		
+		//BALANCE SECOND PALETTE COLOR
+		palette[1]=temp_palette[temp_palette.length/2];
+		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
+			if(diff(palette[1],temp_palette[i]) > totalDiff)
+				palette[1]=palette[1].add(temp_palette[i]).divide(2);
+		}		
+		
+		//INTERPOLATE (TRYING TO REDUCE BLOCKINESS)
+		palette[1].interpolateLocal(palette[0], .5f);
+		
+		/*for(int i=0; i<temp_palette.length; i++) 	
+			temp_palette[i] = texel.getPixelRGBA(i,i);
+		
+		for(int i=0; i<temp_palette.length; i++) {				
+			if(temp_palette[i] == null) {
+				temp_palette[i] = Vector4f.UNIT_XYZW;
+			} else {
+				for(int x=0; x<w; x++) {
+					for(int y=0; y<h; y++) {
+						
+					}
+				}
+			}
+		}*/
 
 		//		boolean dithering=true;
 		//		for(int loop_i=0;loop_i<loop;loop_i++){
@@ -116,6 +189,7 @@ public class TexelReducer{
 			for(int y=0;y<h;y++){
 				Vector4f px=texel.getPixelRGBA(x,y);
 				Vector4f nearest_palette=palette[0];
+				
 				float d=diff(px,nearest_palette);
 				for(int i=1;i<palette.length;i++){
 					float d1=diff(px,palette[i]);
