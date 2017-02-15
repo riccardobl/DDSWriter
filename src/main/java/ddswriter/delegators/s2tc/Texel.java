@@ -10,6 +10,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
+
+import jme3tools.converters.RGB565;
 /**
  * 
  * @author Riccardo Balbo
@@ -18,13 +20,13 @@ import com.jme3.texture.image.ImageRaster;
 
 public class Texel implements Cloneable{
 	public static enum PixelFormat{
-		RGBA8_FLOAT,RGBA8_INT,RGBA5658_INT,RGBA565_PACKED
+		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB
 	}
 
 	protected final Vector4f[][] PIXELS;
 	protected final PixelFormat FORMAT;
 	protected Vector2f[] AREA;
-	
+	private static Vector4f PADDINGPX_COLOR=new Vector4f(1,1,0,1);
 	@Override
 	public Texel clone(){
 		Texel cloned= Texel.fromTexel(FORMAT,this,new Vector2f(),new Vector2f(getWidth(),getHeight()));
@@ -38,11 +40,11 @@ public class Texel implements Cloneable{
 			for(int x=(int)from.x;x<to.x;x++){
 				int xl=(int)(x-from.x);
 				int yl=(int)(y-from.y);
-				Vector4f c=x>=ir.getWidth()||y>=ir.getHeight()?new Vector4f(0,0,0,0):ir.getPixel(x,y).toVector4f();
+				Vector4f c=x>=ir.getWidth()||y>=ir.getHeight()?PADDINGPX_COLOR:ir.getPixel(x,y).toVector4f();
 				pixels[xl][yl]=c;
 			}
 		}
-		return new Texel(PixelFormat.RGBA8_FLOAT,pixels);
+		return new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
 	}
 
 	public static Texel fromTexel(PixelFormat dest_format, Texel tx, Vector2f from, Vector2f to) {
@@ -51,7 +53,7 @@ public class Texel implements Cloneable{
 			for(int x=(int)from.x;x<to.x;x++){
 				int xl=(int)(x-from.x);
 				int yl=(int)(y-from.y);
-				Vector4f c=x>=tx.getWidth()||y>=tx.getHeight()?new Vector4f(0,0,0,0):tx.get(dest_format,x,y);
+				Vector4f c=x>=tx.getWidth()||y>=tx.getHeight()?PADDINGPX_COLOR:tx.get(dest_format,x,y);
 				pixels[xl][yl]=c;
 			}
 		}
@@ -74,9 +76,9 @@ public class Texel implements Cloneable{
 	private Vector4f convert(PixelFormat from, PixelFormat to, Vector4f c) {
 
 		if(from==to) return c.clone();
-		if(from==PixelFormat.RGBA8_FLOAT){
+		if(from==PixelFormat.FLOAT_NORMALIZED_RGBA){
 			switch(to){
-				case RGBA8_INT:{
+				case INT_RGBA:{
 					Vector4f out=c.clone();
 					out.x=(int)(c.x*255f);
 					out.y=(int)(c.y*255f);
@@ -84,17 +86,22 @@ public class Texel implements Cloneable{
 					out.w=(int)(c.w*255f);
 					return out;
 				}
-				case RGBA5658_INT:{
-					return convert(PixelFormat.RGBA8_INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.RGBA8_FLOAT,PixelFormat.RGBA8_INT,c));
+				case PACKED_ARGB:{
+					Vector4f out=convert(PixelFormat.FLOAT_NORMALIZED_RGBA,PixelFormat.INT_RGBA,c);
+					out=convert(PixelFormat.INT_RGBA,PixelFormat.PACKED_ARGB,out);
+					return out;
 				}
-				case RGBA565_PACKED:{
-					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.RGBA8_FLOAT,PixelFormat.RGBA5658_INT,c));
-
-				}
+//				case RGBA5658_INT:{
+//					return convert(PixelFormat.INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.FLOAT,PixelFormat.INT,c));
+//				}
+//				case RGBA565_PACKED:{
+//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.FLOAT,PixelFormat.RGBA5658_INT,c));
+//
+//				}
 			}
-		}else if(from==PixelFormat.RGBA8_INT){
+		}else if(from==PixelFormat.INT_RGBA){
 			switch(to){
-				case RGBA8_FLOAT:{
+				case FLOAT_NORMALIZED_RGBA:{
 					Vector4f out=c.clone();
 					out.x=(c.x/255f);
 					out.y=(c.y/255f);
@@ -102,52 +109,85 @@ public class Texel implements Cloneable{
 					out.w=(c.w/255f);
 					return out;
 				}
-				case RGBA5658_INT:{
-					Vector4f out=c.clone();
-					out.x=(int)(c.x)&0b11111;
-					out.y=((int)(c.y))&0b111111;
-					out.z=((int)(c.z))&0b11111;
-					out.w=(int)(c.w);
+				case PACKED_ARGB:{
+					Vector4f out=new Vector4f();
+					int p=(int)c.w<<24 | (int)c.x<<16 | (int)c.y<<8 | (int)c.z;					
+					out.x=p;			
 					return out;
 				}
-				case RGBA565_PACKED:{
-					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
-
-				}
-			}
-		}else if(from==PixelFormat.RGBA5658_INT){
-			switch(to){
-				case RGBA8_INT:{
-					Vector4f out=c.clone();
-					out.x=(c.x);
-					out.y=(c.y);
-					out.z=(c.z);
-					out.w=(c.w);
-					return out;
-				}
-				case RGBA8_FLOAT:{
-					Vector4f out=c.clone();
-					out.x=(c.x/255f);
-					out.y=(c.y/255f);
-					out.z=(c.z/255f);
-					out.w=(c.w/255f);
-					return out;
-				}
-				case RGBA565_PACKED:{
-					Vector4f out=c.clone();
-					int r=(int)c.x&0b11111;
-					r<<=5;
-					r|=(int)c.y&0b111111;
-					r<<=6;
-					r|=(int)c.z&0b11111;
-					out.x=r;
-					out.y=0;
-					out.z=0;
-					out.w=0;
-					return out;
-				}
+//				case RGBA5658_INT:{
+//					Vector4f out=c.clone();
+//					out.x=(int)(c.x)&0b11111;
+//					out.y=((int)(c.y))&0b111111;
+//					out.z=((int)(c.z))&0b11111;
+//					out.w=(int)(c.w);
+//					return out;
+//				}
+//				case RGBA565_PACKED:{
+//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
+//
+//				}
 			}
 		}
+//		else if(from==PixelFormat.RGBA5658_INT){
+//			switch(to){
+//				case INT:{
+//					Vector4f out=c.clone();
+//					out.x=(c.x);
+//					out.y=(c.y);
+//					out.z=(c.z);
+//					out.w=(c.w);
+//					return out;
+//				}
+//				case FLOAT:{
+//					Vector4f out=c.clone();
+//					out.x=(c.x/255f);
+//					out.y=(c.y/255f);
+//					out.z=(c.z/255f);
+//					out.w=(c.w/255f);
+//					return out;
+//				}
+//				case RGBA565_PACKED:{
+//					Vector4f out=c.clone();
+//					int r=(int)c.x&0b11111;
+//					r<<=5;
+//					r|=(int)c.y&0b111111;
+//					r<<=6;
+//					r|=(int)c.z&0b11111;
+//					out.x=r;
+//					out.y=0;
+//					out.z=0;
+//					out.w=0;
+//					return out;
+//				}
+//			}
+//		}else if(from==PixelFormat.RGBA565_PACKED){
+//			switch(to){
+//				case INT:{
+//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
+//					return c;
+//				}
+//				case FLOAT:{
+//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
+//					c=convert(PixelFormat.RGBA5658_INT,PixelFormat.FLOAT,c);
+//					return c;
+//				}
+//				case RGBA5658_INT:{
+//					int x=(int)c.x;
+//					Vector4f out=c.clone();
+//					int r=x&0b11111;
+//					r>>=5;
+//					int g=x&0b111111;
+//					r>>=6;
+//					int b=x&0b11111;
+//					out.x=r;
+//					out.y=g;
+//					out.z=b;
+//					out.w=1;
+//					return out;
+//				}
+//			}
+//		}
 		return null;
 	}
 
@@ -211,7 +251,7 @@ public class Texel implements Cloneable{
 			for(int x=(int)from.x;x<to.x;x++){
 				int xl=(int)(x-from.x);
 				int yl=(int)(y-from.y);
-				Vector4f c=get(PixelFormat.RGBA8_FLOAT,xl,yl);
+				Vector4f c=get(PixelFormat.FLOAT_NORMALIZED_RGBA,xl,yl);
 				ColorRGBA crgba=new ColorRGBA(c.x,c.y,c.z,c.w);
 				dst.setPixel(x,y,crgba);
 			}
@@ -225,13 +265,13 @@ public class Texel implements Cloneable{
 
 	@Deprecated
 	public void setPixelRGBA(int x, int y, Vector4f c) {
-		set(PixelFormat.RGBA8_FLOAT,x,y,c);
+		set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,c);
 	}
 
 	@Deprecated
 	public void setIntPixelRGBA(int x, int y, int c[]) {
 		Vector4f v=new Vector4f(c[0],c[1],c[2],c[3]);
-		set(PixelFormat.RGBA8_INT,x,y,v);
+		set(PixelFormat.INT_RGBA,x,y,v);
 
 		//		Vector4f p=getPixelRGBA(x,y);
 		//		p.x=(float)c[0]/255f;
@@ -243,14 +283,14 @@ public class Texel implements Cloneable{
 
 	@Deprecated
 	public Vector4f getPixelRGBA(int x, int y) {
-		return get(PixelFormat.RGBA8_FLOAT,x,y);
+		return get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
 
 	}
 
 	@Deprecated
 	public int[] getIntPixelRGBA(int x, int y) {
 		int out[]=new int[4];
-		Vector4f v=get(PixelFormat.RGBA8_INT,x,y);
+		Vector4f v=get(PixelFormat.INT_RGBA,x,y);
 		out[0]=(int)v.x;
 		out[1]=(int)v.y;
 		out[2]=(int)v.z;
