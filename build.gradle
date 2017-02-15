@@ -18,5 +18,6 @@ repositories {
 dependencies {
     compileOnly "${jme_group}:jme3-core:${jme_version}"
     compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
-    compileOnly "${jme_group}:jme3-desktop:${jme_version}"    
+    compileOnly "${jme_group}:jme3-desktop:${jme_version}"   
+      testCompile 'junit:junit:4.12' 
 }
