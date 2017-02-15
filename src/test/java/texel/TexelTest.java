@@ -22,19 +22,12 @@ public class TexelTest{
 			}
 		}
 
-		Texel texel=new Texel(PixelFormat.RGBA8_INT,pixels);
+		Texel texel=new Texel(PixelFormat.INT_RGBA,pixels);
 
-		Vector4f pixel1=texel.get(PixelFormat.RGBA8_FLOAT,0,0);
+		Vector4f pixel1=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
 		Vector4f pixel2=new Vector4f(11f/255,11f/255,11f/255,11f/255);
 		assertTrue("RGBA8_INT 2 RGBA8_FLOAT: "+pixel1+" != "+pixel2,pixel1.equals(pixel2));
 
-		pixel1=texel.get(PixelFormat.RGBA8_INT,0,0);
-		pixel2=texel.get(PixelFormat.RGBA5658_INT,0,0);
-		assertTrue("RGBA8_INT 2 RGBA5658_INT: "+pixel1+" != "+pixel2,pixel1.equals(pixel2));
-		
-		pixel1=texel.get(PixelFormat.RGBA8_INT,0,1);
-		pixel2=texel.get(PixelFormat.RGBA5658_INT,0,1);
-		assertTrue("RGBA8_INT 2 RGBA5658_INT  -OUT range: "+pixel1+" == "+pixel2,!pixel1.equals(pixel2));
 	}
 
 }
