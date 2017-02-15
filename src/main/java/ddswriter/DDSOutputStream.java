@@ -11,66 +11,68 @@ import com.jme3.math.ColorRGBA;
  * @author Riccardo Balbo
  *
  */
-public class DDSOutputStream extends DataOutputStream{
+public class DDSOutputStream extends OutputStream{
 	protected String PIXEL_FORMAT;
+	protected DataOutputStream DOS;
 
 	public DDSOutputStream(OutputStream os){
 		this(os,"argb");
 	}
-	
-	
+
 	public DDSOutputStream(OutputStream os,String pixelformat){
-		super(os);
+		DOS=new DataOutputStream(os);
 		PIXEL_FORMAT=new StringBuilder(pixelformat).reverse().toString();
 	}
-	
-	
 
-		
 	public void writeWord(int i) throws IOException {
-		byte[] dword=new byte[2];
-		dword[0]=(byte)(i&0x00FF);
-		dword[1]=(byte)((i>>8)&0x000000FF);
-		write(dword);
+		DOS.writeShort(Short.reverseBytes((short)i));
+
 	}
 
 	public void writeWords(int... ws) throws IOException {
-		for(int w:ws)writeWord(w);
+		for(int w:ws)
+			writeWord(w);
 	}
 
 	public void writeDWord(int i) throws IOException {
-		byte[] dword=new byte[4];
-		dword[0]=(byte)(i&0x00FF);
-		dword[1]=(byte)((i>>8)&0x000000FF);
-		dword[2]=(byte)((i>>16)&0x000000FF);
-		dword[3]=(byte)((i>>24)&0x000000FF);
-		write(dword);
+		DOS.writeInt(Integer.reverseBytes(i));
 	}
-	
+
 	public void writeDWords(int... i) throws IOException {
 		for(int k:i){
 			writeDWord(k);
 		}
+
 	}
-
-
+	
+	public void writeByte(int b) throws IOException{
+		DOS.writeByte(b);
+	}
+	
+	public void writeBytes(byte ...bs){
+		for(byte b:bs){
+			writeBytes(bs);
+		}
+	}
+	
+	
 
 	public void writePixel(int r, int g, int b, int a) throws IOException {
 		for(int i=0;i<PIXEL_FORMAT.length();i++){
 			switch(PIXEL_FORMAT.charAt(i)){
 				case 'r':
-					writeByte(r);
+					DOS.writeByte(r);
 					break;
 				case 'g':
-					writeByte(g);
+					DOS.writeByte(g);
 					break;
 				case 'b':
-					writeByte(b);
+					DOS.writeByte(b);
 					break;
 				case 'a':
-					writeByte(a);
+					DOS.writeByte(a);
 					break;
-					
+
 			}
 		}
 	}
@@ -83,7 +85,19 @@ public class DDSOutputStream extends DataOutputStream{
 		writePixel(r,g,b,a);
 	}
 
+	@Override
+	public void write(int b) throws IOException {
+		DOS.write(b);
+	}
 
 	
+	@Override
+	public void close() throws IOException{
+		DOS.close();
+	}
 	
+	@Override
+	public void flush() throws IOException{
+		DOS.flush();
+	}
 }
