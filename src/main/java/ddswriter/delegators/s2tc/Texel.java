@@ -1,4 +1,10 @@
+
+
+
+
 package ddswriter.delegators.s2tc;
+
+
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -12,7 +18,7 @@ import com.jme3.texture.image.ImageRaster;
 
 public class Texel implements Cloneable{
 	public static enum PixelFormat{
-		RGBA8_FLOAT,RGBA8_INT,RGBA5658_INT
+		RGBA8_FLOAT,RGBA8_INT,RGBA5658_INT,RGBA565_PACKED
 	}
 
 	protected final Vector4f[][] PIXELS;
@@ -81,6 +87,33 @@ public class Texel implements Cloneable{
 				case RGBA5658_INT:{
 					return convert(PixelFormat.RGBA8_INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.RGBA8_FLOAT,PixelFormat.RGBA8_INT,c));
 				}
+				case RGBA565_PACKED:{
+					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.RGBA8_FLOAT,PixelFormat.RGBA5658_INT,c));
+
+				}
+			}
+		}else if(from==PixelFormat.RGBA8_INT){
+			switch(to){
+				case RGBA8_FLOAT:{
+					Vector4f out=c.clone();
+					out.x=(c.x/255f);
+					out.y=(c.y/255f);
+					out.z=(c.z/255f);
+					out.w=(c.w/255f);
+					return out;
+				}
+				case RGBA5658_INT:{
+					Vector4f out=c.clone();
+					out.x=(int)(c.x)&0b11111;
+					out.y=((int)(c.y))&0b111111;
+					out.z=((int)(c.z))&0b11111;
+					out.w=(int)(c.w);
+					return out;
+				}
+				case RGBA565_PACKED:{
+					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
+
+				}
 			}
 		}else if(from==PixelFormat.RGBA5658_INT){
 			switch(to){
@@ -100,23 +133,17 @@ public class Texel implements Cloneable{
 					out.w=(c.w/255f);
 					return out;
 				}
-			}
-		}else if(from==PixelFormat.RGBA8_INT){
-			switch(to){
-				case RGBA8_FLOAT:{
+				case RGBA565_PACKED:{
 					Vector4f out=c.clone();
-					out.x=(c.x/255f);
-					out.y=(c.y/255f);
-					out.z=(c.z/255f);
-					out.w=(c.w/255f);
-					return out;
-				}
-				case RGBA5658_INT:{
-					Vector4f out=c.clone();
-					out.x=(int)(c.x)&0b11111;
-					out.y=((int)(c.y))&0b111111;
-					out.z=((int)(c.z))&0b11111;
-					out.w=(int)(c.w);
+					int r=(int)c.x&0b11111;
+					r<<=5;
+					r|=(int)c.y&0b111111;
+					r<<=6;
+					r|=(int)c.z&0b11111;
+					out.x=r;
+					out.y=0;
+					out.z=0;
+					out.w=0;
 					return out;
 				}
 			}
