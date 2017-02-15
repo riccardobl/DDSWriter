@@ -18,6 +18,7 @@ import com.jme3.texture.Image;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
+import ddswriter.delegators.s2tc.Texel.PixelFormat;
 import jme3tools.converters.ImageToAwt;
 
 public class TexelReducer{
@@ -75,53 +76,13 @@ public class TexelReducer{
 
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 
-		/*int loop=2;
-		
-		for(int l_id=0; l_id<loop; l_id++){
-			for(int palette_i=0; palette_i<palette.length; palette_i++) {	
-				
-				int a_i=palette_i-1;
-				if(a_i<0) a_i=palette.length+a_i;
-
-				Vector4f base=palette[a_i];
-				Vector4f best_pick=palette[palette_i];
-				
-				float d;
-				
-				if(base==null||best_pick==null) d=0;
-				else d=diff(base,best_pick);
-
-				for(int x=0;x<w;x++){
-					for(int y=0;y<h;y++){
-						Vector4f px=texel.getPixelRGBA(x,y);
-						
-						if(base==null){
-							base=px;
-							best_pick=px;
-							continue;
-						}
-
-						float d1=diff(px,base);
-						
-						if(d1>d || best_pick==null) {
-							d=d1;
-							best_pick=px;
-						} else if(best_pick!=null) {
-							
-						}
-					}
-				}
-
-				palette[palette_i]=best_pick;
-			}
-		}*/
 		
 		int colors = w + h -1;
 		Vector4f[] temp_palette=new Vector4f[colors];
 		
 		for(int x=0; x<w; x++) {
-			temp_palette[x]=texel.getPixelRGBA(x, x);				//FIRST BIAS
-			temp_palette[x+w-1]=texel.getPixelRGBA(w-x-1, h-x-1);	//SECOND BIAS
+			temp_palette[x]=texel.get(PixelFormat.RGBA8_FLOAT,x, x);				//FIRST BIAS
+			temp_palette[x+w-1]=texel.get(PixelFormat.RGBA8_FLOAT,w-x-1, h-x-1);	//SECOND BIAS
 		}
 		
 		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
@@ -181,13 +142,10 @@ public class TexelReducer{
 			}
 		}*/
 
-		//		boolean dithering=true;
-		//		for(int loop_i=0;loop_i<loop;loop_i++){
-		//			if(loop_i==loop-1) dithering=false;
-
+	
 		for(int x=0;x<w;x++){
 			for(int y=0;y<h;y++){
-				Vector4f px=texel.getPixelRGBA(x,y);
+				Vector4f px=texel.get(PixelFormat.RGBA8_FLOAT,x,y);
 				Vector4f nearest_palette=palette[0];
 				
 				float d=diff(px,nearest_palette);
@@ -195,40 +153,15 @@ public class TexelReducer{
 					float d1=diff(px,palette[i]);
 					if(d1<d){
 						d=d1;
-						nearest_palette=px;
+						nearest_palette=palette[i];
 					}
 				}
 
-				//					if(dithering){
-				//
-				//						Vector4f oldColor=texel.getPixelRGBA(x,y);
-				//						Vector4f newColor=nearest_palette;
-				//						texel.setPixelRGBA(x,y,nearest_palette);
-				//						Vector4f err=oldColor.subtract(newColor);
-				//
-				//						if(x+1<w){
-				//							texel.setPixelRGBA(y,x+1,texel.getPixelRGBA(y,x+1).add(err.mult(7.f/16f)));
-				//						}
-				//
-				//						if(x-1>=0&&y+1<h){
-				//							texel.setPixelRGBA(y+1,x-1,texel.getPixelRGBA(y+1,x-1).add(err.mult(3.f/16f)));
-				//						}
-				//
-				//						if(y+1<h){
-				//							texel.setPixelRGBA(y+1,x,texel.getPixelRGBA(y+1,x).add(err.mult(5.f/16f)));
-				//						}
-				//
-				//						if(x+1<w&&y+1<h){
-				//							texel.setPixelRGBA(y+1,x+1,texel.getPixelRGBA(y+1,x+1).add(err.mult(1.f/16f)));
-				//						}
-				//
-				//					}else{
+
 				Vector4f npx=nearest_palette.clone();
 				npx.w=px.w;
-				texel.setPixelRGBA(x,y,nearest_palette);
+				texel.set(PixelFormat.RGBA8_FLOAT,x,y,nearest_palette);
 
-				//					}
-				//				}
 			}
 		}
 
@@ -249,6 +182,22 @@ public class TexelReducer{
 			for(int y=0;y<=ir.getHeight()-subsample[1];y+=subsample[1]){
 				Texel tx=new Texel(ir,new int[]{x,y},new int[]{x+subsample[0],y+subsample[1]});
 				reduce(tx);
+				
+				
+				Vector4f ca=tx.get(PixelFormat.RGBA8_FLOAT,0,0);
+				Vector4f cb=null;
+				for(int xx=0;xx<tx.getWidth();xx++){
+					for(int yx=0;yx<tx.getHeight();yx++){
+						Vector4f xyt=tx.get(PixelFormat.RGBA8_FLOAT,xx,yx);
+						if(!xyt.equals(ca)){
+							if(cb==null)cb=xyt;
+							else if(!cb.equals(xyt)){
+								System.out.println("Palette is wrong. 3 colors found :"+ca+" "+cb+" "+xyt);
+							}
+						}
+						
+					}
+				}
 				enqueue_write.add(tx);
 			}
 		}
