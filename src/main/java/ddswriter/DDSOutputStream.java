@@ -24,20 +24,36 @@ public class DDSOutputStream extends OutputStream{
 		PIXEL_FORMAT=new StringBuilder(pixelformat).reverse().toString();
 	}
 
+	/**
+	 * 
+	 * @description 16bit
+	 */
 	public void writeWord(int i) throws IOException {
 		DOS.writeShort(Short.reverseBytes((short)i));
 
 	}
-
+	
+	/**
+	 * 
+	 * @description 16bit
+	 */
 	public void writeWords(int... ws) throws IOException {
 		for(int w:ws)
 			writeWord(w);
 	}
 
+	/**
+	 * 
+	 * @description 32bit
+	 */
 	public void writeDWord(int i) throws IOException {
 		DOS.writeInt(Integer.reverseBytes(i));
 	}
 
+	/**
+	 * 
+	 * @description 32bit
+	 */
 	public void writeDWords(int... i) throws IOException {
 		for(int k:i){
 			writeDWord(k);
