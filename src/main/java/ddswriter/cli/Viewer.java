@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Scanner;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -26,10 +28,25 @@ public class Viewer extends SimpleApplication{
 	private static File IMAGEF;
 	private static Texture IMAGE;
 
-	private static long LAST_MODIFIED;
+	private static byte[] HASH;
 	private static Picture VIEWER;
+	public static float UPDATE_TIME=1f;
 
-	public static void main(String[] _args) throws IOException {
+	public static byte[] hash(File f) throws Exception {
+		MessageDigest md=MessageDigest.getInstance("MD5");
+		FileInputStream is=new FileInputStream(f);
+		md.reset();
+		byte[] bytes=new byte[2048];
+		int numBytes;
+		while((numBytes=is.read(bytes))!=-1)
+			md.update(bytes,0,numBytes);
+		byte[] mb=md.digest();
+		is.close();
+		return mb;
+
+	}
+	
+	public static void main(String[] _args) throws Exception {
 		if(_args.length==0){
 			System.out.print("Interactive console:~$ ");
 			Scanner r=new Scanner(System.in);
@@ -41,16 +58,16 @@ public class Viewer extends SimpleApplication{
 
 	}
 
-	public Viewer() throws IOException{
+	public Viewer() throws Exception{
 		setShowSettings(false);
 		AppSettings settings=new AppSettings(true);
 		settings.setResizable(true);
-		settings.setFrameRate(10);
+		settings.setFrameRate(15);
 		settings.setWidth(640);
 		settings.setHeight(480);
 		settings.setTitle("Image Viewer");
 
-		reloadImage();
+		reloadImage(null);
 
 		int w=IMAGE.getImage().getWidth();
 		int h=IMAGE.getImage().getHeight();
@@ -65,7 +82,7 @@ public class Viewer extends SimpleApplication{
 
 	}
 
-	private static void reloadImage() throws IOException {
+	private static void reloadImage(byte newhash[]) throws Exception {
 //		if(IMAGE!=null) IMAGE.getImage().dispose();
 		InputStream is=new BufferedInputStream(new FileInputStream(IMAGEF));
 		String ext=IMAGEF.getAbsolutePath().substring(IMAGEF.getAbsolutePath().lastIndexOf(".")+1);
@@ -86,8 +103,9 @@ public class Viewer extends SimpleApplication{
 				
 		}
 		is.close();
-		LAST_MODIFIED=IMAGEF.lastModified();
-
+		if(newhash==null)HASH=hash(IMAGEF);
+		else HASH=newhash;
+		
 		if(VIEWER!=null){
 			VIEWER.removeFromParent();
 			VIEWER=null;
@@ -109,16 +127,21 @@ public class Viewer extends SimpleApplication{
 		}
 	}
 
+	float t=0;
 	@Override
 	public void simpleUpdate(float tpf) {
 		try{
-
-			if(LAST_MODIFIED!=IMAGEF.lastModified()){
-				try{
-					reloadImage();
-				}catch(IOException e){
-					e.printStackTrace();
+			t+=tpf;
+			if(t>=UPDATE_TIME){
+				byte newhash[]=hash(IMAGEF);
+				if(!Arrays.equals(HASH,newhash)){
+					try{
+						reloadImage(newhash);
+					}catch(IOException e){
+						e.printStackTrace();
+					}
 				}
+				t=0;
 			}
 	
 			if(VIEWER==null){
