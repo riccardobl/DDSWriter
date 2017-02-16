@@ -13,7 +13,5 @@ public class DDS_BODY extends DDSOutputStream{
 		super(os);
 	}
 
-	public DDS_BODY(OutputStream os,String pixelformat){
-		super(os,pixelformat);
-	}
+	
 }

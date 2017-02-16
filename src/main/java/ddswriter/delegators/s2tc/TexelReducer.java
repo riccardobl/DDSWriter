@@ -1,20 +1,14 @@
 package ddswriter.delegators.s2tc;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
@@ -25,8 +19,8 @@ import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
 import ddswriter.DDSWriter;
+import ddswriter.colors.RGB565ColorBit;
 import ddswriter.delegators.s2tc.Texel.PixelFormat;
-import jme3tools.converters.ImageToAwt;
 
 public class TexelReducer{
 
@@ -278,7 +272,7 @@ public class TexelReducer{
 	}
 
 	public static void main(String[] args) throws Exception {
-		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.png"));
+		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.jpg"));
 		AWTLoader loader=new AWTLoader();
 		Image img=loader.load(is,false);
 		is.close();
@@ -289,8 +283,6 @@ public class TexelReducer{
 		for(int x=0;x<ir.getWidth();x+=subsample[0]){
 			for(int y=0;y<ir.getHeight();y+=subsample[1]){
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
-//				RGB565.convertTexel(tx);
-
 				reduce2(tx);
 				
 				
@@ -313,6 +305,7 @@ public class TexelReducer{
 		}
 
 		Map<String,Object> options=new HashMap<String,Object> ();
+		options.put("format","RGB565");
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File("/tmp/reduced.dds")));
 		DDSWriter.write(new Texture2D(img),options,fo);
 		fo.close();

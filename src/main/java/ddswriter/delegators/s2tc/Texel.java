@@ -10,8 +10,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
-
-import jme3tools.converters.RGB565;
 /**
  * 
  * @author Riccardo Balbo
