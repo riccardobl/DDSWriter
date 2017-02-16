@@ -24,6 +24,10 @@ public class DDSOutputStream extends OutputStream{
 		PIXEL_FORMAT=new StringBuilder(pixelformat).reverse().toString();
 	}
 
+	public void writeInt(int i) throws IOException{
+		DOS.writeInt(i);
+	}
+	
 	/**
 	 * 
 	 * @description 16bit

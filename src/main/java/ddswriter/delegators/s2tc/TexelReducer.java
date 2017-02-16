@@ -13,6 +13,7 @@ import java.util.Collection;
 import javax.imageio.ImageIO;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Image;
 import com.jme3.texture.image.ImageRaster;
@@ -73,7 +74,17 @@ public class TexelReducer{
 	public static void reduce(Texel texel) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
-
+//		int dd=0;
+//		
+//		for(int x=0;x<w;x++){
+//			for(int y=0;y<h;y++){
+//				dd++;
+//				if(dd%2==0) texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,new Vector4f(1,1,1,1));
+//				else texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,new Vector4f(1,0,1,1));
+//
+//			}
+//		}
+//		if(1==1)return;
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 
 		
@@ -161,8 +172,8 @@ public class TexelReducer{
 				}
 
 
-				Vector4f npx=nearest_palette.clone();
-				npx.w=px.w;
+//				Vector4f npx=nearest_palette.clone();
+//				npx.w=px.w;
 				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
 
 			}
@@ -179,11 +190,11 @@ public class TexelReducer{
 		ImageRaster ir=ImageRaster.create(img);
 		int subsample[]=new int[]{4,4};
 
-		Collection<Texel> enqueue_write=new ArrayList<Texel>();
-		int j=0;
-		for(int x=0;x<=ir.getWidth()-subsample[0];x+=subsample[0]){
-			for(int y=0;y<=ir.getHeight()-subsample[1];y+=subsample[1]){
-				Texel tx=new Texel(ir,new int[]{x,y},new int[]{x+subsample[0],y+subsample[1]});
+		for(int x=0;x<ir.getWidth();x+=subsample[0]){
+			for(int y=0;y<ir.getHeight();y+=subsample[1]){
+				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
+				RGB565.convertTexel(tx);
+
 				reduce(tx);
 				
 				
@@ -201,14 +212,11 @@ public class TexelReducer{
 						
 					}
 				}
-				enqueue_write.add(tx);
+				tx.write(ir);
 			}
 		}
 
-		for(Texel tx:enqueue_write){
-			tx.write(ir);
-		}
-
+	
 		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/reduced.jpg"));
 		BufferedImage bimg=ImageToAwt.convert(img,false,true,0);
 		ImageIO.write(bimg,"jpg",out);

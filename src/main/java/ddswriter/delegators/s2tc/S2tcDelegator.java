@@ -40,110 +40,120 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 	public static final int ALPHA_A1=0b001;
 	public static final int ALPHA_TRANSPARENT=0b110;
 	public static final int ALPHA_OPAQUE=0b111;
-	
+
 	public static final int COLOR_C0=0x0;
 	public static final int COLOR_C1=0x1;
-	
-	
-	
-	
-	public static enum Format {
-		DXT1("DXT1",8),
-		DXT3("DXT3",8),
-		DXT5("DXT5",16);
+
+	public static enum Format{
+		DXT1("DXT1",8),DXT3("DXT3",8),DXT5("DXT5",16);
 		String s;
 		int blocksize;
+
 		private Format(String s,int blocksize){
 			this.s=s;
 			this.blocksize=blocksize;
 		}
-		
-		public int getBlockSize(){
+
+		public int getBlockSize() {
 			return blocksize;
 		}
-		
+
 		@Override
-		public String toString(){
+		public String toString() {
 			return s;
 		}
 	}
+
 	protected Format FORMAT; // 1= dxt1 
+
 	@Override
 	public void header(Texture tx, ImageRaster ir, int mipmap, int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
 		super.header(tx,ir,mipmap,slice,options,header);
 		if(mipmap==0&&slice==0){
 			String format=((String)options.getOrDefault("format","dxt1")).toLowerCase();
-			
+
 			switch(format){
 				case "dxt1":
 				default:
-					FORMAT=Format.DXT1;					
+					FORMAT=Format.DXT1;
 			}
-			
+
 			header.dwFlags|=DDSD_LINEARSIZE;
 			header.ddspf.dwFlags|=DDPF_FOURCC;
 
 			byte formatb[]=FORMAT.toString().getBytes();
-			for(int i=0;i<formatb.length;i++)header.ddspf.dwFourCC[i]=formatb[i];
+			for(int i=0;i<formatb.length;i++)
+				header.ddspf.dwFourCC[i]=formatb[i];
 
 			int w=tx.getImage().getWidth();
 			int h=tx.getImage().getHeight();
-			header.dwPitchOrLinearSize=((w+3)/4) * ((h+3)/4) * FORMAT.getBlockSize();
+			header.dwPitchOrLinearSize=((w+3)/4)*((h+3)/4)*FORMAT.getBlockSize();
 		}
 	}
 
-	
 	@Override
 	public void body(Texture tx, ImageRaster ir, int mipmap, int slice, Map<String,Object> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 		int w=ir.getWidth();
 		int h=ir.getHeight();
 		int pxXblock[]=new int[]{4,4};
 
-		Texel txl=Texel.fromImageRaster(ir,new Vector2f(0,0),new Vector2f(ir.getWidth(),ir.getHeight()));
+//		Texel txl=Texel.fromImageRaster(ir,new Vector2f(0,0),new Vector2f(ir.getWidth(),ir.getHeight()));
 
 		// Step 1 - Convert To RGB565 (16bpp)
-		RGB565.convertTexel(txl);
-		
 		// Step 2 - Divide The Image Into Blocks
-		Texel blocks[][]=new Texel[(int)FastMath.ceil((float)w/pxXblock[0])][(int)FastMath.ceil((float)h/pxXblock[1])];
-		for(int y=0;y<blocks[0].length;y++){
-			for(int x=0;x<blocks.length;x++){
-				int xl=x*pxXblock[0];
-				int yl=y*pxXblock[1];
-				blocks[x][y]=Texel.fromTexel(PixelFormat.FLOAT_NORMALIZED_RGBA,txl,new Vector2f(xl,yl),new Vector2f(xl+pxXblock[0],yl+pxXblock[1]));
+		// Step 3 - Palette-Reduce The Blocks	
+		// Step 4 - Encode The Blocks		
+
+//		Texel blocks[][]=new Texel[(int)FastMath.ceil((float)w/pxXblock[0])][(int)FastMath.ceil((float)h/pxXblock[1])];
+
+//		int bx=0;
+//		int by=0;
+		for(int y=0;y<ir.getHeight();y+=pxXblock[1]){
+			for(int x=0;x<ir.getWidth();x+=pxXblock[0]){
+				Texel btx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+pxXblock[0],y+pxXblock[1]));
+				RGB565.convertTexel(btx);
+				TexelReducer.reduce(btx);
+				if(FORMAT==Format.DXT1) writeDXT1(btx,body);
+
+//				blocks[bx][by]=btx;
+//				by++;
 			}
 		}
+//			bx++;
+//		}
+//				RGB565.convertTexel(tx);
+//				
+//		for(int y=0;y<blocks[0].length;y++){
+//			for(int x=0;x<blocks.length;x++){
+//				int xl=x*pxXblock[0];
+//				int yl=y*pxXblock[1];
+//			}
+//		}
 
 		// Step 3 - Palette-Reduce The Blocks		
-		for(int y=0;y<blocks[0].length;y++){
-
-		for(int x=0;x<blocks.length;x++){
-				Texel texel=blocks[x][y];
-				TexelReducer.reduce(texel);
-			}
-		}
-		
+//		for(int y=0;y<blocks[0].length;y++){
+//
+//			for(int x=0;x<blocks.length;x++){
+//				Texel texel=blocks[x][y];
+//			}
+//		}
 
 		// Step 4 - Encode The Blocks		
-		for(int x=0;x<blocks.length;x++){
-
-		for(int y=0;y<blocks[0].length;y++){
-
-
-				if(FORMAT==Format.DXT1)writeDXT1(blocks[x][y],body);
-			}
-		}
+//		for(int y=0;y<blocks[0].length;y++){
+//
+//			for(int x=0;x<blocks.length;x++){
+//
+//				if(FORMAT==Format.DXT1) writeDXT1(blocks[x][y],body);
+//			}
+//		}
 
 	}
 
-
-
 	private void writeDXT1(Texel texel, DDS_BODY body) throws Exception {
-
 
 		int c0=RGB565.packPixel(texel.get(PixelFormat.INT_RGBA,0,0));
 		int c1=c0;
-		for(int x=1;x<texel.getWidth();x++){
+		for(int x=0;x<texel.getWidth();x++){
 			for(int y=0;y<texel.getHeight();y++){
 				int c=RGB565.packPixel(texel.get(PixelFormat.INT_RGBA,x,y));
 				if(c!=c0){
@@ -151,39 +161,33 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 					break;
 				}
 			}
-		}		
-
+		}
 
 		if(c0>c1){
 			int aux=c0;
 			c0=c1;
 			c1=aux;
 		}
-		
+
 		body.writeWord(c0);
 		body.writeWord(c1);
-		
-		
 
 		int color_data=0;
+		for(int x=0;x<texel.getWidth();x++){
 
 		for(int y=0;y<texel.getHeight();y++){
-			for(int x=0;x<texel.getWidth();x++){
-				if(x!=0||y!=0)color_data<<=2;		
+				if(x!=0||y!=0) color_data<<=2;
 				int ct=RGB565.packPixel(texel.get(PixelFormat.INT_RGBA,x,y));
-				 if(ct==c1)color_data|=0b01;
-				 else if(ct==c0)color_data|=0b00;
-				else {
+				if(ct==c1) color_data|=0b01;
+				else if(ct==c0) color_data|=0b00;
+				else{
 					System.err.print("Palette generation is wrong! "+ct+" "+c0+" "+c1);
-					System.exit(1);					
+					System.exit(1);
 				}
 			}
 		}
-		body.writeInt(color_data);
+		body.writeDWord(color_data);
 
 	}
-	
-	
+
 }
-
-
