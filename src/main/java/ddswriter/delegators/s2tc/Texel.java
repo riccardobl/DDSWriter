@@ -23,7 +23,7 @@ public class Texel implements Cloneable{
 		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB
 	}
 
-	protected final Vector4f[] COLORS_PALETTE, ALPHA_PALETTE;
+	protected final Vector4f[] PALETTE;
 	protected final Vector4f[][] PIXELS;
 	protected final PixelFormat FORMAT;
 	protected Vector2f[] AREA;
@@ -81,8 +81,7 @@ public class Texel implements Cloneable{
 
 	public Texel(PixelFormat format,Vector4f pixels[][],Vector2f area[]){
 		PIXELS=pixels;
-		COLORS_PALETTE=new Vector4f[2];
-		ALPHA_PALETTE=new Vector4f[2];
+		PALETTE=new Vector4f[2];
 		FORMAT=format;
 		AREA=area;
 	}
@@ -217,14 +216,8 @@ public class Texel implements Cloneable{
 		TexelReducer.reduce(this);
 	}
 	
-	protected float mapColor(Vector4f color) {
-		if(color.distance(COLORS_PALETTE[0]) >= color.distance(COLORS_PALETTE[1])) 
-			return 0f;
-		else return 1f;
-	}
-	
-	protected float mapAlpha(Vector4f alpha) {
-		if(alpha.distance(ALPHA_PALETTE[0]) >= alpha.distance(ALPHA_PALETTE[1])) 
+	protected float map(Vector4f color) {
+		if(color.distance(PALETTE[0]) >= color.distance(PALETTE[1])) 
 			return 0f;
 		else return 1f;
 	}
@@ -235,6 +228,11 @@ public class Texel implements Cloneable{
 
 	public void set(PixelFormat f, int x, int y, Vector4f c) {
 		PIXELS[x][y]=convert(f,FORMAT,c).clone();
+	}
+	
+	public void setPalette(Vector4f[] palette) {
+		PALETTE[0]=palette[0];
+		PALETTE[1]=palette[1];
 	}
 
 	public int getWidth() {
@@ -248,7 +246,11 @@ public class Texel implements Cloneable{
 	public Vector4f[][] getPixels() {
 		return PIXELS;
 	}
-
+	
+	public Vector4f[] getPalette() {
+		return PALETTE;
+	}
+	
 	public Vector2f[] getArea() {
 		return AREA;
 	}
@@ -340,8 +342,7 @@ public class Texel implements Cloneable{
 	public Texel(ImageRaster ir,int from[],int to[]){
 		Texel tmp=Texel.fromImageRaster(ir,new Vector2f(from[0],from[1]),new Vector2f(to[0],to[1]));
 		PIXELS=tmp.getPixels();
-		COLORS_PALETTE=new Vector4f[2];
-		ALPHA_PALETTE=new Vector4f[2];
+		PALETTE=new Vector4f[2];
 		FORMAT=tmp.getFormat();
 		AREA=tmp.getArea();
 	}

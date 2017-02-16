@@ -184,7 +184,7 @@ public class TexelReducer{
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 
 		
-		int colors = w + h -1;
+		int colors = w + h - 1;
 		Vector4f[] temp_palette=new Vector4f[colors];
 		
 		for(int x=0; x<w; x++) {
@@ -198,15 +198,15 @@ public class TexelReducer{
 			Vector4f c=temp_palette[i];
 			float mediumDiff;	//MEDIUM DIFFERENCE BETWEEN THE CURRENT COLOR AND THE LAST COLOR THAT WAS SORTED
 			
-			if(i>0) mediumDiff=diff(c,temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
-			else mediumDiff=diff(c,temp_palette[0]);	  //CONSIDER THE COLOR ITSELF IF IT IS THE FIRST OF THE ARRAY
+			if(i>0) mediumDiff=diff(c, temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
+			else mediumDiff=diff(c, temp_palette[0]);	  //CONSIDER THE COLOR ITSELF IF IT IS THE FIRST OF THE ARRAY
 			
-			for(int j=i; j<temp_palette.length; j++) {
+			for(int j=temp_palette.length/2; j<temp_palette.length; j++) {
 				Vector4f c1=temp_palette[j];
 				float diff;
 				
-				if(i>0) diff=diff(temp_palette[i-1],c1);
-				else diff=diff(temp_palette[0],c1);
+				if(i>0) diff=diff(c1, temp_palette[i-1]);
+				else diff=diff(c1, temp_palette[0]);
 				
 				if(diff < mediumDiff) { //CHECK THE DIFFERENCE
 					Vector4f aux=temp_palette[i];
@@ -224,18 +224,22 @@ public class TexelReducer{
 		//BALANCE FIRST PALETTE COLOR
 		for(int i=1; i<temp_palette.length/2; i++) {
 			if(diff(palette[0],temp_palette[i]) > totalDiff)
-				palette[0]=palette[0].add(temp_palette[i]).divide(2);
+				//palette[0]=palette[0].add(temp_palette[i]).divide(2);
+				palette[0].add(temp_palette[i]);
 		}
+		palette[0].divide(temp_palette.length/2);
 		
 		//BALANCE SECOND PALETTE COLOR
 		palette[1]=temp_palette[temp_palette.length/2];
 		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
 			if(diff(palette[1],temp_palette[i]) > totalDiff)
-				palette[1]=palette[1].add(temp_palette[i]).divide(2);
-		}		
+				//palette[1]=palette[1].add(temp_palette[i]).divide(2);
+				palette[1].add(temp_palette[i]);
+		}	
+		palette[1].divide(temp_palette.length/2);
 		
 		//INTERPOLATE (TRYING TO REDUCE BLOCKINESS)
-		palette[1].interpolateLocal(palette[0], .5f);
+		//palette[1].interpolateLocal(palette[0], .5f);
 		
 		/*for(int i=0; i<temp_palette.length; i++) 	
 			temp_palette[i] = texel.getPixelRGBA(i,i);
@@ -251,7 +255,8 @@ public class TexelReducer{
 				}
 			}
 		}*/
-
+		
+		texel.setPalette(palette);
 	
 		for(int x=0;x<w;x++){
 			for(int y=0;y<h;y++){
@@ -266,19 +271,16 @@ public class TexelReducer{
 						nearest_palette=palette[i];
 					}
 				}
-
-
 //				Vector4f npx=nearest_palette.clone();
 //				npx.w=px.w;
-				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
-
+//				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
 			}
 		}
 
 	}
 
 	public static void main(String[] args) throws Exception {
-		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.png"));
+		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.jpg"));
 		AWTLoader loader=new AWTLoader();
 		Image img=loader.load(is,false);
 		is.close();
@@ -291,7 +293,7 @@ public class TexelReducer{
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
 //				RGB565.convertTexel(tx);
 
-				reduce2(tx);
+				reduce(tx);
 				
 				
 				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
