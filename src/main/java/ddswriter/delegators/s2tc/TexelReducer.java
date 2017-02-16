@@ -3,12 +3,16 @@ package ddswriter.delegators.s2tc;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -16,9 +20,11 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Image;
+import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
+import ddswriter.DDSWriter;
 import ddswriter.delegators.s2tc.Texel.PixelFormat;
 import jme3tools.converters.ImageToAwt;
 
@@ -70,7 +76,97 @@ public class TexelReducer{
 		// weight for u: ???
 		// weight for v: ???
 	}
+	
+	public static void reduce2(Texel texel) {
+		int w=texel.getWidth();
+		int h=texel.getHeight();
 
+		Vector4f palette[]=new Vector4f[2];// Works only for 2.
+
+		int loop=2;
+		for(int l_id=0;l_id<loop;l_id++){
+			for(int palette_i=0;palette_i<palette.length;palette_i++){
+				int a_i=palette_i-1;
+				if(a_i<0) a_i=palette.length+a_i;
+
+				Vector4f base=palette[a_i];
+				Vector4f best_pick=palette[palette_i];
+				float d;
+				if(base==null||best_pick==null) d=0;
+				else d=diff(base,best_pick);
+
+				for(int x=0;x<w;x++){
+					for(int y=0;y<h;y++){
+						Vector4f px=texel.getPixelRGBA(x,y);
+						if(base==null){
+							base=px;
+							best_pick=px;
+							continue;
+						}
+
+						float d1=diff(px,base);
+						if(d1>d||best_pick==null){
+							d=d1;
+							best_pick=px;
+						}
+					}
+				}
+
+				palette[palette_i]=best_pick;
+			}
+		}
+
+		//		boolean dithering=true;
+		//		for(int loop_i=0;loop_i<loop;loop_i++){
+		//			if(loop_i==loop-1) dithering=false;
+
+		for(int x=0;x<w;x++){
+			for(int y=0;y<h;y++){
+				Vector4f px=texel.getPixelRGBA(x,y);
+				Vector4f nearest_palette=palette[0];
+				float d=diff(px,nearest_palette);
+				for(int i=1;i<palette.length;i++){
+					float d1=diff(px,palette[i]);
+					if(d1<d){
+						d=d1;
+						nearest_palette=palette[i];
+					}
+				}
+
+				//					if(dithering){
+				//
+				//						Vector4f oldColor=texel.getPixelRGBA(x,y);
+				//						Vector4f newColor=nearest_palette;
+				//						texel.setPixelRGBA(x,y,nearest_palette);
+				//						Vector4f err=oldColor.subtract(newColor);
+				//
+				//						if(x+1<w){
+				//							texel.setPixelRGBA(y,x+1,texel.getPixelRGBA(y,x+1).add(err.mult(7.f/16f)));
+				//						}
+				//
+				//						if(x-1>=0&&y+1<h){
+				//							texel.setPixelRGBA(y+1,x-1,texel.getPixelRGBA(y+1,x-1).add(err.mult(3.f/16f)));
+				//						}
+				//
+				//						if(y+1<h){
+				//							texel.setPixelRGBA(y+1,x,texel.getPixelRGBA(y+1,x).add(err.mult(5.f/16f)));
+				//						}
+				//
+				//						if(x+1<w&&y+1<h){
+				//							texel.setPixelRGBA(y+1,x+1,texel.getPixelRGBA(y+1,x+1).add(err.mult(1.f/16f)));
+				//						}
+				//
+				//					}else{
+				Vector4f npx=nearest_palette.clone();
+				npx.w=px.w;
+				texel.setPixelRGBA(x,y,nearest_palette);
+
+				//					}
+				//				}
+			}
+		}
+
+}
 	public static void reduce(Texel texel) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
@@ -181,8 +277,8 @@ public class TexelReducer{
 
 	}
 
-	public static void main(String[] args) throws IOException {
-		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.jpg"));
+	public static void main(String[] args) throws Exception {
+		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.png"));
 		AWTLoader loader=new AWTLoader();
 		Image img=loader.load(is,false);
 		is.close();
@@ -193,9 +289,9 @@ public class TexelReducer{
 		for(int x=0;x<ir.getWidth();x+=subsample[0]){
 			for(int y=0;y<ir.getHeight();y+=subsample[1]){
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
-				RGB565.convertTexel(tx);
+//				RGB565.convertTexel(tx);
 
-				reduce(tx);
+				reduce2(tx);
 				
 				
 				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
@@ -216,11 +312,14 @@ public class TexelReducer{
 			}
 		}
 
-	
-		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/reduced.jpg"));
-		BufferedImage bimg=ImageToAwt.convert(img,false,true,0);
-		ImageIO.write(bimg,"jpg",out);
+		Map<String,Object> options=new HashMap<String,Object> ();
+		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File("/tmp/reduced.dds")));
+		DDSWriter.write(new Texture2D(img),options,fo);
+		fo.close();
+//		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/reduced.jpg"));
+//		BufferedImage bimg=ImageToAwt.convert(img,false,true,0);
+//		ImageIO.write(bimg,"bmp",out);
 
-		out.close();
+//		out.close();
 	}
 }

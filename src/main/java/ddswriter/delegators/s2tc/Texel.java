@@ -45,7 +45,12 @@ public class Texel implements Cloneable{
 				pixels[xl][yl]=c;
 			}
 		}
-		return new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
+		Texel tx= new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
+		tx.AREA=new Vector2f[]{
+			from,to
+			
+		};
+		return tx;
 	}
 
 	public static Texel fromTexel(PixelFormat dest_format, Texel tx, Vector2f from, Vector2f to) {
@@ -58,7 +63,13 @@ public class Texel implements Cloneable{
 				pixels[xl][yl]=c;
 			}
 		}
-		return new Texel(dest_format,pixels);
+		Texel tnx= new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
+
+		tnx.AREA=new Vector2f[]{
+				from,to
+				
+			};
+		return tnx;
 	}
 
 	public Texel(PixelFormat format,Vector4f pixels[][]) {
@@ -272,6 +283,7 @@ public class Texel implements Cloneable{
 				int yl=(int)(y-from.y);
 				Vector4f c=get(PixelFormat.FLOAT_NORMALIZED_RGBA,xl,yl);
 				ColorRGBA crgba=new ColorRGBA(c.x,c.y,c.z,c.w);
+				if(x>=dst.getWidth()||y>=dst.getHeight())continue;
 				dst.setPixel(x,y,crgba);
 			}
 		}
