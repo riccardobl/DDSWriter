@@ -1,15 +1,13 @@
 
-
-
-
 package ddswriter.delegators.s2tc;
-
-
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
+
+import ddswriter.colors.RGB565ColorBit;
+
 /**
  * 
  * @author Riccardo Balbo
@@ -18,7 +16,7 @@ import com.jme3.texture.image.ImageRaster;
 
 public class Texel implements Cloneable{
 	public static enum PixelFormat{
-		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB
+		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB,MAPPED_TO_PALETTE
 	}
 
 	protected final Vector4f[] PALETTE;
@@ -26,9 +24,10 @@ public class Texel implements Cloneable{
 	protected final PixelFormat FORMAT;
 	protected Vector2f[] AREA;
 	private static Vector4f PADDINGPX_COLOR=new Vector4f(1,1,0,1);
+
 	@Override
-	public Texel clone(){
-		Texel cloned= Texel.fromTexel(FORMAT,this,new Vector2f(),new Vector2f(getWidth(),getHeight()));
+	public Texel clone() {
+		Texel cloned=Texel.fromTexel(FORMAT,this,new Vector2f(),new Vector2f(getWidth(),getHeight()));
 		cloned.AREA=AREA;
 		return cloned;
 	}
@@ -43,10 +42,9 @@ public class Texel implements Cloneable{
 				pixels[xl][yl]=c;
 			}
 		}
-		Texel tx= new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
-		tx.AREA=new Vector2f[]{
-			from,to
-			
+		Texel tx=new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
+		tx.AREA=new Vector2f[]{from,to
+
 		};
 		return tx;
 	}
@@ -61,16 +59,15 @@ public class Texel implements Cloneable{
 				pixels[xl][yl]=c;
 			}
 		}
-		Texel tnx= new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
+		Texel tnx=new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,pixels);
 
-		tnx.AREA=new Vector2f[]{
-				from,to
-				
-			};
+		tnx.AREA=new Vector2f[]{from,to
+
+		};
 		return tnx;
 	}
 
-	public Texel(PixelFormat format,Vector4f pixels[][]) {
+	public Texel(PixelFormat format,Vector4f pixels[][]){
 		this(format,pixels,new Vector2f[]{new Vector2f(0,0),// from
 				new Vector2f(pixels.length,pixels[0].length)//to
 		});
@@ -102,13 +99,13 @@ public class Texel implements Cloneable{
 					out=convert(PixelFormat.INT_RGBA,PixelFormat.PACKED_ARGB,out);
 					return out;
 				}
-//				case RGBA5658_INT:{
-//					return convert(PixelFormat.INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.FLOAT,PixelFormat.INT,c));
-//				}
-//				case RGBA565_PACKED:{
-//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.FLOAT,PixelFormat.RGBA5658_INT,c));
-//
-//				}
+				//				case RGBA5658_INT:{
+				//					return convert(PixelFormat.INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.FLOAT,PixelFormat.INT,c));
+				//				}
+				//				case RGBA565_PACKED:{
+				//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.FLOAT,PixelFormat.RGBA5658_INT,c));
+				//
+				//				}
 			}
 		}else if(from==PixelFormat.INT_RGBA){
 			switch(to){
@@ -122,83 +119,83 @@ public class Texel implements Cloneable{
 				}
 				case PACKED_ARGB:{
 					Vector4f out=new Vector4f();
-					int p=(int)c.w<<24 | (int)c.x<<16 | (int)c.y<<8 | (int)c.z;					
-					out.x=p;			
+					int p=(int)c.w<<24|(int)c.x<<16|(int)c.y<<8|(int)c.z;
+					out.x=p;
 					return out;
 				}
-//				case RGBA5658_INT:{
-//					Vector4f out=c.clone();
-//					out.x=(int)(c.x)&0b11111;
-//					out.y=((int)(c.y))&0b111111;
-//					out.z=((int)(c.z))&0b11111;
-//					out.w=(int)(c.w);
-//					return out;
-//				}
-//				case RGBA565_PACKED:{
-//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
-//
-//				}
+				//				case RGBA5658_INT:{
+				//					Vector4f out=c.clone();
+				//					out.x=(int)(c.x)&0b11111;
+				//					out.y=((int)(c.y))&0b111111;
+				//					out.z=((int)(c.z))&0b11111;
+				//					out.w=(int)(c.w);
+				//					return out;
+				//				}
+				//				case RGBA565_PACKED:{
+				//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
+				//
+				//				}
 			}
 		}
-//		else if(from==PixelFormat.RGBA5658_INT){
-//			switch(to){
-//				case INT:{
-//					Vector4f out=c.clone();
-//					out.x=(c.x);
-//					out.y=(c.y);
-//					out.z=(c.z);
-//					out.w=(c.w);
-//					return out;
-//				}
-//				case FLOAT:{
-//					Vector4f out=c.clone();
-//					out.x=(c.x/255f);
-//					out.y=(c.y/255f);
-//					out.z=(c.z/255f);
-//					out.w=(c.w/255f);
-//					return out;
-//				}
-//				case RGBA565_PACKED:{
-//					Vector4f out=c.clone();
-//					int r=(int)c.x&0b11111;
-//					r<<=5;
-//					r|=(int)c.y&0b111111;
-//					r<<=6;
-//					r|=(int)c.z&0b11111;
-//					out.x=r;
-//					out.y=0;
-//					out.z=0;
-//					out.w=0;
-//					return out;
-//				}
-//			}
-//		}else if(from==PixelFormat.RGBA565_PACKED){
-//			switch(to){
-//				case INT:{
-//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
-//					return c;
-//				}
-//				case FLOAT:{
-//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
-//					c=convert(PixelFormat.RGBA5658_INT,PixelFormat.FLOAT,c);
-//					return c;
-//				}
-//				case RGBA5658_INT:{
-//					int x=(int)c.x;
-//					Vector4f out=c.clone();
-//					int r=x&0b11111;
-//					r>>=5;
-//					int g=x&0b111111;
-//					r>>=6;
-//					int b=x&0b11111;
-//					out.x=r;
-//					out.y=g;
-//					out.z=b;
-//					out.w=1;
-//					return out;
-//				}
-//			}
-//		}
+		//		else if(from==PixelFormat.RGBA5658_INT){
+		//			switch(to){
+		//				case INT:{
+		//					Vector4f out=c.clone();
+		//					out.x=(c.x);
+		//					out.y=(c.y);
+		//					out.z=(c.z);
+		//					out.w=(c.w);
+		//					return out;
+		//				}
+		//				case FLOAT:{
+		//					Vector4f out=c.clone();
+		//					out.x=(c.x/255f);
+		//					out.y=(c.y/255f);
+		//					out.z=(c.z/255f);
+		//					out.w=(c.w/255f);
+		//					return out;
+		//				}
+		//				case RGBA565_PACKED:{
+		//					Vector4f out=c.clone();
+		//					int r=(int)c.x&0b11111;
+		//					r<<=5;
+		//					r|=(int)c.y&0b111111;
+		//					r<<=6;
+		//					r|=(int)c.z&0b11111;
+		//					out.x=r;
+		//					out.y=0;
+		//					out.z=0;
+		//					out.w=0;
+		//					return out;
+		//				}
+		//			}
+		//		}else if(from==PixelFormat.RGBA565_PACKED){
+		//			switch(to){
+		//				case INT:{
+		//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
+		//					return c;
+		//				}
+		//				case FLOAT:{
+		//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
+		//					c=convert(PixelFormat.RGBA5658_INT,PixelFormat.FLOAT,c);
+		//					return c;
+		//				}
+		//				case RGBA5658_INT:{
+		//					int x=(int)c.x;
+		//					Vector4f out=c.clone();
+		//					int r=x&0b11111;
+		//					r>>=5;
+		//					int g=x&0b111111;
+		//					r>>=6;
+		//					int b=x&0b11111;
+		//					out.x=r;
+		//					out.y=g;
+		//					out.z=b;
+		//					out.w=1;
+		//					return out;
+		//				}
+		//			}
+		//		}
 		return null;
 	}
 
@@ -208,29 +205,53 @@ public class Texel implements Cloneable{
 				PIXELS[x][y]=convert(FORMAT,format,PIXELS[x][y]);// todo
 			}
 		}
-	}	
+	}
 
 	public void genPalette() {
 		TexelReducer.reduce(this);
 	}
-	
-	protected float map(Vector4f color) {
-		if(color.distance(PALETTE[0]) >= color.distance(PALETTE[1])) 
-			return 0f;
-		else return 1f;
-	}
 
 	public Vector4f get(PixelFormat f, int x, int y) {
+		if(f==PixelFormat.MAPPED_TO_PALETTE){
+			
+			Vector4f px=get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
+			Vector4f nearest_palette=PALETTE[0];
+			int  k =0;
+			float d=TexelReducer.diff(px,nearest_palette);
+			for(int i=1;i<PALETTE.length;i++){
+				float d1=TexelReducer.diff(px,PALETTE[i]);
+				if(d1<d){
+					d=d1;
+					nearest_palette=PALETTE[i];
+					k=i;
+				}
+			}
+			
+			return new Vector4f(k,k,k,k);
+//			if(color.distance(PALETTE[0])>=color.distance(PALETTE[1])) return new Vector4f(0f,0,0,0);
+//			else return new Vector4f(1f,1,1,1);
+//			
+//			if(color.equals(PALETTE[0])) return new Vector4f(0f,0,0,0);
+//			else return new Vector4f(1f,1,1,1);
+		}
+
 		return convert(FORMAT,f,PIXELS[x][y]);
 	}
 
 	public void set(PixelFormat f, int x, int y, Vector4f c) {
 		PIXELS[x][y]=convert(f,FORMAT,c).clone();
 	}
-	
-	public void setPalette(Vector4f[] palette) {
-		PALETTE[0]=palette[0];
-		PALETTE[1]=palette[1];
+
+	public void setPalette(PixelFormat f, Vector4f[] palette) {	
+		palette=new Vector4f[]{convert(f,FORMAT,palette[0]),convert(f,FORMAT,palette[1])};
+		boolean rv=palette[0].length()>palette[1].length();;
+		if(rv){
+			PALETTE[1]=palette[0];
+			PALETTE[0]=palette[1];
+		}else{
+			PALETTE[0]=palette[0];
+			PALETTE[1]=palette[1];
+		}
 	}
 
 	public int getWidth() {
@@ -244,11 +265,12 @@ public class Texel implements Cloneable{
 	public Vector4f[][] getPixels() {
 		return PIXELS;
 	}
-	
-	public Vector4f[] getPalette() {
-		return PALETTE;
+
+	public Vector4f[] getPalette(PixelFormat f) {
+
+		return new Vector4f[]{convert(FORMAT,f,PALETTE[0]),convert(FORMAT,f,PALETTE[1])};
 	}
-	
+
 	public Vector2f[] getArea() {
 		return AREA;
 	}
@@ -283,7 +305,7 @@ public class Texel implements Cloneable{
 				int yl=(int)(y-from.y);
 				Vector4f c=get(PixelFormat.FLOAT_NORMALIZED_RGBA,xl,yl);
 				ColorRGBA crgba=new ColorRGBA(c.x,c.y,c.z,c.w);
-				if(x>=dst.getWidth()||y>=dst.getHeight())continue;
+				if(x>=dst.getWidth()||y>=dst.getHeight()) continue;
 				dst.setPixel(x,y,crgba);
 			}
 		}

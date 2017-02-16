@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
@@ -250,26 +251,26 @@ public class TexelReducer{
 			}
 		}*/
 		
-		texel.setPalette(palette);
+		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
 	
-		for(int x=0;x<w;x++){
-			for(int y=0;y<h;y++){
-				Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-				Vector4f nearest_palette=palette[0];
-				
-				float d=diff(px,nearest_palette);
-				for(int i=1;i<palette.length;i++){
-					float d1=diff(px,palette[i]);
-					if(d1<d){
-						d=d1;
-						nearest_palette=palette[i];
-					}
-				}
-//				Vector4f npx=nearest_palette.clone();
-//				npx.w=px.w;
-//				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
-			}
-		}
+//		for(int x=0;x<w;x++){
+//			for(int y=0;y<h;y++){
+//				Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
+//				Vector4f nearest_palette=palette[0];
+//				
+//				float d=diff(px,nearest_palette);
+//				for(int i=1;i<palette.length;i++){
+//					float d1=diff(px,palette[i]);
+//					if(d1<d){
+//						d=d1;
+//						nearest_palette=palette[i];
+//					}
+//				}
+////				Vector4f npx=nearest_palette.clone();
+////				npx.w=px.w;
+////				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
+//			}
+//		}
 
 	}
 
