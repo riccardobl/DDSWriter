@@ -1,6 +1,5 @@
 package ddswriter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.jme3.texture.Texture;

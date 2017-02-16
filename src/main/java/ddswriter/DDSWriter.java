@@ -1,26 +1,21 @@
 package ddswriter;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
-import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
+import ddswriter.delegators.GenericDelegator;
 import ddswriter.delegators.MipmapGenDelegator;
-import ddswriter.delegators.UncompressedARGBDelegator;
 import ddswriter.delegators.s2tc.S2tcDelegator;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
-import jme3tools.converters.MipMapGenerator;
 
 /**
  * 
@@ -81,7 +76,7 @@ public class DDSWriter{
 		delegators.add(new MipmapGenDelegator());
 
 		if((boolean)options.getOrDefault("compress",false))delegators.add(new S2tcDelegator());
-		else delegators.add(new UncompressedARGBDelegator());
+		else delegators.add(new GenericDelegator());
 
 		return delegators;
 	}

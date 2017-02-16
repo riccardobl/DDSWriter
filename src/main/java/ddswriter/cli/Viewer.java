@@ -10,8 +10,8 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Scanner;
+
 import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;

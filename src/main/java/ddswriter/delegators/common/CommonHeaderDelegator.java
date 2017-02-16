@@ -1,23 +1,27 @@
 package ddswriter.delegators.common;
 
-import java.io.OutputStream;
-import java.util.HashMap;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_NEGATIVEX;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_NEGATIVEY;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_NEGATIVEZ;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_POSITIVEX;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_POSITIVEY;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_POSITIVEZ;
+import static ddswriter.format.DDS_HEADER.DDSCAPS2_VOLUME;
+import static ddswriter.format.DDS_HEADER.DDSCAPS_COMPLEX;
+import static ddswriter.format.DDS_HEADER.DDSCAPS_MIPMAP;
+import static ddswriter.format.DDS_HEADER.DDSD_DEPTH;
+import static ddswriter.format.DDS_HEADER.DDSD_MIPMAPCOUNT;
+
 import java.util.Map;
 
-import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.DDSBodyWriterDelegator;
-import ddswriter.DDSDelegator;
 import ddswriter.DDSHeaderWriterDelegator;
-import ddswriter.DDSWriter;
-import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
-import static ddswriter.format.DDS_HEADER.*;
-import static ddswriter.format.DDS_PIXELFORMAT.*;
 
 /**
  * 
