@@ -11,7 +11,7 @@ import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.delegators.GenericDelegator;
+//import ddswriter.delegators.GenericDelegator;
 import ddswriter.delegators.MipmapGenDelegator;
 import ddswriter.delegators.s2tc.S2tcDelegator;
 import ddswriter.format.DDS_BODY;
@@ -76,7 +76,7 @@ public class DDSWriter{
 		delegators.add(new MipmapGenDelegator());
 
 		if((boolean)options.getOrDefault("compress",false))delegators.add(new S2tcDelegator());
-		else delegators.add(new GenericDelegator());
+		else delegators.add(new DDSDelegator());
 
 		return delegators;
 	}

@@ -19,7 +19,7 @@ import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
 import ddswriter.DDSWriter;
-import ddswriter.colors.RGB565ColorBit;
+//import ddswriter.colors.RGB565ColorBit;
 import ddswriter.delegators.s2tc.Texel.PixelFormat;
 
 public class TexelReducer{
