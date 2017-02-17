@@ -162,7 +162,11 @@ public class TexelReducer{
 		}
 
 }
+	
 	public static void reduce(Texel texel) {
+		reduce(texel,false);
+	}
+	public static void reduce(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
 //		int dd=0;
@@ -253,25 +257,26 @@ public class TexelReducer{
 		
 		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
 	
-//		for(int x=0;x<w;x++){
-//			for(int y=0;y<h;y++){
-//				Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-//				Vector4f nearest_palette=palette[0];
-//				
-//				float d=diff(px,nearest_palette);
-//				for(int i=1;i<palette.length;i++){
-//					float d1=diff(px,palette[i]);
-//					if(d1<d){
-//						d=d1;
-//						nearest_palette=palette[i];
-//					}
-//				}
-////				Vector4f npx=nearest_palette.clone();
-////				npx.w=px.w;
-////				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
-//			}
-//		}
-
+		if(apply){
+			for(int x=0;x<w;x++){
+				for(int y=0;y<h;y++){
+					Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
+					Vector4f nearest_palette=palette[0];
+					
+					float d=diff(px,nearest_palette);
+					for(int i=1;i<palette.length;i++){
+						float d1=diff(px,palette[i]);
+						if(d1<d){
+							d=d1;
+							nearest_palette=palette[i];
+						}
+					}
+					Vector4f npx=nearest_palette.clone();
+					npx.w=px.w;
+					texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
+				}
+			}
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -286,7 +291,7 @@ public class TexelReducer{
 		for(int x=0;x<ir.getWidth();x+=subsample[0]){
 			for(int y=0;y<ir.getHeight();y+=subsample[1]){
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
-				reduce2(tx);				
+				reduce(tx,true);				
 				
 				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
 				Vector4f cb=null;
