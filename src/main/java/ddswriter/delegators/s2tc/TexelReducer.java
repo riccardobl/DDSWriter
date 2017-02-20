@@ -217,33 +217,23 @@ public class TexelReducer{
 			}
 		}		
 		
-		palette[0]=temp_palette[0];
-		palette[1]=temp_palette[temp_palette.length/2];
-
-		float totalDiff=diff(palette[1], palette[0]);
-		int balancingCounter=1;
+		palette[0]=temp_palette[(int) (temp_palette.length*.15f)].interpolateLocal(
+						temp_palette[(int) (temp_palette.length*.45f)], .5f);
+		
+		palette[1]=temp_palette[(int) (temp_palette.length*.65f)].interpolateLocal(
+					temp_palette[(int) (temp_palette.length*.95f)], .5f);
+		
+		//palette[0].interpolateLocal(palette[1], .01f);
 		
 		//BALANCE FIRST PALETTE COLOR
-		for(int i=1; i<temp_palette.length/2; i++) {
-			if(diff(palette[0],temp_palette[i]) > totalDiff) {
-				palette[0].addLocal(temp_palette[i]);
-				balancingCounter++;
-				//System.out.println("Balancing palette 0");
-			}
+		/*for(int i=1; i<temp_palette.length/2; i++) {
+			palette[0].addLocal(temp_palette[i]).divideLocal(2f);
 		}
-		palette[0].divideLocal(balancingCounter);
 		
-		balancingCounter=1;
 		//BALANCE SECOND PALETTE COLOR
-		palette[1]=temp_palette[temp_palette.length/2];
 		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
-			if(diff(palette[1],temp_palette[i]) > totalDiff) {
-				palette[1].addLocal(temp_palette[i]);
-				balancingCounter++;
-				//System.out.println("Balancing palette 1");
-			}
-		}	
-		palette[1].divideLocal(balancingCounter);
+			palette[1].addLocal(temp_palette[i]).divideLocal(2f);
+		}	*/
 		
 		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
 	
