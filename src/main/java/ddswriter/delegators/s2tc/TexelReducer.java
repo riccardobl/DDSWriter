@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -164,9 +165,14 @@ public class TexelReducer{
 }
 	
 	public static void reduce(Texel texel) {
-		reduce(texel,false);
+		reduce(texel,false,null);
 	}
-	public static void reduce(Texel texel,boolean apply) {
+	
+	public static void reduce(Texel texel,Texel infTexel) {
+		reduce(texel,false,infTexel);
+	}
+	
+	public static void reduce(Texel texel,boolean apply,Texel infTexel) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
 //		int dd=0;
@@ -183,57 +189,62 @@ public class TexelReducer{
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 
 		
-		final int tempColors = w*h;
-		Vector4f[] temp_palette=new Vector4f[tempColors];
-		
-		int lastFreeIndex=0;
+		//final int tempColors = w*h;
+		ArrayList<Vector4f> temp_palette=new ArrayList<>();		
+		//int lastFreeIndex=0;
 		
 		for(int y=0; y<h; y++) {
 			for(int x=0; x<w; x++) {
-				temp_palette[lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
-				lastFreeIndex++;
-				/*temp_palette[x]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, x);				//FIRST BIAS
-				temp_palette[x+w-1]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,w-x-1, h-x-1);	//SECOND BIAS
-				temp_palette[x*2]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x/2, x);	
-				temp_palette[(x+w-1)*2]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, x/2);	*/	
+				Vector4f pixelColor=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
+				temp_palette.add(pixelColor);
 			}
 		}
 		
+		float mediumFirstDiff=0f,mediumSecondDiff=0f;
 		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
 		/** those 2 groups will be interpolated into 2 single colors to form the palette 		**/
-		for(int i=1; i<temp_palette.length/2; i++) {
-			Vector4f c=temp_palette[i];
-			float firstDiff=diff(c, temp_palette[i-1]);	//MEDIUM DIFFERENCE BETWEEN THE CURRENT COLOR AND THE LAST COLOR THAT WAS SORTED
+		for(int i=1; i<temp_palette.size()/2; i++) {
+			Vector4f c=temp_palette.get(i);
+			float firstDiff=diff(c, temp_palette.get(i-1));	//MEDIUM DIFFERENCE BETWEEN THE CURRENT COLOR AND THE LAST COLOR THAT WAS SORTED
+			mediumFirstDiff+=firstDiff;
 			
-			for(int j=temp_palette.length/2; j<temp_palette.length; j++) {
-				Vector4f c1=temp_palette[j];
-				float secondDiff=diff(c1, temp_palette[i-1]);
+			for(int j=temp_palette.size()/2; j<temp_palette.size(); j++) {
+				Vector4f c1=temp_palette.get(j);
+				float secondDiff=diff(c1, temp_palette.get(i-1));
+				mediumSecondDiff+=secondDiff;
 				
 				if(secondDiff < firstDiff) { //CHECK THE DIFFERENCE
-					Vector4f aux=temp_palette[i];
-					temp_palette[i]=temp_palette[j];
-					temp_palette[j]=aux;
+					Vector4f aux=temp_palette.get(i);
+					temp_palette.set(i, temp_palette.get(j));
+					temp_palette.set(j, aux);
 				}
 			}
 		}		
 		
-		palette[0]=temp_palette[(int) (temp_palette.length*.15f)].interpolateLocal(
-						temp_palette[(int) (temp_palette.length*.45f)], .5f);
+		mediumFirstDiff/=(temp_palette.size()/2);
+		mediumSecondDiff/=(temp_palette.size()/2);
 		
-		palette[1]=temp_palette[(int) (temp_palette.length*.65f)].interpolateLocal(
-					temp_palette[(int) (temp_palette.length*.95f)], .5f);
+		palette[0]=temp_palette.get(0);		
+		palette[1]=temp_palette.get(temp_palette.size()/2);
+		
+		/*if(infTexel != null) {
+			palette[0].addLocal(infTexel.getPalette(PixelFormat.FLOAT_NORMALIZED_RGBA)[0]).divideLocal(2f);
+			//palette[1].addLocal(infTexel.getPalette(PixelFormat.FLOAT_NORMALIZED_RGBA)[1]).divideLocal(2f);
+		}*/
 		
 		//palette[0].interpolateLocal(palette[1], .01f);
 		
 		//BALANCE FIRST PALETTE COLOR
-		/*for(int i=1; i<temp_palette.length/2; i++) {
-			palette[0].addLocal(temp_palette[i]).divideLocal(2f);
+		for(int i=1; i<temp_palette.size()/2; i++) {
+			if(diff(palette[0],temp_palette.get(i)) > mediumFirstDiff)
+				palette[0].addLocal(temp_palette.get(i)).divideLocal(2f);
 		}
 		
 		//BALANCE SECOND PALETTE COLOR
-		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
-			palette[1].addLocal(temp_palette[i]).divideLocal(2f);
-		}	*/
+		for(int i=temp_palette.size()/2+1; i<temp_palette.size(); i++) {
+			if(diff(palette[1],temp_palette.get(i)) > mediumSecondDiff)
+				palette[1].addLocal(temp_palette.get(i)).divideLocal(2f);
+		}	
 		
 		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
 	
@@ -267,11 +278,16 @@ public class TexelReducer{
 
 		ImageRaster ir=ImageRaster.create(img);
 		int subsample[]=new int[]{4,4};
-
+		
+		Texel lastReducedTexel = null;
 		for(int x=0;x<ir.getWidth();x+=subsample[0]){
 			for(int y=0;y<ir.getHeight();y+=subsample[1]){
+				//if(x>0 && y>0) 
+				//	infTx=Texel.fromImageRaster(ir, new Vector2f(x-1,y-1), new Vector2f(x+subsample[0]-1,y+subsample[1]-1));
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
-				reduce(tx,true);				
+				reduce(tx,true,lastReducedTexel);
+				
+				lastReducedTexel=tx;
 				
 				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
 				Vector4f cb=null;

@@ -82,7 +82,6 @@ public class Texel implements Cloneable{
 	}
 
 	private Vector4f convert(PixelFormat from, PixelFormat to, Vector4f c) {
-
 		if(from==to) return c.clone();
 		if(from==PixelFormat.FLOAT_NORMALIZED_RGBA){
 			switch(to){
@@ -267,7 +266,6 @@ public class Texel implements Cloneable{
 	}
 
 	public Vector4f[] getPalette(PixelFormat f) {
-
 		return new Vector4f[]{convert(FORMAT,f,PALETTE[0]),convert(FORMAT,f,PALETTE[1])};
 	}
 
