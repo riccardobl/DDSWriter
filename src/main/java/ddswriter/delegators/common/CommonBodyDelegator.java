@@ -20,7 +20,8 @@ import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.DDSHeaderWriterDelegator;
+import ddswriter.DDSDelegator;
+import ddswriter.DDSSlicedDelegator;
 import ddswriter.format.DDS_HEADER;
 
 /**
@@ -28,11 +29,11 @@ import ddswriter.format.DDS_HEADER;
  * @author Riccardo Balbo
  */
 
-public abstract class CommonHeaderDelegator implements DDSHeaderWriterDelegator{
+public abstract class CommonBodyDelegator implements DDSDelegator{
 
 	@Override
-	public void header(Texture tx, ImageRaster ir,int mipmap,int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
-
+	public void header(Texture tx,Map<String,String>  options,DDS_HEADER header)throws Exception {
+		
 		if(tx.getImage().hasMipmaps()) header.dwFlags|=DDSD_MIPMAPCOUNT;
 		if(tx instanceof Texture3D) header.dwFlags|=DDSD_DEPTH;
 

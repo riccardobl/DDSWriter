@@ -10,10 +10,10 @@ import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.DDSBodyWriterDelegator;
+import ddswriter.Texel;
+import ddswriter.Texel.PixelFormat;
 import ddswriter.colors.RGB565ColorBit;
-import ddswriter.delegators.common.CommonHeaderDelegator;
-import ddswriter.delegators.s2tc.Texel.PixelFormat;
+import ddswriter.delegators.common.CommonSlicedBodyDelegator;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
 
@@ -24,7 +24,7 @@ import ddswriter.format.DDS_HEADER;
 
 // Ref: https://github.com/divVerent/s2tc/wiki
 
-public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWriterDelegator{
+public class S2tcDelegator extends CommonSlicedBodyDelegator{
 
 	public static final int ALPHA_A0=0b000;
 	public static final int ALPHA_A1=0b001;
@@ -35,59 +35,62 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 	public static final int COLOR_C1=0b01;
 
 	public static enum Format{
-		DXT1("DXT1",8),DXT3("DXT3",8),DXT5("DXT5",16);
-		public String name;
+		S2TC_DXT1("DXT1",8),S2TC_DXT3("DXT3",8),S2TC_DXT5("DXT5",16);
+		public String internal_name;
 		public int blocksize;
 
 		private Format(String s,int blocksize){
-			this.name=s;
+			this.internal_name=s;
 			this.blocksize=blocksize;
 		}
 
-		@Override
-		public String toString() {
-			return name;
-		}
+	
 
 	}
 
 	protected Format FORMAT; // 1= dxt1 
 
 	@Override
-	public void header(Texture tx, ImageRaster ir, int mipmap, int slice, Map<String,Object> options, DDS_HEADER header) throws Exception {
-		super.header(tx,ir,mipmap,slice,options,header);
-		if(mipmap==0&&slice==0){
-			String format=((String)options.get("format"));
-			if(format==null){
-				if((boolean)options.getOrDefault("compress",false)){
-					format="DXT1";
-				}
-			}else{
-				format=format.toUpperCase();
-			}
+	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
+		super.header(tx,options,header);
 
-			for(Format f:Format.values()){
-				if(f.name.equals(format)) FORMAT=f;
-			}
+		String format=((String)options.get("format"));
+		if(format==null) {
 
-			if(FORMAT==null) return;
-
-			header.dwFlags|=DDSD_LINEARSIZE;
-			header.ddspf.dwFlags|=DDPF_FOURCC;
-
-			byte formatb[]=FORMAT.name.getBytes();
-			for(int i=0;i<formatb.length;i++)
-				header.ddspf.dwFourCC[i]=formatb[i];
-
-			int w=tx.getImage().getWidth();
-			int h=tx.getImage().getHeight();
-			header.dwPitchOrLinearSize=((w+3)/4)*((h+3)/4)*FORMAT.blocksize;
-
+			SKIP=true;
+			return;
 		}
+
+		format=format.toUpperCase();
+		
+
+		for(Format f:Format.values())if(f.name().equals(format)) FORMAT=f;
+
+
+		if(FORMAT==null){
+			SKIP=true;
+			System.out.println(this.getClass()+" does not support "+format+". skip");
+
+			return;
+		}
+		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
+
+
+		header.dwFlags|=DDSD_LINEARSIZE;
+		header.ddspf.dwFlags|=DDPF_FOURCC;
+
+		byte formatb[]=FORMAT.internal_name.getBytes();
+		for(int i=0;i<formatb.length;i++)
+			header.ddspf.dwFourCC[i]=formatb[i];
+
+		int w=tx.getImage().getWidth();
+		int h=tx.getImage().getHeight();
+		header.dwPitchOrLinearSize=((w+3)/4)*((h+3)/4)*FORMAT.blocksize;
+
 	}
 
 	@Override
-	public void body(Texture tx, ImageRaster ir, int mipmap, int slice, Map<String,Object> options, DDS_HEADER header, DDS_BODY body) throws Exception {
+	public void body(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 		if(FORMAT==null) return;
 
 		int pxXblock[]=new int[]{4,4};
@@ -101,12 +104,12 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 
 			for(int x=0;x<ir.getWidth();x+=pxXblock[0]){
 
-				Texel btx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+pxXblock[0],y+pxXblock[1]));
+				Texel btx=Texel.fromTexel(PixelFormat.FLOAT_NORMALIZED_RGBA,ir,new Vector2f(x,y),new Vector2f(x+pxXblock[0],y+pxXblock[1]));
 				RGB565ColorBit.convertTexel(btx);
 				btx.genPalette();
 				//				RGB565ColorBit.convertTexel(btx);
 				//				TexelReducer.reduce2(btx);
-				if(FORMAT==Format.DXT1) writeDXT1(btx,body);
+				if(FORMAT==Format.S2TC_DXT1) writeDXT1(btx,body);
 			}
 		}
 
@@ -133,5 +136,8 @@ public class S2tcDelegator extends CommonHeaderDelegator implements DDSBodyWrite
 		body.writeInt(color_data);
 
 	}
+
+	@Override
+	public void header(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header) throws Exception {	}
 
 }

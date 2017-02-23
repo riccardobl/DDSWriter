@@ -3,24 +3,30 @@ import java.util.Map;
 
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
-import com.jme3.texture.image.ImageRaster;
 import com.jme3.util.MipMapGenerator;
 
-import ddswriter.DDSHeaderWriterDelegator;
+import ddswriter.DDSDelegator;
+import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
 
 /**
  * 
  * @author Riccardo Balbo
  */
-public class MipmapGenDelegator implements DDSHeaderWriterDelegator{
+public class MipmapGenDelegator implements DDSDelegator{
+
 
 
 
 	@Override
-	public void header(Texture tx,ImageRaster ir, int mipmap,int slice,Map<String,Object> options, DDS_HEADER header) throws Exception {
-		if((boolean)options.getOrDefault("options",false)&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) MipMapGenerator.generateMipMaps(tx.getImage());
+	public void body(Texture tx, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 
+	}
+
+	@Override
+	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
+		if(options.getOrDefault("gen-mipmaps","false").equals("true")&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) MipMapGenerator.generateMipMaps(tx.getImage());
+		
 	}
 
 

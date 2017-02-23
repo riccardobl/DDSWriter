@@ -2,8 +2,8 @@ package ddswriter.colors;
 
 import com.jme3.math.Vector4f;
 
-import ddswriter.delegators.s2tc.Texel;
-import ddswriter.delegators.s2tc.Texel.PixelFormat;
+import ddswriter.Texel;
+import ddswriter.Texel.PixelFormat;
 
 public class RGB565ColorBit implements ColorBit{
 	public static void convertTexel(Texel tx){

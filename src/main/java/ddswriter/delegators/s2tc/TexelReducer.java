@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +20,12 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
+import ddswriter.DDSDelegator;
 import ddswriter.DDSWriter;
+import ddswriter.Texel;
+import ddswriter.Texel.PixelFormat;
 import ddswriter.colors.RGB565ColorBit;
-import ddswriter.delegators.s2tc.Texel.PixelFormat;
+import ddswriter.delegators.GenericDelegator;
 
 public class TexelReducer{
 
@@ -311,10 +315,14 @@ public class TexelReducer{
 			}
 		}
 
-		Map<String,Object> options=new HashMap<String,Object> ();
+		Map<String,String> options=new HashMap<String,String> ();
 		options.put("format","RGB565");
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File("/tmp/reduced.dds")));
-		DDSWriter.write(new Texture2D(img),options,fo);
+		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
+		delegators.add(new S2tcDelegator());
+		delegators.add(new GenericDelegator());
+		
+		DDSWriter.write(new Texture2D(img),options,delegators,fo);
 		fo.close();
 //		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/reduced.jpg"));
 //		BufferedImage bimg=ImageToAwt.convert(img,false,true,0);

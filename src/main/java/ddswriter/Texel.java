@@ -1,12 +1,12 @@
 
-package ddswriter.delegators.s2tc;
+package ddswriter;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.colors.RGB565ColorBit;
+import ddswriter.delegators.s2tc.TexelReducer;
 
 /**
  * 
@@ -262,8 +262,14 @@ public class Texel implements Cloneable{
 		return PIXELS[0].length;
 	}
 
-	public Vector4f[][] getPixels() {
-		return PIXELS;
+	public Vector4f[][] getPixels(PixelFormat f) {
+		Vector4f out[][]=new Vector4f[PIXELS.length][PIXELS[0].length];
+		for(int y=0;y<PIXELS[0].length;y++){
+			for(int x=0;x<PIXELS.length;x++){
+				out[x][y]=get(f,x,y);				
+			}
+		}
+		return out;
 	}
 
 	public Vector4f[] getPalette(PixelFormat f) {
@@ -361,7 +367,7 @@ public class Texel implements Cloneable{
 	@Deprecated
 	public Texel(ImageRaster ir,int from[],int to[]){
 		Texel tmp=Texel.fromImageRaster(ir,new Vector2f(from[0],from[1]),new Vector2f(to[0],to[1]));
-		PIXELS=tmp.getPixels();
+		PIXELS=tmp.getPixels(PixelFormat.FLOAT_NORMALIZED_RGBA);
 		PALETTE=new Vector4f[2];
 		FORMAT=tmp.getFormat();
 		AREA=tmp.getArea();
