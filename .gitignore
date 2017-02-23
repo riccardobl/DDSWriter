@@ -1,10 +1,10 @@
-.project
-.classpath
-bin/
-.settings/
-.gradle/
+**/.project
+**/.classpath
+**/bin/
+**/build/
+**/.settings/
+**/.gradle/
 *.so
 *.dll
 *.dylib
-build/
-hs_err_pid*.log
+**/hs_err_pid*.log

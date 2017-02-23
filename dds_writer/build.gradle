@@ -1,0 +1,8 @@
+
+dependencies {
+	 compileOnly "${jme_group}:jme3-core:${jme_version}"
+	 compile project(':dds_format')
+	 testCompile 'junit:junit:4.12' 
+	 testCompile "${jme_group}:jme3-core:${jme_version}"
+	 
+}

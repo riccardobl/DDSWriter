@@ -1,25 +1,61 @@
 
-apply plugin: 'java'
-def jme_version ="v3.1.0-alpha4"
-def jme_group =  "com.github.jMonkeyEngine.jmonkeyengine"
+allprojects {
+	project.version = "git describe --always --dirty".execute().text.trim()
+	println("version : '${project.version}'")
+	version="0.1"
+	group = "wf.frk.dds"
+}
 
+
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'maven'		
+	apply plugin: 'eclipse'
 	
-repositories {
-    mavenLocal()
-  	mavenCentral()	
-	maven {  
-		url "https://jitpack.io" 
+		
+	sourceCompatibility = JavaVersion.VERSION_1_7
+	targetCompatibility = JavaVersion.VERSION_1_7
+	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+		
+	repositories {
+	    mavenLocal()
+	  	mavenCentral()	
+		maven {  
+			url "https://jitpack.io" 
+		}
+	    maven {
+	         url "http://dl.bintray.com/jmonkeyengine/com.jme3" 
+	    }
+	}	
+		
+	
+	
+	task sourcesJar(type: Jar) {
+		from sourceSets.main.allSource
+		classifier = 'sources'
 	}
-    maven {
-         url "http://dl.bintray.com/jmonkeyengine/com.jme3" 
-    }
-}	
 
-dependencies {
-    compileOnly "${jme_group}:jme3-core:${jme_version}"
-    compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
-    compileOnly "${jme_group}:jme3-desktop:${jme_version}"   
-      testCompile 'junit:junit:4.12' 
-      	compile "org.apache.logging.log4j:log4j-api:2.2"
-	compile "org.apache.logging.log4j:log4j-core:2.2"
+	task writeNewPom << {
+		pom {
+			project {
+				inceptionYear '2017'
+				description project.description
+				licenses {
+					license {
+						name ""
+						url ""
+						distribution "repo"
+					}
+				}
+				developers {
+					developer {
+						id "riccardobl"
+						name "Riccardo Balbo"
+					}
+				}
+			}
+		}.writeTo("$buildDir/newpom.xml")
+}
+	
 }

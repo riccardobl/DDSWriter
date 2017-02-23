@@ -1,0 +1,14 @@
+
+dependencies {
+	compileOnly "${jme_group}:jme3-core:${jme_version}"
+	
+	testCompile project(':dds_writer__cli')
+	testCompile project(':dds_writer__s2tc_delegator')
+	testCompile project(':dds_writer__s3tc_ati_lwjgl2_delegator')
+	
+	testCompile "${jme_group}:jme3-core:${jme_version}"
+	testCompile "${jme_group}:jme3-desktop:${jme_version}"
+
+	    
+	testCompile 'junit:junit:4.12' 
+}
