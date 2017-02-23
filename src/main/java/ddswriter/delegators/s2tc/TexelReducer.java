@@ -170,29 +170,22 @@ public class TexelReducer{
 	public static void reduce(Texel texel) {
 		reduce(texel,false);
 	}
+	
 	public static void reduce(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
-//		int dd=0;
-//		
-//		for(int x=0;x<w;x++){
-//			for(int y=0;y<h;y++){
-//				dd++;
-//				if(dd%2==0) texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,new Vector4f(1,1,1,1));
-//				else texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,new Vector4f(1,0,1,1));
-//
-//			}
-//		}
-//		if(1==1)return;
-		Vector4f palette[]=new Vector4f[2];// Works only for 2.
-
 		
-		int colors = w + h - 1;
+		Vector4f palette[]=new Vector4f[2];// Works only for 2.
+		
+		int colors = (w + h);
 		Vector4f[] temp_palette=new Vector4f[colors];
+		System.out.println("Colors: "+colors);
+		
+		int lastFreeIndex=-1;
 		
 		for(int x=0; x<w; x++) {
-			temp_palette[x]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x, x);				//FIRST BIAS
-			temp_palette[x+w-1]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,w-x-1, h-x-1);	//SECOND BIAS
+			temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x, x);			//FIRST BIAS
+			temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,w-x-1, h-x-1);	//SECOND BIAS
 		}
 		
 		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
@@ -291,11 +284,11 @@ public class TexelReducer{
 
 		ImageRaster ir=ImageRaster.create(img);
 		int subsample[]=new int[]{4,4};
-
+		
 		for(int x=0;x<ir.getWidth();x+=subsample[0]){
 			for(int y=0;y<ir.getHeight();y+=subsample[1]){
 				Texel tx=Texel.fromImageRaster(ir,new Vector2f(x,y),new Vector2f(x+subsample[0],y+subsample[1]));
-				reduce(tx,true);				
+				reduce(tx,true);
 				
 				Vector4f ca=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,0,0);
 				Vector4f cb=null;
@@ -316,7 +309,7 @@ public class TexelReducer{
 		}
 
 		Map<String,String> options=new HashMap<String,String> ();
-		options.put("format","RGB565");
+		options.put("format","ARGB8");
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File("/tmp/reduced.dds")));
 		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
 		delegators.add(new S2tcDelegator());
