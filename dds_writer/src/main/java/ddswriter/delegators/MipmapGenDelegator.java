@@ -13,6 +13,7 @@ import ddswriter.format.DDS_HEADER;
  * 
  * @author Riccardo Balbo
  */
+@Deprecated
 public class MipmapGenDelegator implements DDSDelegator{
 
 
@@ -25,7 +26,8 @@ public class MipmapGenDelegator implements DDSDelegator{
 
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-		if(options.getOrDefault("gen-mipmaps","false").equals("true")&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) MipMapGenerator.generateMipMaps(tx.getImage());
+		if(options.getOrDefault("mipmaps","false").equals("true")&&!tx.getImage().hasMipmaps()&&tx instanceof Texture2D) 
+			MipMapGenerator.generateMipMaps(tx.getImage());
 		
 	}
 

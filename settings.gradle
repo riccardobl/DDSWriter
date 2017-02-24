@@ -1,4 +1,4 @@
-rootProject.name = 'dds_writer'
+rootProject.name = 'ddswriter'
 include 'dds_format'
 include 'dds_writer'
 include 'dds_writer__s2tc_delegator'

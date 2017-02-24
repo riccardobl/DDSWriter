@@ -65,7 +65,9 @@ public class Texel implements Cloneable{
 		};
 		return tnx;
 	}
-
+	public Texel(PixelFormat format,int w,int h){
+		this(format,new Vector4f[w][h]);
+	}
 	public Texel(PixelFormat format,Vector4f pixels[][]){
 		this(format,pixels,new Vector2f[]{new Vector2f(0,0),// from
 				new Vector2f(pixels.length,pixels[0].length)//to
@@ -373,6 +375,13 @@ public class Texel implements Cloneable{
 	@Deprecated
 	public void write(ImageRaster out, int from[], int to[]) {
 		write(out,new Vector2f(from[0],from[1]),new Vector2f(to[0],to[1]));
+	}
+
+	Texel[] MIPMAPS;
+	public Texel[] getMipMap(int n, boolean regen) {
+		if(MIPMAPS!=null&&n==MIPMAPS.length&&!regen)return MIPMAPS;
+		MIPMAPS=TexelMipmapGenerator.generateMipMaps(this,n);
+		return MIPMAPS;
 	}
 
 }

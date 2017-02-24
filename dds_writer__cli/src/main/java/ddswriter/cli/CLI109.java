@@ -47,7 +47,7 @@ public class CLI109{
 		out.add("   --in <FILE>: Input file\n");
 		out.add("   --out <FILE.dds>: Output file\n");
 		out.add("   --format: Output format. Default: ARGB8 (uncompressed)\n");
-		out.add("   --mipmaps: Generate mipmaps [Works only with 2d textures]\n");
+		out.add("   --gen-mipmaps: Generate mipmaps\n");
 		out.add("   --exit: Exit interactive console\n");
 		out.add("   --debug: Show debug informations\n");
 		out.add("Input formats:\n");

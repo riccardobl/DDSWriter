@@ -23,6 +23,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
 
+import org.lwjgl.opengl.Util;
+
 import com.jme3.math.Vector4f;
 import com.jme3.renderer.Renderer;
 import com.jme3.texture.Texture;
@@ -121,10 +123,11 @@ public class S3TC_ATI_HardwareCompressionDelegator extends CommonSlicedBodyDeleg
 			}
 		}
 		bbf.rewind();
-		glTexImage2D(GL_TEXTURE_2D,0,FORMAT.gl,tx.getImage().getWidth(),tx.getImage().getHeight(),0,GL_RGBA,GL_FLOAT,bbf);
+		glTexImage2D(GL_TEXTURE_2D,0,FORMAT.gl,pixels.length,pixels[0].length,0,GL_RGBA,GL_FLOAT,bbf);
 		
-		int compressed=glGetTexLevelParameteri(GL_TEXTURE_2D,0,FORMAT.gl);
-		if(compressed!=GL_TRUE){
+//		int compressed=glGetTexLevelParameteri(GL_TEXTURE_2D,0,FORMAT.gl);
+		
+//		if(compressed==GL_TRUE){
 			int out_size=glGetTexLevelParameteri(GL_TEXTURE_2D,0,GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB);
 			ByteBuffer out=BufferUtils.createByteBuffer(out_size);			
 			glGetCompressedTexImageARB(GL_TEXTURE_2D,0,out);
@@ -133,10 +136,11 @@ public class S3TC_ATI_HardwareCompressionDelegator extends CommonSlicedBodyDeleg
 			out.get(bytes);
 			body.write(bytes);
 			BufferUtils.destroyDirectBuffer(out);
-		}else{
-			throw new Exception("Can't do hw compression for format "+FORMAT.internal_name);
-
-		}
+//		}else{
+//			Util.checkGLError();
+//			throw new Exception("Can't do hw compression for format "+FORMAT.internal_name);
+//
+//		}
 		
 		BufferUtils.destroyDirectBuffer(bbf);
 		glBindTexture(GL_TEXTURE_2D,0);

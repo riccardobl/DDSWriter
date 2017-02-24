@@ -62,7 +62,7 @@ public class S3tcCLI109Module implements CLI109Module{
 	
 	@Override
 	public void unload(Map<String,String> options, List<String> help, ArrayList<DDSDelegator> delegators) {
-        pbuffer.destroy();
+        if(pbuffer!=null)pbuffer.destroy();
 
 	}
 }
