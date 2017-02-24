@@ -1,4 +1,4 @@
-package ddswriter.delegators.common;
+package ddswriter.delegators;
 
 import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP;
 import static ddswriter.format.DDS_HEADER.DDSCAPS2_CUBEMAP_NEGATIVEX;
@@ -19,7 +19,6 @@ import com.jme3.math.Vector2f;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
-import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.DDSSlicedDelegator;
 import ddswriter.Texel;
@@ -31,7 +30,7 @@ import ddswriter.format.DDS_HEADER;
  * @author Riccardo Balbo
  */
 
-public abstract class CommonSlicedBodyDelegator extends DDSSlicedDelegator{
+public abstract class CommonBodyDelegator extends DDSSlicedDelegator{
 	
 	int numMipMaps(Vector2f s){
         return  1 + (int)(Math.ceil(Math.log(s.x>s.y?s.x:s.y) / Math.log(2f)))  ;

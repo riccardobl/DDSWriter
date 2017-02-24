@@ -10,16 +10,11 @@ import java.io.OutputStream;
  *
  */
 public class DDSOutputStream extends OutputStream{
-//	protected String PIXEL_FORMAT;
 	protected DataOutputStream DOS;
 
-//	public DDSOutputStream(OutputStream os){
-//		this(os,"argb");
-//	}
 
-	public DDSOutputStream(OutputStream os){//,String pixelformat){
+	public DDSOutputStream(OutputStream os){
 		DOS=new DataOutputStream(os);
-//		PIXEL_FORMAT=new StringBuilder(pixelformat).reverse().toString();
 	}
 
 	public void writeInt(int i) throws IOException{
@@ -69,39 +64,10 @@ public class DDSOutputStream extends OutputStream{
 	
 	public void writeBytes(byte ...bs){
 		for(byte b:bs){
-			writeBytes(bs);
+			writeBytes(b);
 		}
 	}
 	
-	
-//
-//	public void writePixel(int r, int g, int b, int a) throws IOException {
-//		for(int i=0;i<PIXEL_FORMAT.length();i++){
-//			switch(PIXEL_FORMAT.charAt(i)){
-//				case 'r':
-//					DOS.writeByte(r);
-//					break;
-//				case 'g':
-//					DOS.writeByte(g);
-//					break;
-//				case 'b':
-//					DOS.writeByte(b);
-//					break;
-//				case 'a':
-//					DOS.writeByte(a);
-//					break;
-//
-//			}
-//		}
-//	}
-//
-//	public void writePixel(ColorRGBA c) throws IOException {
-//		int b=(int)(c.b*255f);
-//		int g=(int)(c.g*255f);
-//		int r=(int)(c.r*255f);
-//		int a=(int)(c.a*255f);
-//		writePixel(r,g,b,a);
-//	}
 	
 	
 

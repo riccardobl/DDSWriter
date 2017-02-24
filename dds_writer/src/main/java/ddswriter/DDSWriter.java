@@ -16,34 +16,9 @@ import ddswriter.format.DDS_HEADER;
 public class DDSWriter{
 
 
-//
-//	
-//	private static Collection<DDSDelegator>  loadDefaultDelegators(Map<String,Object> options){
-//		Collection<DDSDelegator>  delegators=new ArrayList<DDSDelegator> ();
-//		
-//		delegators.add(new MipmapGenDelegator());
-//
-//		if((boolean)options.getOrDefault("compress",false))delegators.add(new S2tcDelegator());
-//		else delegators.add(new GenericDelegator());
-//
-//		return delegators;
-//	}
-//
-//	public static void write(Texture tx, Map<String,Object> options, OutputStream output ) throws Exception {
-//		write(tx,options,loadDefaultDelegators(options),output);
-//	}
 
-	/**
-	 * 
-	 * @param tx
-	 * @param options
-	 * @param delegators : one delegator must be a DDSBodyWriterDelegator
-	 * @param output
-	 * @throws Exception
-	 */
 	public static void write(Texture tx, Map<String,String> options,Collection<DDSDelegator> delegators, OutputStream output ) throws Exception {
 		// TODO: Add support for DX10 HEADER
-		// TODO: Add mipmap generation for texture 3d and texture cubemap
 		boolean debug=options.getOrDefault("debug","false").equals("true");
 		
 		DDSOutputStream os=new DDSOutputStream(output);

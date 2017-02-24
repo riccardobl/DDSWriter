@@ -6,14 +6,11 @@ import static ddswriter.format.DDS_PIXELFORMAT.DDPF_RGB;
 
 import java.util.Map;
 
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
-import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-import ddswriter.delegators.common.CommonSlicedBodyDelegator;
 import ddswriter.encoders.ARGB8ColorBit;
 import ddswriter.encoders.ColorBit;
 import ddswriter.encoders.RGB565ColorBit;
@@ -25,7 +22,7 @@ import ddswriter.format.DDS_HEADER;
  * 
  * @author Riccardo Balbo
  */
-public class GenericDelegator extends CommonSlicedBodyDelegator{
+public class GenericDelegator extends CommonBodyDelegator{
 	public static enum Format{
 		ARGB8(new ARGB8ColorBit()),RGB8(new RGB8ColorBit()),
 

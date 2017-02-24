@@ -1,14 +1,6 @@
 package ddswriter;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector4f;
-import com.jme3.texture.Image;
-import com.jme3.texture.image.ImageRaster;
-import com.jme3.util.BufferUtils;
 
 import ddswriter.Texel.PixelFormat;
 

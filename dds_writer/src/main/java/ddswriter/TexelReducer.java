@@ -1,30 +1,9 @@
 package ddswriter;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
-import com.jme3.texture.Image;
-import com.jme3.texture.Texture2D;
-import com.jme3.texture.image.ImageRaster;
 
-import ddswriter.DDSDelegator;
-import ddswriter.DDSWriter;
-import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-import ddswriter.delegators.GenericDelegator;
-import ddswriter.encoders.RGB565ColorBit;
 
 public class TexelReducer{
 

@@ -8,11 +8,10 @@ import java.util.Map;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
-import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-import ddswriter.delegators.common.CommonSlicedBodyDelegator;
+import ddswriter.delegators.CommonBodyDelegator;
 import ddswriter.encoders.RGB565ColorBit;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
@@ -24,7 +23,7 @@ import ddswriter.format.DDS_HEADER;
 
 // Ref: https://github.com/divVerent/s2tc/wiki
 
-public class S2tcDelegator extends CommonSlicedBodyDelegator{
+public class S2tcDelegator extends CommonBodyDelegator{
 
 	public static final int ALPHA_A0=0b000;
 	public static final int ALPHA_A1=0b001;
