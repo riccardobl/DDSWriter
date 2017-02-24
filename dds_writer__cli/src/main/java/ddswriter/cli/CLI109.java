@@ -57,9 +57,8 @@ public class CLI109{
 	
 	
 
-	static void run(String[] _args) throws Exception {
+	static int run(String[] _args) throws Exception {
 		Map<String,String> options=new HashMap<String,String>();
-		options.put("debug","true");
 		List<String> help=genericHelp();
 		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
 		delegators.add(new GenericDelegator());
@@ -98,7 +97,7 @@ public class CLI109{
 				
 		if(out==null||in==null) {			
 			System.out.println(toString(help));
-			System.exit(1);
+			return 1;
 		}
 
 
@@ -132,7 +131,7 @@ public class CLI109{
 
 		if(tx==null){
 			System.err.println("Input format not supported: "+ext);
-			System.exit(1);
+			return 1;
 		}
 
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(out)));
@@ -140,6 +139,7 @@ public class CLI109{
 		fo.close();
 		for(CLI109Module m:modules)m.unload(options,help,delegators);
 
+		return 0;
 	}
 
 	private static String toString(List<String> c) {
@@ -153,13 +153,24 @@ public class CLI109{
 
 
 	public static void main(String[] _args) throws Exception {
-		if(_args.length==0){
-			Scanner s=new Scanner(System.in);
-			while(true){
-				System.out.print("Interactive console:~$ ");
-				_args=s.nextLine().split(" ");
-				run(_args);
+		boolean interactive=false;
+		for(int i=0;i<_args.length;i++){
+			if(_args[i].equals("--interactive")){
+				interactive=true;
 			}
+		}
+		if(interactive){
+			int i=0;
+			Scanner s=new Scanner(System.in);
+			do{
+				System.out.print("Interactive console:~$ ");
+				String i_args[]=s.nextLine().split(" ");
+				String f_args[]=new String[i_args.length+_args.length];
+				System.arraycopy(_args,0,f_args,0,_args.length);
+				System.arraycopy(i_args,0,f_args,_args.length,i_args.length);				
+				i=run(f_args);
+			}while(i==0);
+			s.close();
 		}else{
 			run(_args);
 		}

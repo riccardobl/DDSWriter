@@ -55,9 +55,11 @@ public class TexelMipmapGenerator{
 		Texel current=image;
 
 		for(int i=0;i<n;i++){
-			if(height==1||width==1) break;
+
 			height/=2;
 			width/=2;
+			if(height<2)height=2;
+			if(width<2) width=2;
 			//			}
 			//				System.out.println("Gen mipmap "+width+"x"+height);
 			current=scaleImage(current,width,height);

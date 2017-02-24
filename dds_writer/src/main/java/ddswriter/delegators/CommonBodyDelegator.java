@@ -73,12 +73,12 @@ public abstract class CommonBodyDelegator extends DDSSlicedDelegator{
 	public  void process_slice(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception{
 		boolean gen_mipmaps=!tx.getImage().hasMipmaps()&&options.getOrDefault("gen-mipmaps","false").equals("true");
 		if(mipmap==0&&gen_mipmaps){
-			int n=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()));
+			int n=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()))-1/*first mipmap is the image*/;
 			Texel mipmaps[]=ir.getMipMap(n,false);
 			super.process_slice(tx,ir,mipmap,slice,options,header,body);
-			for(int i=0;i<mipmaps.length-1/*first mipmap is the image*/;i++){
+			for(int i=0;i<n;i++){
 				Texel m=mipmaps[i];
-				super.process_slice(tx,m,i+1,slice,options,header,body);
+				super.process_slice(tx,m,i+1,slice,options,header,body); 
 			}
 		}else{
 			super.process_slice(tx,ir,mipmap,slice,options,header,body);
