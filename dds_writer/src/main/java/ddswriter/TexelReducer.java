@@ -155,32 +155,25 @@ public class TexelReducer{
 		
 		Vector4f palette[]=new Vector4f[2];// Works only for 2.
 		
-		int colors = (w + h);
+		int colors = (w * h);
 		Vector4f[] temp_palette=new Vector4f[colors];
-		System.out.println("Colors: "+colors);
 		
 		int lastFreeIndex=-1;
-		
 		for(int x=0; x<w; x++) {
-			temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x, x);			//FIRST BIAS
-			temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,w-x-1, h-x-1);	//SECOND BIAS
-		}
+			for(int y=0; y<h; y++) {
+				temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
+			}
+		} 
 		
 		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
 		/** those 2 groups will be interpolated into 2 single colors to form the palette 		**/
-		for(int i=0; i<temp_palette.length/2; i++) {
+		for(int i=1; i<temp_palette.length/2; i++) {
 			Vector4f c=temp_palette[i];
-			float mediumDiff;	//MEDIUM DIFFERENCE BETWEEN THE CURRENT COLOR AND THE LAST COLOR THAT WAS SORTED
+			float mediumDiff=diff(c, temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
 			
-			if(i>0) mediumDiff=diff(c, temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
-			else mediumDiff=diff(c, temp_palette[0]);	  //CONSIDER THE COLOR ITSELF IF IT IS THE FIRST OF THE ARRAY
-			
-			for(int j=temp_palette.length/2; j<temp_palette.length; j++) {
+			for(int j=temp_palette.length/2 + 1; j<temp_palette.length; j++) {
 				Vector4f c1=temp_palette[j];
-				float diff;
-				
-				if(i>0) diff=diff(c1, temp_palette[i-1]);
-				else diff=diff(c1, temp_palette[0]);
+				float diff=diff(c1, temp_palette[j-1]);
 				
 				if(diff < mediumDiff) { //CHECK THE DIFFERENCE
 					Vector4f aux=temp_palette[i];
@@ -193,66 +186,53 @@ public class TexelReducer{
 		palette[0]=temp_palette[0];
 		palette[1]=temp_palette[temp_palette.length/2];
 		
-		float totalDiff=diff(palette[0], palette[1]);
+		float mediumDiff=diff(palette[0],palette[1]);
 		
 		//BALANCE FIRST PALETTE COLOR
+		int balancingCounter=1;
 		for(int i=1; i<temp_palette.length/2; i++) {
-			if(diff(palette[0],temp_palette[i]) > totalDiff)
-				//palette[0]=palette[0].add(temp_palette[i]).divide(2);
-				palette[0].add(temp_palette[i]);
+			if(diff(palette[0],temp_palette[i]) < mediumDiff) {
+				palette[0].addLocal(temp_palette[i]);
+				balancingCounter++;
+			}
 		}
-		palette[0].divide(temp_palette.length/2);
+		palette[0].divideLocal(balancingCounter);
 		
 		//BALANCE SECOND PALETTE COLOR
+		balancingCounter=1;
 		palette[1]=temp_palette[temp_palette.length/2];
 		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
-			if(diff(palette[1],temp_palette[i]) > totalDiff)
-				//palette[1]=palette[1].add(temp_palette[i]).divide(2);
-				palette[1].add(temp_palette[i]);
-		}	
-		palette[1].divide(temp_palette.length/2);
-		
-		//INTERPOLATE (TRYING TO REDUCE BLOCKINESS)
-		//palette[1].interpolateLocal(palette[0], .5f);
-		
-		/*for(int i=0; i<temp_palette.length; i++) 	
-			temp_palette[i] = texel.getPixelRGBA(i,i);
-		
-		for(int i=0; i<temp_palette.length; i++) {				
-			if(temp_palette[i] == null) {
-				temp_palette[i] = Vector4f.UNIT_XYZW;
-			} else {
-				for(int x=0; x<w; x++) {
-					for(int y=0; y<h; y++) {
-						
-					}
-				}
+			if(diff(palette[1],temp_palette[i]) < mediumDiff) {
+				palette[1].addLocal(temp_palette[i]);
+				balancingCounter++;
 			}
-		}*/
+		}	
+		palette[1].divideLocal(balancingCounter);
 		
 		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
 	
-		if(apply){
-			for(int x=0;x<w;x++){
-				for(int y=0;y<h;y++){
-					Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-					Vector4f nearest_palette=palette[0];
-					
-					float d=diff(px,nearest_palette);
-					for(int i=1;i<palette.length;i++){
-						float d1=diff(px,palette[i]);
-						if(d1<d){
-							d=d1;
-							nearest_palette=palette[i];
-						}
-					}
-					Vector4f npx=nearest_palette.clone();
-					npx.w=px.w;
-					texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
-				}
-			}
-		}
+		if(apply) apply(w,h,texel,palette);
 	}
 //
 
+	public static void apply(float w,float h,Texel texel,Vector4f[] palette) {
+		for(int x=0;x<w;x++){
+			for(int y=0;y<h;y++){
+				Vector4f px=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
+				Vector4f nearest_palette=palette[0];
+				
+				float d=diff(px,nearest_palette);
+				for(int i=1;i<palette.length;i++){
+					float d1=diff(px,palette[i]);
+					if(d1<d){
+						d=d1;
+						nearest_palette=palette[i];
+					}
+				}
+				Vector4f npx=nearest_palette.clone();
+				npx.w=px.w;
+				texel.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,nearest_palette);
+			}
+		}
+	}
 }
