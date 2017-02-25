@@ -1,5 +1,7 @@
 package ddswriter;
 
+import java.util.ArrayList;
+
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector4f;
 
@@ -152,65 +154,58 @@ public class TexelReducer{
 	public static void reduce(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
+
+		int colors = 2; // Works only for 2.
 		
-		Vector4f palette[]=new Vector4f[2];// Works only for 2.
+		Vector4f palette[] = new Vector4f[colors];
+		ArrayList<Vector4f> tempPalette = new ArrayList<>();
 		
-		int colors = (w * h);
-		Vector4f[] temp_palette=new Vector4f[colors];
+		float mediumTempDiff = 0f;
 		
-		int lastFreeIndex=-1;
 		for(int x=0; x<w; x++) {
 			for(int y=0; y<h; y++) {
-				temp_palette[++lastFreeIndex]=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
-			}
-		} 
-		
-		/** temp_palette should be divided into 2 subgroups, [0,length/2] and [length/2,length] **/
-		/** those 2 groups will be interpolated into 2 single colors to form the palette 		**/
-		for(int i=1; i<temp_palette.length/2; i++) {
-			Vector4f c=temp_palette[i];
-			float mediumDiff=diff(c, temp_palette[i-1]); //CONSIDER THE LAST COLOR THAT WAS SORTED (IF ANY)
-			
-			for(int j=temp_palette.length/2 + 1; j<temp_palette.length; j++) {
-				Vector4f c1=temp_palette[j];
-				float diff=diff(c1, temp_palette[j-1]);
+				boolean toBeAdded = true;
+				Vector4f color=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
 				
-				if(diff < mediumDiff) { //CHECK THE DIFFERENCE
-					Vector4f aux=temp_palette[i];
-					temp_palette[i]=temp_palette[j];
-					temp_palette[j]=aux;
+				for(Vector4f tempColor:tempPalette) {
+					if(diff(color,tempColor) < mediumTempDiff) {
+						toBeAdded = false; 
+						break;
+					}
+				}
+				
+				if(toBeAdded) {
+					tempPalette.add(color);
+					if(tempPalette.size() > 1) {
+						mediumTempDiff += diff(tempPalette.get(tempPalette.size()-1), tempPalette.get(tempPalette.size()-2));
+						mediumTempDiff /= 2;
+					}
 				}
 			}
-		}		
+		}
 		
-		palette[0]=temp_palette[0];
-		palette[1]=temp_palette[temp_palette.length/2];
-		
-		float mediumDiff=diff(palette[0],palette[1]);
-		
-		//BALANCE FIRST PALETTE COLOR
-		int balancingCounter=1;
-		for(int i=1; i<temp_palette.length/2; i++) {
-			if(diff(palette[0],temp_palette[i]) < mediumDiff) {
-				palette[0].addLocal(temp_palette[i]);
-				balancingCounter++;
+		for(Vector4f tempColor:tempPalette) {
+			if(palette[0] == null)
+				palette[0] = tempColor.clone();
+			else if(palette[1] == null) 
+				palette[1] = tempColor.clone();
+			else {
+				if(diff(palette[0], tempColor) > diff(palette[0],palette[1])) {
+					palette[1] = tempColor.clone();
+				} else if(diff(tempColor,palette[1]) > diff(palette[0],palette[1])) {
+					palette[0] = tempColor.clone();
+				}
 			}
 		}
-		palette[0].divideLocal(balancingCounter);
 		
-		//BALANCE SECOND PALETTE COLOR
-		balancingCounter=1;
-		palette[1]=temp_palette[temp_palette.length/2];
-		for(int i=temp_palette.length/2+1; i<temp_palette.length; i++) {
-			if(diff(palette[1],temp_palette[i]) < mediumDiff) {
-				palette[1].addLocal(temp_palette[i]);
-				balancingCounter++;
-			}
-		}	
-		palette[1].divideLocal(balancingCounter);
-		
-		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA,palette);
+		if(palette[1] == null) {
+			if(palette[0] == null) 
+				palette[0] = new Vector4f(1f, 1f, 1f, 1f);
+			
+			palette[1] = palette[0].clone();
+		}
 	
+		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA, palette);
 		if(apply) apply(w,h,texel,palette);
 	}
 //
