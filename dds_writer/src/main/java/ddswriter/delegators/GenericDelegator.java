@@ -40,7 +40,6 @@ public class GenericDelegator extends CommonBodyDelegator{
 
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-		super.header(tx,options,header);
 		String format=((String)options.get("format"));
 		
 		if(format==null){
@@ -56,11 +55,12 @@ public class GenericDelegator extends CommonBodyDelegator{
 
 		if(FORMAT==null){
 			System.out.println(this.getClass()+" does not support "+format+". skip");
-			SKIP=true;
+			skip();
 			return;
 		}
 
 		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
+		super.header(tx,options,header);
 
 		header.dwFlags|=DDSD_PITCH;
 		header.dwPitchOrLinearSize=(tx.getImage().getWidth()*FORMAT.colorbit.getBPP()+7)/8;

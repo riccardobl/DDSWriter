@@ -13,7 +13,10 @@ import java.util.zip.ZipFile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class FileUtils{
 	protected static final Logger LOGGER=LogManager.getLogger(FileUtils.class);
 

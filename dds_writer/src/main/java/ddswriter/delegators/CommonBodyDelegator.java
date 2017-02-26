@@ -38,7 +38,7 @@ public abstract class CommonBodyDelegator extends DDSSlicedDelegator{
 	}
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-		if(SKIP)return;
+		
 		int mipmaps_count=tx.getImage().hasMipmaps()?tx.getImage().getMipMapSizes().length:0;
 		if(mipmaps_count==0&&options.getOrDefault("gen-mipmaps","false").equals("true")){
 			mipmaps_count=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()));

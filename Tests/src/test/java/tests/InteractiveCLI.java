@@ -1,3 +1,4 @@
+package tests;
 import ddswriter.cli.CLI109;
 
 public class InteractiveCLI{

@@ -6,7 +6,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Scanner;
-
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class StreamUtils{
 	public static void inputStreamToOutputStream(InputStream in,OutputStream out) throws IOException{
 		byte[] buffer = new byte[1024*50];

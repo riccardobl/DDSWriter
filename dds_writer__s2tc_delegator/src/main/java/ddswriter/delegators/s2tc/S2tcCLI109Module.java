@@ -21,7 +21,7 @@ public class S2tcCLI109Module implements CLI109Module{
 				i++;
 			}
 		}
-		help.add(i+1,"   S2TC_DXT1,S2TC_DXT3(TODO),S2TC_DXT5(TODO)\n");
+		help.add(i+1,"   S2TC_DXT1\n");
 		delegators.add(new S2tcDelegator());
 	}
 	

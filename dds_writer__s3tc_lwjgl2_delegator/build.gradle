@@ -2,9 +2,12 @@ dependencies {
 	    compileOnly "${jme_group}:jme3-core:${jme_version}"
 	    compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
 	    compileOnly project(':dds_writer__cli')
-	    compileOnly project(':dds_format')
+	    
+	    compile project(':dds_format')
+	   	compile project(':dds_writer__lwjgl2_blockcompression_delegator')
+	    compile project(':dds_writer')
+	    
 	    testCompile 'junit:junit:4.12' 
-		compileOnly project(':dds_writer')
 		runtime 'org.lwjgl.lwjgl:lwjgl:2.9.3'
 		runtime( "${jme_group}:jme3-lwjgl:${jme_version}"){
           transitive = false

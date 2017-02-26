@@ -5,7 +5,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedList;
-
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 
 public class ClassUtils{
 	

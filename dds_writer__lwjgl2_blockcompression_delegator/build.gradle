@@ -1,0 +1,8 @@
+dependencies {
+	    compileOnly "${jme_group}:jme3-core:${jme_version}"
+	    compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
+	    compileOnly project(':dds_format')
+		compileOnly project(':dds_writer')
+			    compileOnly project(':dds_writer__cli')
+		
+}

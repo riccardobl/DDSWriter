@@ -7,6 +7,7 @@ import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
 
 
+
 /**
  * 
  * @author Riccardo Balbo
@@ -15,10 +16,9 @@ import com.jme3.texture.image.ImageRaster;
 
 public class Texel implements Cloneable{
 	public static enum PixelFormat{
-		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB,MAPPED_TO_PALETTE
+		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB
 	}
 
-	protected final Vector4f[] PALETTE;
 	protected final Vector4f[][] PIXELS;
 	protected final PixelFormat FORMAT;
 	protected Vector2f[] AREA;
@@ -77,12 +77,11 @@ public class Texel implements Cloneable{
 
 	public Texel(PixelFormat format,Vector4f pixels[][],Vector2f area[]){
 		PIXELS=pixels;
-		PALETTE=new Vector4f[2];
 		FORMAT=format;
 		AREA=area;
 	}
 
-	private Vector4f convert(PixelFormat from, PixelFormat to, Vector4f c) {
+	protected Vector4f convert(PixelFormat from, PixelFormat to, Vector4f c) {
 		if(from==to) return c.clone();
 		if(from==PixelFormat.FLOAT_NORMALIZED_RGBA){
 			switch(to){
@@ -99,13 +98,6 @@ public class Texel implements Cloneable{
 					out=convert(PixelFormat.INT_RGBA,PixelFormat.PACKED_ARGB,out);
 					return out;
 				}
-				//				case RGBA5658_INT:{
-				//					return convert(PixelFormat.INT,PixelFormat.RGBA5658_INT,convert(PixelFormat.FLOAT,PixelFormat.INT,c));
-				//				}
-				//				case RGBA565_PACKED:{
-				//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,convert(PixelFormat.FLOAT,PixelFormat.RGBA5658_INT,c));
-				//
-				//				}
 			}
 		}else if(from==PixelFormat.INT_RGBA){
 			switch(to){
@@ -123,79 +115,8 @@ public class Texel implements Cloneable{
 					out.x=p;
 					return out;
 				}
-				//				case RGBA5658_INT:{
-				//					Vector4f out=c.clone();
-				//					out.x=(int)(c.x)&0b11111;
-				//					out.y=((int)(c.y))&0b111111;
-				//					out.z=((int)(c.z))&0b11111;
-				//					out.w=(int)(c.w);
-				//					return out;
-				//				}
-				//				case RGBA565_PACKED:{
-				//					return convert(PixelFormat.RGBA5658_INT,PixelFormat.RGBA565_PACKED,c);
-				//
-				//				}
 			}
 		}
-		//		else if(from==PixelFormat.RGBA5658_INT){
-		//			switch(to){
-		//				case INT:{
-		//					Vector4f out=c.clone();
-		//					out.x=(c.x);
-		//					out.y=(c.y);
-		//					out.z=(c.z);
-		//					out.w=(c.w);
-		//					return out;
-		//				}
-		//				case FLOAT:{
-		//					Vector4f out=c.clone();
-		//					out.x=(c.x/255f);
-		//					out.y=(c.y/255f);
-		//					out.z=(c.z/255f);
-		//					out.w=(c.w/255f);
-		//					return out;
-		//				}
-		//				case RGBA565_PACKED:{
-		//					Vector4f out=c.clone();
-		//					int r=(int)c.x&0b11111;
-		//					r<<=5;
-		//					r|=(int)c.y&0b111111;
-		//					r<<=6;
-		//					r|=(int)c.z&0b11111;
-		//					out.x=r;
-		//					out.y=0;
-		//					out.z=0;
-		//					out.w=0;
-		//					return out;
-		//				}
-		//			}
-		//		}else if(from==PixelFormat.RGBA565_PACKED){
-		//			switch(to){
-		//				case INT:{
-		//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
-		//					return c;
-		//				}
-		//				case FLOAT:{
-		//					c=convert(PixelFormat.RGBA565_PACKED,PixelFormat.RGBA5658_INT,c);
-		//					c=convert(PixelFormat.RGBA5658_INT,PixelFormat.FLOAT,c);
-		//					return c;
-		//				}
-		//				case RGBA5658_INT:{
-		//					int x=(int)c.x;
-		//					Vector4f out=c.clone();
-		//					int r=x&0b11111;
-		//					r>>=5;
-		//					int g=x&0b111111;
-		//					r>>=6;
-		//					int b=x&0b11111;
-		//					out.x=r;
-		//					out.y=g;
-		//					out.z=b;
-		//					out.w=1;
-		//					return out;
-		//				}
-		//			}
-		//		}
 		return null;
 	}
 
@@ -207,34 +128,11 @@ public class Texel implements Cloneable{
 		}
 	}
 
-	public void genPalette() {
-		TexelReducer.reduce(this);
-	}
+//	public void genPalette() {
+//		TexelReducer.reduce(this);
+//	}
 
 	public Vector4f get(PixelFormat f, int x, int y) {
-		if(f==PixelFormat.MAPPED_TO_PALETTE){
-			
-			Vector4f px=get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-			Vector4f nearest_palette=PALETTE[0];
-			int  k =0;
-			float d=TexelReducer.diff(px,nearest_palette);
-			for(int i=1;i<PALETTE.length;i++){
-				float d1=TexelReducer.diff(px,PALETTE[i]);
-				if(d1<d){
-					d=d1;
-					nearest_palette=PALETTE[i];
-					k=i;
-				}
-			}
-			
-			return new Vector4f(k,k,k,k);
-//			if(color.distance(PALETTE[0])>=color.distance(PALETTE[1])) return new Vector4f(0f,0,0,0);
-//			else return new Vector4f(1f,1,1,1);
-//			
-//			if(color.equals(PALETTE[0])) return new Vector4f(0f,0,0,0);
-//			else return new Vector4f(1f,1,1,1);
-		}
-
 		return convert(FORMAT,f,PIXELS[x][y]);
 	}
 
@@ -242,17 +140,6 @@ public class Texel implements Cloneable{
 		PIXELS[x][y]=convert(f,FORMAT,c).clone();
 	}
 
-	public void setPalette(PixelFormat f, Vector4f[] palette) {	
-		palette=new Vector4f[]{convert(f,FORMAT,palette[0]),convert(f,FORMAT,palette[1])};
-		boolean rv=palette[0].length()>palette[1].length();;
-		if(rv){
-			PALETTE[1]=palette[0];
-			PALETTE[0]=palette[1];
-		}else{
-			PALETTE[0]=palette[0];
-			PALETTE[1]=palette[1];
-		}
-	}
 
 	public int getWidth() {
 		return PIXELS.length;
@@ -270,10 +157,6 @@ public class Texel implements Cloneable{
 			}
 		}
 		return out;
-	}
-
-	public Vector4f[] getPalette(PixelFormat f) {
-		return new Vector4f[]{convert(FORMAT,f,PALETTE[0]),convert(FORMAT,f,PALETTE[1])};
 	}
 
 	public Vector2f[] getArea() {
@@ -316,68 +199,7 @@ public class Texel implements Cloneable{
 		}
 	}
 
-	@Deprecated
-	private ColorRGBA colorRGBAfromVec4(Vector4f c) {
-		return new ColorRGBA(c.x,c.y,c.z,c.w);
-	}
-
-	@Deprecated
-	public void setPixelRGBA(int x, int y, Vector4f c) {
-		set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,c);
-	}
-
-	@Deprecated
-	public void setIntPixelRGBA(int x, int y, int c[]) {
-		Vector4f v=new Vector4f(c[0],c[1],c[2],c[3]);
-		set(PixelFormat.INT_RGBA,x,y,v);
-
-		//		Vector4f p=getPixelRGBA(x,y);
-		//		p.x=(float)c[0]/255f;
-		//		p.y=(float)c[1]/255f;
-		//		p.z=(float)c[2]/255f;
-		//		p.w=(float)c[3]/255f;
-		//		setPixelRGBA(x,y,p);
-	}
-
-	@Deprecated
-	public Vector4f getPixelRGBA(int x, int y) {
-		return get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-
-	}
-
-	@Deprecated
-	public int[] getIntPixelRGBA(int x, int y) {
-		int out[]=new int[4];
-		Vector4f v=get(PixelFormat.INT_RGBA,x,y);
-		out[0]=(int)v.x;
-		out[1]=(int)v.y;
-		out[2]=(int)v.z;
-		out[3]=(int)v.w;
-		return out;
-		//		Vector4f c=getPixelRGBA(x,y);
-		//		int r=(int)(c.x*255f);
-		//		int g=(int)(c.y*255f);
-		//		int b=(int)(c.z*255f);
-		//		int a=(int)(c.w*255f);
-		//		return new int[]{r,g,b,a};
-
-	}
-
-	@Deprecated
-	public Texel(ImageRaster ir,int from[],int to[]){
-		Texel tmp=Texel.fromImageRaster(ir,new Vector2f(from[0],from[1]),new Vector2f(to[0],to[1]));
-		PIXELS=tmp.getPixels(PixelFormat.FLOAT_NORMALIZED_RGBA);
-		PALETTE=new Vector4f[2];
-		FORMAT=tmp.getFormat();
-		AREA=tmp.getArea();
-	}
-
-	@Deprecated
-	public void write(ImageRaster out, int from[], int to[]) {
-		write(out,new Vector2f(from[0],from[1]),new Vector2f(to[0],to[1]));
-	}
-
-	Texel[] MIPMAPS;
+	protected Texel[] MIPMAPS;
 	public Texel[] getMipMap(int n, boolean regen) {
 		if(MIPMAPS!=null&&n==MIPMAPS.length&&!regen)return MIPMAPS;
 		MIPMAPS=TexelMipmapGenerator.generateMipMaps(this,n);

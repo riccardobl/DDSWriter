@@ -1,11 +1,11 @@
-package ddswriter;
+package ddswriter.delegators.s2tc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector4f;
 
+import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 /**
  * 
@@ -28,11 +28,11 @@ public class TexelReducer{
 		return color_dist_srgb_mixed(ia,ib);
 	}
 
-	public static int SHRR(int a, int n) {
+	private static int SHRR(int a, int n) {
 		return (((a)+(1<<((n)-1)))>>(n));
 	}
 
-	public static int srgb_get_y(int a[]) {
+	private static int srgb_get_y(int a[]) {
 		// convert to linear
 		int r=a[0]*(int)a[0];
 		int g=a[1]*(int)a[1];
@@ -44,7 +44,7 @@ public class TexelReducer{
 		return y;
 	}
 
-	public static int color_dist_srgb_mixed(int a[], int b[]) {
+	private static int color_dist_srgb_mixed(int a[], int b[]) {
 		// get Y
 		int ay=srgb_get_y(a);
 		int by=srgb_get_y(b);
@@ -62,102 +62,12 @@ public class TexelReducer{
 		// weight for v: ???
 	}
 	
-	public static void reduce2(Texel texel) {
-		int w=texel.getWidth();
-		int h=texel.getHeight();
 
-		Vector4f palette[]=new Vector4f[2];// Works only for 2.
-
-		int loop=2;
-		for(int l_id=0;l_id<loop;l_id++){
-			for(int palette_i=0;palette_i<palette.length;palette_i++){
-				int a_i=palette_i-1;
-				if(a_i<0) a_i=palette.length+a_i;
-
-				Vector4f base=palette[a_i];
-				Vector4f best_pick=palette[palette_i];
-				float d;
-				if(base==null||best_pick==null) d=0;
-				else d=diff(base,best_pick);
-
-				for(int x=0;x<w;x++){
-					for(int y=0;y<h;y++){
-						Vector4f px=texel.getPixelRGBA(x,y);
-						if(base==null){
-							base=px;
-							best_pick=px;
-							continue;
-						}
-
-						float d1=diff(px,base);
-						if(d1>d||best_pick==null){
-							d=d1;
-							best_pick=px;
-						}
-					}
-				}
-
-				palette[palette_i]=best_pick;
-			}
-		}
-
-		//		boolean dithering=true;
-		//		for(int loop_i=0;loop_i<loop;loop_i++){
-		//			if(loop_i==loop-1) dithering=false;
-
-		for(int x=0;x<w;x++){
-			for(int y=0;y<h;y++){
-				Vector4f px=texel.getPixelRGBA(x,y);
-				Vector4f nearest_palette=palette[0];
-				float d=diff(px,nearest_palette);
-				for(int i=1;i<palette.length;i++){
-					float d1=diff(px,palette[i]);
-					if(d1<d){
-						d=d1;
-						nearest_palette=palette[i];
-					}
-				}
-
-				//					if(dithering){
-				//
-				//						Vector4f oldColor=texel.getPixelRGBA(x,y);
-				//						Vector4f newColor=nearest_palette;
-				//						texel.setPixelRGBA(x,y,nearest_palette);
-				//						Vector4f err=oldColor.subtract(newColor);
-				//
-				//						if(x+1<w){
-				//							texel.setPixelRGBA(y,x+1,texel.getPixelRGBA(y,x+1).add(err.mult(7.f/16f)));
-				//						}
-				//
-				//						if(x-1>=0&&y+1<h){
-				//							texel.setPixelRGBA(y+1,x-1,texel.getPixelRGBA(y+1,x-1).add(err.mult(3.f/16f)));
-				//						}
-				//
-				//						if(y+1<h){
-				//							texel.setPixelRGBA(y+1,x,texel.getPixelRGBA(y+1,x).add(err.mult(5.f/16f)));
-				//						}
-				//
-				//						if(x+1<w&&y+1<h){
-				//							texel.setPixelRGBA(y+1,x+1,texel.getPixelRGBA(y+1,x+1).add(err.mult(1.f/16f)));
-				//						}
-				//
-				//					}else{
-				Vector4f npx=nearest_palette.clone();
-				npx.w=px.w;
-				texel.setPixelRGBA(x,y,nearest_palette);
-
-				//					}
-				//				}
-			}
-		}
-
-}
-	
-	public static void reduce(Texel texel) {
-		reduce(texel,false);
+	public static TexelReduced reduce(Texel texel) {
+		return reduce(texel,false);
 	}
 	
-	public static void reduce1(Texel texel,boolean apply) {
+	public static TexelReduced reduce1(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
 
@@ -224,15 +134,16 @@ public class TexelReducer{
 			palette[1] = palette[0].clone();
 		}
 	
-		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA, palette);
+		TexelReduced red=new TexelReduced(texel, palette);
 		if(apply) 
-			apply(w,h,texel,palette);
+			apply(w,h,red,palette);
+		return red;
 	}
 	
 	private static final ArrayList<Vector4f> GLOBAL_PALETTE = new ArrayList<>();
 	private static float GLOBAL_DIFF = 0f;
 	
-	public static void reduce(Texel texel,boolean apply) {
+	public static TexelReduced reduce(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
 
@@ -311,8 +222,9 @@ public class TexelReducer{
 			GLOBAL_PALETTE.add(palette[1]);
 		}
 	
-		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA, palette);
+		TexelReduced red=new TexelReduced(texel, palette);
 		if(apply) apply(w,h,texel,palette);
+		return red;
 	}
 	
 	public static void apply(float w,float h,Texel texel,Vector4f[] palette) {

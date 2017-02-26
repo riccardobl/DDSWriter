@@ -33,8 +33,10 @@ public class S2tcDelegator extends CommonBodyDelegator{
 	public static final int COLOR_C0=0b00;
 	public static final int COLOR_C1=0b01;
 
+	protected Format FORMAT; 
+
 	public static enum Format{
-		S2TC_DXT1("DXT1",8),S2TC_DXT3("DXT3",8),S2TC_DXT5("DXT5",16);
+		S2TC_DXT1("DXT1",8);//,S2TC_DXT3("DXT3",8),S2TC_DXT5("DXT5",16);
 		public String internal_name;
 		public int blocksize;
 
@@ -47,16 +49,13 @@ public class S2tcDelegator extends CommonBodyDelegator{
 
 	}
 
-	protected Format FORMAT; // 1= dxt1 
 
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-		super.header(tx,options,header);
 
 		String format=((String)options.get("format"));
 		if(format==null) {
-
-			SKIP=true;
+			skip();
 			return;
 		}
 
@@ -67,12 +66,12 @@ public class S2tcDelegator extends CommonBodyDelegator{
 
 
 		if(FORMAT==null){
-			SKIP=true;
+			skip();
 			System.out.println(this.getClass()+" does not support "+format+". skip");
-
 			return;
 		}
 		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
+		super.header(tx,options,header);
 
 
 		header.dwFlags|=DDSD_LINEARSIZE;
@@ -105,16 +104,16 @@ public class S2tcDelegator extends CommonBodyDelegator{
 
 				Texel btx=Texel.fromTexel(PixelFormat.FLOAT_NORMALIZED_RGBA,ir,new Vector2f(x,y),new Vector2f(x+pxXblock[0],y+pxXblock[1]));
 				RGB565ColorBit.convertTexel(btx);
-				btx.genPalette();
+				btx=TexelReducer.reduce(btx);
 				//				RGB565ColorBit.convertTexel(btx);
 				//				TexelReducer.reduce2(btx);
-				if(FORMAT==Format.S2TC_DXT1) writeDXT1(btx,body);
+				if(FORMAT==Format.S2TC_DXT1) writeDXT1((TexelReduced)btx,body);
 			}
 		}
 
 	}
 
-	private void writeDXT1(Texel texel, DDS_BODY body) throws Exception {
+	private void writeDXT1(TexelReduced texel, DDS_BODY body) throws Exception {
 
 		Vector4f palette[]=texel.getPalette(PixelFormat.INT_RGBA);
 		int c0=RGB565ColorBit.packPixel(palette[0]);
@@ -127,7 +126,7 @@ public class S2tcDelegator extends CommonBodyDelegator{
 		for(int y=0;y<texel.getHeight();y++){
 			for(int x=texel.getWidth()-1;x>=0;x--){
 				if(x!=0||y!=0) color_data<<=2;
-				float i=texel.get(PixelFormat.MAPPED_TO_PALETTE,x,y).x;
+				float i=texel.map(x,y);
 				if(i>.5f) color_data|=COLOR_C1;
 				else color_data|=COLOR_C0;
 			}

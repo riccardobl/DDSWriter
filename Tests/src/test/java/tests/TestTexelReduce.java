@@ -1,3 +1,4 @@
+package tests;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,10 +21,9 @@ import ddswriter.DDSDelegator;
 import ddswriter.DDSWriter;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-import ddswriter.TexelReducer;
 import ddswriter.delegators.GenericDelegator;
 import ddswriter.delegators.s2tc.S2tcDelegator;
-import tests.TestUtils;
+import ddswriter.delegators.s2tc.TexelReducer;
 
 public class TestTexelReduce{
 	public static void main(String[] args) throws Exception {

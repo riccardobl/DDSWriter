@@ -11,15 +11,20 @@ import com.jme3.system.NativeLibraryLoader;
 
 import ddswriter.DDSDelegator;
 import ddswriter.cli.CLI109Module;
+import ddswriter.lwjgl.LWJGLCliModule;
 
-public class S3tcCLI109Module implements CLI109Module{
+/**
+ * 
+ * @author Riccardo Balbo
+ */
+public class S3tcCLI109Module extends LWJGLCliModule{
 	public S3tcCLI109Module(){
-		 
+
 	}
-	Pbuffer pbuffer;
+
 	@Override
 	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegator> delegators) {
-	
+		if(!startGL()) return;
 		int i=0;
 		for(String s:help){
 			if(s.startsWith("Input formats")){
@@ -31,7 +36,7 @@ public class S3tcCLI109Module implements CLI109Module{
 		help.add(i,"   --use_lwjgl: Enable hardware compression with lwjgl\n");
 
 		String hwc=options.get("use_lwjgl");
-		if(hwc==null||hwc.equals("false"))return;
+		if(hwc==null||hwc.equals("false")) return;
 		i=0;
 		for(String s:help){
 			if(s.startsWith("Output formats")){
@@ -40,27 +45,13 @@ public class S3tcCLI109Module implements CLI109Module{
 				i++;
 			}
 		}
-		help.add(i+1,"   S3TC_DXT1,S3TC_DXT3,S3TC_DXT5,ATI_3DC\n");
-		delegators.add(new S3TC_ATI_HardwareCompressionDelegator()); 
-        try{
-			NativeLibraryLoader.loadNativeLibrary("lwjgl",true);
-			pbuffer=new Pbuffer(8,8,new PixelFormat(), null, null);
-            pbuffer.makeCurrent();
-             
-            if(pbuffer.isBufferLost()) {
-              pbuffer.destroy();
-              throw new Exception("pbuffer lost");
-            }
-             
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5(BC3)\n");
+		delegators.add(new S3TC_LWJGLCompressionDelegator());
 	}
-	
-	
+
 	@Override
 	public void unload(Map<String,String> options, List<String> help, ArrayList<DDSDelegator> delegators) {
-        if(pbuffer!=null)pbuffer.destroy();
+		endGL();
 
 	}
 }

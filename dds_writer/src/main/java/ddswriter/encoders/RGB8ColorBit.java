@@ -1,7 +1,10 @@
 package ddswriter.encoders;
 
 import com.jme3.math.Vector4f;
-
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class RGB8ColorBit implements ColorBit{
 
 	@Override

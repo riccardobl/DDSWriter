@@ -33,7 +33,6 @@ import ddswriter.delegators.GenericDelegator;
  * 
  * @author Riccardo Balbo
  */
-//--in /tmp/test.png --out /tmp/test_output.dds --compress
 
 public class CLI109{
 	protected static final Logger LOGGER=LogManager.getLogger(CLI109.class);

@@ -1,7 +1,6 @@
-package ddswriter.delegators.s2tc;
+package tests;
 
 import ddswriter.cli.CLI109;
-import tests.TestUtils;
 
 public class Test{
 	public static void main(String[] _args) throws Exception {

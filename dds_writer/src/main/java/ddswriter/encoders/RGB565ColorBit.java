@@ -4,7 +4,10 @@ import com.jme3.math.Vector4f;
 
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-
+/**
+ * 
+ * @author Riccardo Balbo
+ */
 public class RGB565ColorBit implements ColorBit{
 	public static void convertTexel(Texel tx){
 		int w=tx.getWidth();
