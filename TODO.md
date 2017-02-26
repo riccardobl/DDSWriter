@@ -2,7 +2,7 @@
 
 ## Base
 - [x] DDS format implementation
-- [ ] dx10 header implementation
+- [ ] [dx10 header implementation](https://msdn.microsoft.com/en-us/library/windows/desktop/bb943983(v=vs.85).aspx)
 - [x] MipMap generation
 
 ## CLI
