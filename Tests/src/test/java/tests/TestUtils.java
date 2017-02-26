@@ -48,6 +48,8 @@ public class TestUtils{
 				"texture2D_MipMaps.dds",
 				"texture2D.dds",
 				"texture2D.jpg",
+				"texture2D_2.png",
+
 				"texture2DwithAlpha.png",
 				"textureCubeMap_MipMaps.dds",
 				"textureCubeMap.dds"						
