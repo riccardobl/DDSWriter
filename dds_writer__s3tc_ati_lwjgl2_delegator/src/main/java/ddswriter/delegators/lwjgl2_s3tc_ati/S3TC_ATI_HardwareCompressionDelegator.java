@@ -4,7 +4,6 @@ import static ddswriter.format.DDS_HEADER.DDSD_LINEARSIZE;
 import static ddswriter.format.DDS_PIXELFORMAT.DDPF_FOURCC;
 import static org.lwjgl.opengl.ARBTextureCompression.GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB;
 import static org.lwjgl.opengl.ARBTextureCompression.glGetCompressedTexImageARB;
-import static org.lwjgl.opengl.ATITextureCompression3DC.GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI;
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -15,6 +14,8 @@ import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RG_RGTC2;
+import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RED_RGTC1;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -40,17 +41,19 @@ import ddswriter.format.DDS_HEADER;
 public class S3TC_ATI_HardwareCompressionDelegator extends CommonBodyDelegator{
 
 	public static enum Format{		
-		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT),
-		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT),
-		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT),
-		ATI_3DC("ATI2",16,GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI);
+		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,"BC1","DXT1"),
+		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC2","DXT3"),
+		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC3","DXT5"),
+		ATI1("ATI1",8,GL_COMPRESSED_RED_RGTC1,"ATI_3DC+","BC4","3DC+"),
+		ATI2("ATI2",16,GL_COMPRESSED_RG_RGTC2,"ATI_3DC","BC5","3DC");
 		public String internal_name;
 		public int gl,blocksize;
-
-		private Format(String s,int blocksize,int gl){
+		public String[] aliases;
+		private Format(String s,int blocksize,int gl,String... aliases){
 			this.internal_name=s;
 			this.gl=gl;
 			this.blocksize=blocksize;
+			this.aliases=aliases;
 		}
 
 
@@ -71,12 +74,21 @@ public class S3TC_ATI_HardwareCompressionDelegator extends CommonBodyDelegator{
 		}
 
 		format=format.toUpperCase();
-		for(Format f:Format.values())if(f.name().equals(format)) FORMAT=f;
+		for(Format f:Format.values()){
+			if(f.name().equals(format)) FORMAT=f;
+			else{
+				for(String a:f.aliases){
+					if(format.equals(a)){
+						FORMAT=f;
+						break;
+					}					
+				}
+			}
+		}
 		
 		if(FORMAT==null) {
 			SKIP=true;
 			System.out.println(this.getClass()+" does not support "+format+". skip");
-
 			return;
 		}
 		

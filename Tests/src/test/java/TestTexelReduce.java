@@ -23,10 +23,13 @@ import ddswriter.Texel.PixelFormat;
 import ddswriter.TexelReducer;
 import ddswriter.delegators.GenericDelegator;
 import ddswriter.delegators.s2tc.S2tcDelegator;
+import tests.TestUtils;
 
 public class TestTexelReduce{
 	public static void main(String[] args) throws Exception {
-		InputStream is=new BufferedInputStream(new FileInputStream("/tmp/tobereduced.jpg"));
+		TestUtils.extractResources();
+
+		InputStream is=new BufferedInputStream(new FileInputStream(		TestUtils.tmpPath("texture2D.jpg")));
 		AWTLoader loader=new AWTLoader();
 		Image img=loader.load(is,false);
 		is.close();
@@ -59,7 +62,7 @@ public class TestTexelReduce{
 
 		Map<String,String> options=new HashMap<String,String>();
 		options.put("format","ARGB8");
-		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File("/tmp/reduced.dds")));
+		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(TestUtils.tmpPath("texture2D_REDUCED.dds"))));
 		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
 		delegators.add(new S2tcDelegator());
 		delegators.add(new GenericDelegator());
