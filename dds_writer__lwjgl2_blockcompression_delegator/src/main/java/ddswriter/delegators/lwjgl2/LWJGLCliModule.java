@@ -1,4 +1,4 @@
-package ddswriter.lwjgl;
+package ddswriter.delegators.lwjgl2;
 
 import org.lwjgl.opengl.Pbuffer;
 import org.lwjgl.opengl.PixelFormat;

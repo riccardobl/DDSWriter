@@ -1,3 +1,4 @@
+package ddswriter.delegators.lwjgl2_s3tc;
 
 import static ddswriter.format.DDS_HEADER.DDSD_LINEARSIZE;
 import static ddswriter.format.DDS_PIXELFORMAT.DDPF_FOURCC;
@@ -28,24 +29,26 @@ import com.jme3.util.BufferUtils;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 import ddswriter.delegators.CommonBodyDelegator;
+import ddswriter.delegators.lwjgl2.LWJGLBlockCompressionDelegator;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
-import ddswriter.lwjgl.LWJGLBlockCompressionDelegator;
 
 /**
  * 	
  * @author Riccardo Balbo
  */
 
-public class RGTC_HardwareCompressionDelegator extends LWJGLBlockCompressionDelegator{
 
-	public static enum Format{
-		RGTC1("ATI1",8,GL_COMPRESSED_RED_RGTC1,"ATI1","ATI_3DC+","BC4","3DC+"),
-		RGTC2("ATI2",16,GL_COMPRESSED_RG_RGTC2,"ATI2","ATI_3DC","BC5","3DC");
+public class S3TC_LWJGLCompressionDelegator extends LWJGLBlockCompressionDelegator{
+	protected Format FORMAT; 
+
+	public static enum Format{		
+		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,"BC1","DXT1"),
+		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC2","DXT3"),
+		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC3","DXT5");
 		public String internal_name;
 		public int gl,blocksize;
 		public String[] aliases;
-
 		private Format(String s,int blocksize,int gl,String... aliases){
 			this.internal_name=s;
 			this.gl=gl;
@@ -53,15 +56,17 @@ public class RGTC_HardwareCompressionDelegator extends LWJGLBlockCompressionDele
 			this.aliases=aliases;
 		}
 
+
 	}
 
-	protected Format FORMAT;
+
+
 
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
 
 		String format=((String)options.get("format"));
-		if(format==null){
+		if(format==null) {
 			skip();
 			return;
 		}
@@ -74,17 +79,21 @@ public class RGTC_HardwareCompressionDelegator extends LWJGLBlockCompressionDele
 					if(format.equals(a)){
 						FORMAT=f;
 						break;
-					}
+					}					
 				}
 			}
 		}
-
-		if(FORMAT==null){
+		
+		if(FORMAT==null) {
 			skip();
 			System.out.println(this.getClass()+" does not support "+format+". skip");
 			return;
 		}
+		
+		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
+
 		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
+
 
 	}
 

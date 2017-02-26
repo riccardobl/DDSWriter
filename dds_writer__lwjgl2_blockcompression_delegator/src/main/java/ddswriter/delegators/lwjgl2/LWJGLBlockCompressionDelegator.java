@@ -1,4 +1,4 @@
-package ddswriter.lwjgl;
+package ddswriter.delegators.lwjgl2;
 
 import static ddswriter.format.DDS_HEADER.DDSD_LINEARSIZE;
 import static ddswriter.format.DDS_PIXELFORMAT.DDPF_FOURCC;

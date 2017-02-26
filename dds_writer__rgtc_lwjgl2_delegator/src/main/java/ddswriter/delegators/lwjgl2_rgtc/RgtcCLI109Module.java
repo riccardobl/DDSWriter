@@ -1,4 +1,5 @@
-package ddswriter.delegators.lwjgl2_s3tc_ati;
+package ddswriter.delegators.lwjgl2_rgtc;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,16 +12,17 @@ import com.jme3.system.NativeLibraryLoader;
 
 import ddswriter.DDSDelegator;
 import ddswriter.cli.CLI109Module;
-import ddswriter.lwjgl.LWJGLCliModule;
+import ddswriter.delegators.lwjgl2.LWJGLCliModule;
 
 /**
  * 
  * @author Riccardo Balbo
  */
-public class S3tcCLI109Module extends LWJGLCliModule{
-	public S3tcCLI109Module(){
+public class RgtcCLI109Module  extends LWJGLCliModule{
+	public RgtcCLI109Module(){
 
 	}
+
 
 	@Override
 	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegator> delegators) {
@@ -45,8 +47,8 @@ public class S3tcCLI109Module extends LWJGLCliModule{
 				i++;
 			}
 		}
-		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5(BC3)\n");
-		delegators.add(new S3TC_LWJGLCompressionDelegator());
+		help.add(i+1,"   RGTC1 (Compatible with ATI1, BC4, 3DC+), RGTC2 (Compatible with ATI2, BC5, 3DC)\n");
+		delegators.add(new RGTC_HardwareCompressionDelegator());
 	}
 
 	@Override
