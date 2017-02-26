@@ -1,3 +1,5 @@
+package ddswriter.cli;
+
 /*
  * Copyright (c) 2009-2012 jMonkeyEngine
  * All rights reserved.
@@ -29,15 +31,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package ddswriter.cli;
-
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetLoader;
@@ -49,6 +42,13 @@ import com.jme3.texture.image.ColorSpace;
 import com.jme3.texture.plugins.DXTFlipper;
 import com.jme3.util.BufferUtils;
 import com.jme3.util.LittleEndien;
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -298,6 +298,12 @@ public class DDSLoader implements AssetLoader {
                     // exit here, the rest of the structure is not valid
                     // the real format will be available in the DX10 header
                     return;
+                    
+                case 113:
+                    compressed = false;
+                    bpp = 64;
+                    pixelFormat = Image.Format.RGBA16F;
+                    break;
                 default:
                     throw new IOException("Unknown fourcc: " + string(fourcc) + ", " + Integer.toHexString(fourcc));
             }

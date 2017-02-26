@@ -29,7 +29,6 @@ import com.jme3.texture.Texture.Type;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
-import com.jme3.texture.plugins.DDSLoader;
 
 /**
  * 
