@@ -1,5 +1,4 @@
-/**
-Copyright 2017 Riccardo Balbo
+Copyright 2017 @author
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -15,21 +14,3 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-package ddswriter;
-
-import java.util.Map;
-
-import com.jme3.texture.Texture;
-
-import ddswriter.format.DDS_BODY;
-import ddswriter.format.DDS_HEADER;
-
-/**
- * 
- * @author Riccardo Balbo
- */
-public interface DDSDelegator{
-	public void body(Texture tx,Map<String,String>  options, DDS_HEADER header,DDS_BODY body)throws Exception ; 
-	public void header(Texture tx,Map<String,String>  options,DDS_HEADER header)throws Exception ; 
-}
