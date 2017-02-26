@@ -1,34 +1,13 @@
 package ddswriter.delegators.lwjgl2_rgtc;
 
-import static ddswriter.format.DDS_HEADER.DDSD_LINEARSIZE;
-import static ddswriter.format.DDS_PIXELFORMAT.DDPF_FOURCC;
-import static org.lwjgl.opengl.ARBTextureCompression.GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB;
-import static org.lwjgl.opengl.ARBTextureCompression.glGetCompressedTexImageARB;
-import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RG_RGTC2;
 import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RED_RGTC1;
+import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RG_RGTC2;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Map;
 
-import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
-import com.jme3.util.BufferUtils;
 
 import ddswriter.Texel;
-import ddswriter.Texel.PixelFormat;
-import ddswriter.delegators.CommonBodyDelegator;
 import ddswriter.delegators.lwjgl2.LWJGLBlockCompressionDelegator;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
@@ -38,7 +17,7 @@ import ddswriter.format.DDS_HEADER;
  * @author Riccardo Balbo
  */
 
-public class RGTC_HardwareCompressionDelegator extends LWJGLBlockCompressionDelegator{
+public class RGTC_LWJGL2CompressionDelegator extends LWJGLBlockCompressionDelegator{
 
 	public static enum Format{
 		RGTC1("ATI1",8,GL_COMPRESSED_RED_RGTC1,"ATI1","ATI_3DC+","BC4","3DC+"),

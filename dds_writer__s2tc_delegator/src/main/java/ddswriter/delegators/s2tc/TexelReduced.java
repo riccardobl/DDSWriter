@@ -1,9 +1,6 @@
 package ddswriter.delegators.s2tc;
 
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
-import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.Texel;
 

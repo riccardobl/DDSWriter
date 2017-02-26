@@ -3,7 +3,7 @@ dependencies {
 	    compileOnly "${jme_group}:jme3-lwjgl:${jme_version}"
 	    compileOnly project(':dds_writer__cli')
 	    
-	    compile project(':dds_format')
+    compile project(':dds_format')
 	   	compile project(':dds_writer__lwjgl2_blockcompression_delegator')
 	    compile project(':dds_writer')
 	    

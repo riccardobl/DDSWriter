@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.opengl.Pbuffer;
-import org.lwjgl.opengl.PixelFormat;
-
-import com.jme3.system.NativeLibraryLoader;
-
 import ddswriter.DDSDelegator;
-import ddswriter.cli.CLI109Module;
 import ddswriter.delegators.lwjgl2.LWJGLCliModule;
 
 /**
@@ -46,7 +40,7 @@ public class S3tcCLI109Module extends LWJGLCliModule{
 			}
 		}
 		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5(BC3)\n");
-		delegators.add(new S3TC_LWJGLCompressionDelegator());
+		delegators.add(new S3TC_LWJGL2CompressionDelegator());
 	}
 
 	@Override

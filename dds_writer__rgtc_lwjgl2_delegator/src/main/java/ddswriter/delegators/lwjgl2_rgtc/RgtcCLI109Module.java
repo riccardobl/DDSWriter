@@ -5,13 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.opengl.Pbuffer;
-import org.lwjgl.opengl.PixelFormat;
-
-import com.jme3.system.NativeLibraryLoader;
-
 import ddswriter.DDSDelegator;
-import ddswriter.cli.CLI109Module;
 import ddswriter.delegators.lwjgl2.LWJGLCliModule;
 
 /**
@@ -48,7 +42,7 @@ public class RgtcCLI109Module  extends LWJGLCliModule{
 			}
 		}
 		help.add(i+1,"   RGTC1 (Compatible with ATI1, BC4, 3DC+), RGTC2 (Compatible with ATI2, BC5, 3DC)\n");
-		delegators.add(new RGTC_HardwareCompressionDelegator());
+		delegators.add(new RGTC_LWJGL2CompressionDelegator());
 	}
 
 	@Override
