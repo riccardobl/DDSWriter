@@ -2,7 +2,7 @@
 
 ## Base
 - [x] DDS format implementation
-- [ ] dx10 header implementation
+- [ ] [dx10 header implementation](https://msdn.microsoft.com/en-us/library/windows/desktop/bb943983(v=vs.85).aspx)
 - [x] MipMap generation
 
 ## CLI
@@ -19,7 +19,7 @@
 - [x] S3TC DXT1  native compression via EXT_Texture_Compression_S3TC
 - [x] S3TC DXT3 native compression via EXT_Texture_Compression_S3TC
 - [x] S3TC DXT5 native compression via EXT_Texture_Compression_S3TC
-- [ ] S3TC pure-java compression < not possible atm due to sofware patent
+- [ ] S3TC pure-java compression < not possible atm due to software patent
 
 ## 3DC/RGTC
 - [x] 3DC+/RGTC1 native compression via OpenGL 3.0 core
