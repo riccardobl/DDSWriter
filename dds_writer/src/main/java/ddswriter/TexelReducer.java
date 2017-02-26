@@ -1,13 +1,19 @@
 package ddswriter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector4f;
 
 import ddswriter.Texel.PixelFormat;
+/**
+ * 
+ * @author Lorenzo Catania, Riccardo Balbo
+ */
 
 public class TexelReducer{
+	public static final float BASE_DIFF=diff(new Vector4f(1f,0f,0f,1f),new Vector4f(0f,0f,1f,1f));
 
 //	public static float val(Vector4f c) {
 //
@@ -151,6 +157,81 @@ public class TexelReducer{
 		reduce(texel,false);
 	}
 	
+	public static void reduce1(Texel texel,boolean apply) {
+		int w=texel.getWidth();
+		int h=texel.getHeight();
+
+		int colors = 2; // Works only for 2.
+		
+		Vector4f palette[] = new Vector4f[colors];
+		
+		ArrayList<Vector4f> colorMap = new ArrayList<>();
+		ArrayList<Integer> weightMap = new ArrayList<>();
+		
+		float mediumTempDiff = 0f;
+		
+		for(int x=0; x<w; x++) {
+			for(int y=0; y<h; y++) {
+				boolean toBeAdded = true;
+				Vector4f color=texel.get(PixelFormat.FLOAT_NORMALIZED_RGBA, x, y);
+				
+				for(Vector4f tempColor:colorMap) {
+					if(diff(color,tempColor) < mediumTempDiff) {
+						toBeAdded = false; 
+						int colorIndex = colorMap.indexOf(tempColor);
+						
+						weightMap.set(colorIndex, weightMap.get(colorIndex) + 1);
+						break;
+					}
+				}
+				
+				if(toBeAdded) {
+					colorMap.add(color);
+					weightMap.add(0);
+					
+					if(colorMap.size() > 1) {
+						mediumTempDiff += diff(color, colorMap.get(colorMap.size()-2));
+						mediumTempDiff /= 2;
+					}
+				}
+			}
+		}
+		
+		int[] paletteWeight = {0,0};
+		
+		for(int i=0; i<colorMap.size(); i++) {
+			Vector4f tempColor = colorMap.get(i);
+			
+			if(palette[0] == null)
+				palette[0] = tempColor.clone();
+			else if(palette[1] == null) 
+				palette[1] = tempColor.clone();
+			else {
+				if(/*diff(palette[0], tempColor) > diff(palette[0],palette[1]) &&*/ weightMap.get(i) > paletteWeight[1] / 2) {
+					palette[1] = tempColor.clone();
+					paletteWeight[1] = weightMap.get(i);
+				} else if(/*diff(tempColor,palette[1]) > diff(palette[0],palette[1]) &&*/ weightMap.get(i) > paletteWeight[1] / 2) {
+					palette[0] = tempColor.clone();
+					paletteWeight[0] = weightMap.get(i);
+				}
+			}
+		}
+		
+		if(palette[1] == null) {
+			if(palette[0] == null) 
+				palette[0] = new Vector4f(1f, 1f, 1f, 1f);
+			
+			palette[1] = palette[0].clone();
+		}
+	
+		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA, palette);
+		if(apply) 
+			apply(w,h,texel,palette);
+	}
+	
+	private static final ArrayList<Vector4f> GLOBAL_PALETTE = new ArrayList<>();
+	private static float GLOBAL_DIFF = 0f;
+	
 	public static void reduce(Texel texel,boolean apply) {
 		int w=texel.getWidth();
 		int h=texel.getHeight();
@@ -203,13 +284,37 @@ public class TexelReducer{
 				palette[0] = new Vector4f(1f, 1f, 1f, 1f);
 			
 			palette[1] = palette[0].clone();
+		} 
+		
+		if(GLOBAL_PALETTE.size() > 2) {
+			for(int i=0; i<palette.length; i++) {
+				boolean unsimilarColor = true;
+				
+				for(Vector4f globalColor:GLOBAL_PALETTE) {
+					if(diff(palette[i],globalColor) < GLOBAL_DIFF) {
+						unsimilarColor=false;
+						
+						palette[i].interpolateLocal(globalColor, .05f);
+						break;
+					} 
+				}
+				
+				if(unsimilarColor) {
+					GLOBAL_PALETTE.add(palette[i].clone());	
+					
+					GLOBAL_DIFF += diff(palette[i], GLOBAL_PALETTE.get(GLOBAL_PALETTE.size() - 2));
+					GLOBAL_DIFF /= 2;
+				} 
+			}
+		} else {
+			GLOBAL_PALETTE.add(palette[0]);
+			GLOBAL_PALETTE.add(palette[1]);
 		}
 	
 		texel.setPalette(PixelFormat.FLOAT_NORMALIZED_RGBA, palette);
 		if(apply) apply(w,h,texel,palette);
 	}
-//
-
+	
 	public static void apply(float w,float h,Texel texel,Vector4f[] palette) {
 		for(int x=0;x<w;x++){
 			for(int y=0;y<h;y++){
