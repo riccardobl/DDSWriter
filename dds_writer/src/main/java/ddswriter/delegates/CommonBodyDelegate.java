@@ -56,9 +56,10 @@ public abstract class CommonBodyDelegate extends DDSSlicedDelegate{
 	}
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-		
+		String gen_mm=options.get("gen-mipmaps");
+		if(gen_mm==null)gen_mm="false";
 		int mipmaps_count=tx.getImage().hasMipmaps()?tx.getImage().getMipMapSizes().length:0;
-		if(mipmaps_count==0&&options.getOrDefault("gen-mipmaps","false").equals("true")){
+		if(mipmaps_count==0&&gen_mm.equals("true")){
 			mipmaps_count=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()));
 		}
 
@@ -89,7 +90,9 @@ public abstract class CommonBodyDelegate extends DDSSlicedDelegate{
 	}
 	
 	public  void process_slice(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception{
-		boolean gen_mipmaps=!tx.getImage().hasMipmaps()&&options.getOrDefault("gen-mipmaps","false").equals("true");
+		String gen_mm=options.get("gen-mipmaps");
+		if(gen_mm==null)gen_mm="false";
+		boolean gen_mipmaps=!tx.getImage().hasMipmaps()&&gen_mm.equals("true");
 		if(mipmap==0&&gen_mipmaps){
 			int n=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()))-1/*first mipmap is the image*/;
 			Texel mipmaps[]=ir.getMipMap(n,false);

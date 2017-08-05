@@ -23,20 +23,20 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+
 /**
  * 
  * @author Riccardo Balbo
  */
 
 public class ClassUtils{
-	
 
 	public static LinkedList<String> getAllClasses() {
 		return getAllClasses("*",false);
 	}
 
-	public static LinkedList<String> getAllClasses(String path, boolean asFile) {
-		LinkedList<String> out=new LinkedList<String>();
+	public static LinkedList<String> getAllClasses(String path, final boolean asFile) {
+		final LinkedList<String> out=new LinkedList<String>();
 		if(path.equals("*")){
 			ClassLoader cl=ClassLoader.getSystemClassLoader();
 			URL[] urls=((URLClassLoader)cl).getURLs();
@@ -57,7 +57,7 @@ public class ClassUtils{
 					ou.add(relpath);
 				}
 			}
-			ou.forEach(z -> {
+			for(String z:ou){
 
 				if(z.endsWith(".class")){
 					if(asFile) out.add(z);
@@ -72,7 +72,7 @@ public class ClassUtils{
 						if(add) out.add(s);
 					}
 				}
-			});
+			}
 		}
 
 		return out;

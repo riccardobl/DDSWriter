@@ -37,8 +37,9 @@ public class DDSWriter{
 
 	public static void write(Texture tx, Map<String,String> options,Collection<DDSDelegate> delegates, OutputStream output ) throws Exception {
 		// TODO: Add support for DX10 HEADER
-		boolean debug=options.getOrDefault("debug","false").equals("true");
-		
+		String debugs=options.get("debug");
+		if(debugs==null)debugs="false";
+		boolean debug=debugs.equals("true");
 		DDSOutputStream os=new DDSOutputStream(output);
 		
 		DDS_HEADER header=new DDS_HEADER();
