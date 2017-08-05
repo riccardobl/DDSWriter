@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedList;
-import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -135,7 +134,11 @@ public class FileUtils{
 			else if((ext.equals("*")||file.getPath().endsWith(ext))&&(pref.equals("*")||file.getName().startsWith(pref))) out.add(file);
 	}
 
-	public static void forEachFile(File fl, Consumer<File> c) {
+	
+	public static interface FileConsumer {
+		public void accept(File f);
+	}
+	public static void forEachFile(File fl, FileConsumer c) {
 		File[] l=fl.listFiles();
 		if(l!=null) for(File file:l){
 			if(file.isDirectory()){
@@ -166,8 +169,8 @@ public class FileUtils{
 		return listZipElements(archive,recursive,true);
 	}
 
-	public static LinkedList<String> listZipElements(File file, boolean recursive, boolean subzipasdir) throws Exception {
-		LinkedList<String> o=new LinkedList<String>();
+	public static LinkedList<String> listZipElements(File file, boolean recursive, final boolean subzipasdir) throws Exception {
+		final LinkedList<String> o=new LinkedList<String>();
 		// ZipInputStream zipfile = new ZipInputStream(file);
 		// ZipEntry e;
 		// while ((e=zipfile.getNextEntry())!=null) {
@@ -177,7 +180,7 @@ public class FileUtils{
 		while(en.hasMoreElements()){
 			ZipEntry e=en.nextElement();
 
-			String f=e.getName();
+			final String f=e.getName();
 
 			if(f.endsWith(".zip")&&recursive){
 				File tempfile=new File(FileUtils._TEMP_DIR+"FileUtils_zipListTemp"+(Math.random()*Float.MAX_VALUE)+".tmp");
@@ -188,10 +191,10 @@ public class FileUtils{
 				bout.close();
 				LinkedList<String> o2=listZipElements(tempfile,true);
 				FileUtils.delete(tempfile);
-				o2.forEach(o2s -> {
+				for(String o2s:o2){
 					if(subzipasdir) o.add(f+"/"+o2s);
 					else o.add(o2s);
-				});
+				}
 			}else o.add(f);
 		}
 		zipfile.close();
