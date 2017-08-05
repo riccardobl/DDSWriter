@@ -19,12 +19,13 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package ddswriter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.image.ImageRaster;
-
-
 
 /**
  * 
@@ -33,6 +34,8 @@ import com.jme3.texture.image.ImageRaster;
  */
 
 public class Texel implements Cloneable{
+	protected static final Logger LOGGER=LogManager.getLogger(Texel.class);
+
 	public static enum PixelFormat{
 		FLOAT_NORMALIZED_RGBA,INT_RGBA,PACKED_ARGB
 	}
@@ -55,7 +58,15 @@ public class Texel implements Cloneable{
 			for(int x=(int)from.x;x<to.x;x++){
 				int xl=(int)(x-from.x);
 				int yl=(int)(y-from.y);
-				Vector4f c=x>=ir.getWidth()||y>=ir.getHeight()?PADDINGPX_COLOR:ir.getPixel(x,y).toVector4f();
+
+				Vector4f c;
+				if(x>=ir.getWidth()||y>=ir.getHeight()||x<0||y<0){
+					LOGGER.warn("Invalid coordinates x{} y{} for image w{} h{}. Use padding color.",x,y,ir.getWidth(),ir.getHeight());
+					c=PADDINGPX_COLOR;
+				}else{
+					c=ir.getPixel(x,y).toVector4f();
+				}
+
 				pixels[xl][yl]=c;
 			}
 		}
@@ -72,7 +83,15 @@ public class Texel implements Cloneable{
 			for(int x=(int)from.x;x<to.x;x++){
 				int xl=(int)(x-from.x);
 				int yl=(int)(y-from.y);
-				Vector4f c=x>=tx.getWidth()||y>=tx.getHeight()?PADDINGPX_COLOR:tx.get(dest_format,x,y);
+
+				Vector4f c;
+				if(x>=tx.getWidth()||y>=tx.getHeight()||x<0||y<0){
+					LOGGER.warn("Invalid coordinates x{} y{} for texel w{} h{}. Use padding color.",x,y,tx.getWidth(),tx.getHeight());
+					c=PADDINGPX_COLOR;
+
+				}else{
+					c=tx.get(dest_format,x,y);
+				}
 				pixels[xl][yl]=c;
 			}
 		}
@@ -83,9 +102,11 @@ public class Texel implements Cloneable{
 		};
 		return tnx;
 	}
+
 	public Texel(PixelFormat format,int w,int h){
 		this(format,new Vector4f[w][h]);
 	}
+
 	public Texel(PixelFormat format,Vector4f pixels[][]){
 		this(format,pixels,new Vector2f[]{new Vector2f(0,0),// from
 				new Vector2f(pixels.length,pixels[0].length)//to
@@ -146,9 +167,9 @@ public class Texel implements Cloneable{
 		}
 	}
 
-//	public void genPalette() {
-//		TexelReducer.reduce(this);
-//	}
+	//	public void genPalette() {
+	//		TexelReducer.reduce(this);
+	//	}
 
 	public Vector4f get(PixelFormat f, int x, int y) {
 		return convert(FORMAT,f,PIXELS[x][y]);
@@ -157,7 +178,6 @@ public class Texel implements Cloneable{
 	public void set(PixelFormat f, int x, int y, Vector4f c) {
 		PIXELS[x][y]=convert(f,FORMAT,c).clone();
 	}
-
 
 	public int getWidth() {
 		return PIXELS.length;
@@ -171,7 +191,7 @@ public class Texel implements Cloneable{
 		Vector4f out[][]=new Vector4f[PIXELS.length][PIXELS[0].length];
 		for(int y=0;y<PIXELS[0].length;y++){
 			for(int x=0;x<PIXELS.length;x++){
-				out[x][y]=get(f,x,y);				
+				out[x][y]=get(f,x,y);
 			}
 		}
 		return out;
@@ -218,8 +238,9 @@ public class Texel implements Cloneable{
 	}
 
 	protected Texel[] MIPMAPS;
+
 	public Texel[] getMipMap(int n, boolean regen) {
-		if(MIPMAPS!=null&&n==MIPMAPS.length&&!regen)return MIPMAPS;
+		if(MIPMAPS!=null&&n==MIPMAPS.length&&!regen) return MIPMAPS;
 		MIPMAPS=TexelMipmapGenerator.generateMipMaps(this,n);
 		return MIPMAPS;
 	}
