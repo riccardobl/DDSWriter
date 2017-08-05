@@ -40,3 +40,4 @@
 
 ## Others
 - [ ] Implement ETC compression
+- [ ] Write proper documentation

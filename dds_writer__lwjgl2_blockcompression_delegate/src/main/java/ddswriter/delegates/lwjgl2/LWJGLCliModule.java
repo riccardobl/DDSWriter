@@ -16,50 +16,47 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package ddswriter;
+package ddswriter.delegates.lwjgl2;
 
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Map;
+import org.lwjgl.opengl.Pbuffer;
+import org.lwjgl.opengl.PixelFormat;
 
-import com.jme3.texture.Texture;
+import com.jme3.system.NativeLibraryLoader;
 
-import ddswriter.format.DDS_BODY;
-import ddswriter.format.DDS_HEADER;
-
+import ddswriter.cli.CLI109Module;
 /**
  * 
  * @author Riccardo Balbo
+ *
  */
-public class DDSWriter{
+public abstract class LWJGLCliModule implements CLI109Module{
 
+	public static Pbuffer pbuffer;
 
+	public boolean startGL() {
+		if(pbuffer!=null) return true;
+		try{
+			NativeLibraryLoader.loadNativeLibrary("lwjgl",true);
+			pbuffer=new Pbuffer(8,8,new PixelFormat(),null,null);
+			pbuffer.makeCurrent();
 
-	public static void write(Texture tx, Map<String,String> options,Collection<DDSDelegate> delegates, OutputStream output ) throws Exception {
-		// TODO: Add support for DX10 HEADER
-		boolean debug=options.getOrDefault("debug","false").equals("true");
-		
-		DDSOutputStream os=new DDSOutputStream(output);
-		
-		DDS_HEADER header=new DDS_HEADER();
-		for(DDSDelegate delegate:delegates){
-			delegate.header(tx, options, header);
+			if(pbuffer.isBufferLost()){
+				pbuffer.destroy();
+				throw new Exception("pbuffer lost");
+			}
+
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
 		}
-		if(debug){
-			System.out.println(header.dump());
-		}
-		header.write(os);
-		os.flush();
-		
-		DDS_BODY body=new DDS_BODY(os);
-		for(DDSDelegate delegate:delegates){
-			delegate.body(tx, options, header,body);
-		}
-		
-		body.flush();
-		os.close();
+		return false;
 	}
 
+	public void endGL() {
+		if(pbuffer!=null){
+			pbuffer.destroy();
+			pbuffer=null;
+		}
 
-
+	}
 }

@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import ddswriter.DDSDelegator;
+import ddswriter.DDSDelegate;
 /**
  * 
  * @author Riccardo Balbo
  */
 public interface CLI109Module{
-	public void load(Map<String,String> options, List<String> help,ArrayList<DDSDelegator> delegators);
-	public void unload(Map<String,String> options, List<String> help,ArrayList<DDSDelegator> delegators);
+	public void load(Map<String,String> options, List<String> help,ArrayList<DDSDelegate> delegates);
+	public void unload(Map<String,String> options, List<String> help,ArrayList<DDSDelegate> delegates);
 
 }

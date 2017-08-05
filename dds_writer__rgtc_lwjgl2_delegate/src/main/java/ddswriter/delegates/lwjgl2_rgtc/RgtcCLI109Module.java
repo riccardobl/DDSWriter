@@ -16,50 +16,56 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package ddswriter;
+package ddswriter.delegates.lwjgl2_rgtc;
 
-import java.io.OutputStream;
-import java.util.Collection;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import com.jme3.texture.Texture;
-
-import ddswriter.format.DDS_BODY;
-import ddswriter.format.DDS_HEADER;
+import ddswriter.DDSDelegate;
+import ddswriter.delegates.lwjgl2.LWJGLCliModule;
 
 /**
  * 
  * @author Riccardo Balbo
  */
-public class DDSWriter{
+public class RgtcCLI109Module  extends LWJGLCliModule{
+	public RgtcCLI109Module(){
 
-
-
-	public static void write(Texture tx, Map<String,String> options,Collection<DDSDelegate> delegates, OutputStream output ) throws Exception {
-		// TODO: Add support for DX10 HEADER
-		boolean debug=options.getOrDefault("debug","false").equals("true");
-		
-		DDSOutputStream os=new DDSOutputStream(output);
-		
-		DDS_HEADER header=new DDS_HEADER();
-		for(DDSDelegate delegate:delegates){
-			delegate.header(tx, options, header);
-		}
-		if(debug){
-			System.out.println(header.dump());
-		}
-		header.write(os);
-		os.flush();
-		
-		DDS_BODY body=new DDS_BODY(os);
-		for(DDSDelegate delegate:delegates){
-			delegate.body(tx, options, header,body);
-		}
-		
-		body.flush();
-		os.close();
 	}
 
 
+	@Override
+	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
+		if(!startGL()) return;
+		int i=0;
+		for(String s:help){
+			if(s.startsWith("Input formats")){
+				break;
+			}else{
+				i++;
+			}
+		}
+		help.add(i,"   --use_lwjgl: Enable hardware compression with lwjgl\n");
 
+		String hwc=options.get("use_lwjgl");
+		if(hwc==null||hwc.equals("false")) return;
+		i=0;
+		for(String s:help){
+			if(s.startsWith("Output formats")){
+				break;
+			}else{
+				i++;
+			}
+		}
+		help.add(i+1,"   RGTC1 (Compatible with ATI1, BC4, 3DC+), RGTC2 (Compatible with ATI2, BC5, 3DC)\n");
+		delegates.add(new RGTC_LWJGL2CompressionDelegate());
+	}
+
+	@Override
+	public void unload(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
+		endGL();
+
+	}
 }

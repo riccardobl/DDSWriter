@@ -17,11 +17,11 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.image.ImageRaster;
 import com.jme3.texture.plugins.AWTLoader;
 
-import ddswriter.DDSDelegator;
+import ddswriter.DDSDelegate;
 import ddswriter.DDSWriter;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
-import ddswriter.delegators.GenericDelegator;
+import ddswriter.delegates.GenericDelegate;
 import ddswriter.delegators.s2tc.S2tcDelegator;
 import ddswriter.delegators.s2tc.TexelReducer;
 
@@ -63,9 +63,9 @@ public class TestTexelReduce{
 		Map<String,String> options=new HashMap<String,String>();
 		options.put("format","ARGB8");
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(TestUtils.tmpPath("texture2D_REDUCED.dds"))));
-		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
+		ArrayList<DDSDelegate> delegators=new ArrayList<DDSDelegate>();
 		delegators.add(new S2tcDelegator());
-		delegators.add(new GenericDelegator());
+		delegators.add(new GenericDelegate());
 
 		DDSWriter.write(new Texture2D(img),options,delegators,fo);
 		fo.close();

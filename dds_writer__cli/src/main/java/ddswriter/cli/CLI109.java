@@ -42,10 +42,10 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.texture.plugins.TGALoader;
 
-import ddswriter.DDSDelegator;
+import ddswriter.DDSDelegate;
 import ddswriter.DDSWriter;
 import ddswriter.cli.utils.ClassUtils;
-import ddswriter.delegators.GenericDelegator;
+import ddswriter.delegates.GenericDelegate;
 
 /**
  * 
@@ -77,8 +77,8 @@ public class CLI109{
 	static int run(String[] _args) throws Exception {
 		Map<String,String> options=new HashMap<String,String>();
 		List<String> help=genericHelp();
-		ArrayList<DDSDelegator> delegators=new ArrayList<DDSDelegator>();
-		delegators.add(new GenericDelegator());
+		ArrayList<DDSDelegate> delegates=new ArrayList<DDSDelegate>();
+		delegates.add(new GenericDelegate());
 		
 		for(int i=0;i<_args.length;i++){
 			String cmd=_args[i];		
@@ -109,7 +109,7 @@ public class CLI109{
 			}
 		}
 		
-		for(CLI109Module m:modules)m.load(options,help,delegators);
+		for(CLI109Module m:modules)m.load(options,help,delegates);
 			
 				
 		if(out==null||in==null) {			
@@ -152,9 +152,9 @@ public class CLI109{
 		}
 
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(out)));
-		DDSWriter.write(tx,options,delegators,fo);
+		DDSWriter.write(tx,options,delegates,fo);
 		fo.close();
-		for(CLI109Module m:modules)m.unload(options,help,delegators);
+		for(CLI109Module m:modules)m.unload(options,help,delegates);
 
 		return 0;
 	}
