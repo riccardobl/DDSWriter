@@ -22,8 +22,8 @@ import ddswriter.DDSWriter;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 import ddswriter.delegates.GenericDelegate;
-import ddswriter.delegators.s2tc.S2tcDelegator;
-import ddswriter.delegators.s2tc.TexelReducer;
+import ddswriter.delegates.s2tc.S2tcDelegate;
+import ddswriter.delegates.s2tc.TexelReducer;
 
 public class TestTexelReduce{
 	public static void main(String[] args) throws Exception {
@@ -63,11 +63,11 @@ public class TestTexelReduce{
 		Map<String,String> options=new HashMap<String,String>();
 		options.put("format","ARGB8");
 		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(TestUtils.tmpPath("texture2D_REDUCED.dds"))));
-		ArrayList<DDSDelegate> delegators=new ArrayList<DDSDelegate>();
-		delegators.add(new S2tcDelegator());
-		delegators.add(new GenericDelegate());
+		ArrayList<DDSDelegate> delegates=new ArrayList<DDSDelegate>();
+		delegates.add(new S2tcDelegate());
+		delegates.add(new GenericDelegate());
 
-		DDSWriter.write(new Texture2D(img),options,delegators,fo);
+		DDSWriter.write(new Texture2D(img),options,delegates,fo);
 		fo.close();
 		//		BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream("/tmp/reduced.jpg"));
 		//		BufferedImage bimg=ImageToAwt.convert(img,false,true,0);
