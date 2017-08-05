@@ -4,7 +4,7 @@
 # DDSWriter
 
 DDSWriter is a command-line utility and java library to write DDS. 
-It can be extended to support other formats (including compressed formats) with the use of delegate and CLI modules.
+It can be extended to support other formats (including compressed formats) with the use of delegates and CLI modules.
 
 A delegate is a class to which is delegated the task to write the header and the body of the DDS, a CLI module is an extension for the CLI interface.
 
@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.riccardobl.DDSWriter:dds_writer:$version
+    compile "com.github.riccardobl.DDSWriter:dds_writer:$version"
 }
 
 ````
