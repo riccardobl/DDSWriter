@@ -99,7 +99,7 @@ compile 'com.github.riccardobl.DDSWriter:dds_writer__rgtc_lwjgl2_delegate:$versi
 
 #### CLI with s3tc delegator
 ```
-java -cp "dds_writer__cli-fat-0.1.jar:dds_writer__s3tc_ati_lwjgl2_delegator-fat-0.1.jar"  ddswriter.cli.CLI109 --help
+java -cp "dds_writer__cli-fat-1.0.jar:dds_writer__s3tc_ati_lwjgl2_delegate-fat-1.0.jar"  ddswriter.cli.CLI109 --help
 ```
 
 
