@@ -44,7 +44,7 @@ com.jme3.texture.Texture tx=...; // Texture loaded with jmonkey
 OutputStream fo=...; 
  Map<String,String> options=...; // Options for ddswriter and for the delegates
 Collection<DDSDelegate> delegates=...; // List of delegate (can be empty) 
-DDSWriter.write(tx,options,delegators,fo);
+DDSWriter.write(tx,options,delegates,fo);
 ```
 
 #### Options
