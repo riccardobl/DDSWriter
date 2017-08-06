@@ -80,6 +80,11 @@ To use one or more delegates in CLI, they must be added to the classpath.
 Delegate that provides S3tc (DXT) compression, it requires graphical drivers that support such compression and works only in an LWJGL2 context.
 
 This delegate adds the formats S3TC_DXT1,S3TC_DXT2,S3TC_DXT5.
+
+```java
+ddswriter.delegates.lwjgl2_s3tc.S3TC_LWJGL2CompressionDelegate delegate=new ddswriter.delegates.lwjgl2_s3tc.S3TC_LWJGL2CompressionDelegate();
+```
+
 #### Gradle depencency
 ```gradle
 compile 'com.github.riccardobl.DDSWriter:dds_writer__s3tc_lwjgl2_delegate:$version'
@@ -90,6 +95,10 @@ compile 'com.github.riccardobl.DDSWriter:dds_writer__s3tc_lwjgl2_delegate:$versi
 Delegate that provides RGTC (ATI) compression, it requires graphical drivers that support such compression and works only in an LWJGL2 context.
 
 This delegate adds the formats RGTC1,RGTC2.
+
+```java
+ddswriter.delegates.lwjgl2_rgtc.RGTC_LWJGL2CompressionDelegate delegate=new ddswriter.delegates.lwjgl2_rgtc.RGTC_LWJGL2CompressionDelegate();
+```
 #### Gradle depencency
 ```gradle
 compile 'com.github.riccardobl.DDSWriter:dds_writer__rgtc_lwjgl2_delegate:$version'
