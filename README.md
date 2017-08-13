@@ -16,6 +16,7 @@ def jme_version = "v3.1"
 def jme_group =  "com.github.jMonkeyEngine.jmonkeyengine"
 
 repositories {
+    mavenCentral()	
     maven { url 'https://jitpack.io' }
 }
 dependencies {
