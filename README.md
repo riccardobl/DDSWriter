@@ -4,7 +4,7 @@
 # DDSWriter
 
 DDSWriter is a command-line utility and java library to write DDS. 
-It can be extended to support other formats (including compressed formats) with the use of delegates and CLI modules.
+It supports extensions with the use of delegates and CLI modules.
 
 A delegate is a class to which is delegated the task to write the header and the body of the DDS, a CLI module is an extension for the CLI interface.
 
@@ -16,6 +16,7 @@ def jme_version = "v3.1"
 def jme_group =  "com.github.jMonkeyEngine.jmonkeyengine"
 
 repositories {
+    mavenCentral()	
     maven { url 'https://jitpack.io' }
 }
 dependencies {
@@ -43,8 +44,8 @@ dependencies {
 com.jme3.texture.Texture tx=...; // Texture loaded with jmonkey
 OutputStream fo=...; 
  Map<String,String> options=...; // Options for ddswriter and for the delegates
-Collection<DDSDelegate> delegates=...; // List of delegate (can be empty) 
-DDSWriter.write(tx,options,delegators,fo);
+Collection<DDSDelegate> delegates=...; // List of delegate (needs at least one) 
+DDSWriter.write(tx,options,delegates,fo);
 ```
 
 #### Options
@@ -52,7 +53,7 @@ DDSWriter.write(tx,options,delegators,fo);
 
 ```debug``` = ```true```/```false``` - Enable/Disable debug info
 
-```format``` = ```ARGB8```/```RGB8```/```RGB565``` - Output format (Note: delegates can add more output formats)
+```format``` - Output format. (See delegates for available formats) 
 
 ## The Command line
 ```
@@ -76,10 +77,23 @@ To use one or more delegates in CLI, they must be added to the classpath.
 
 ## Delegates
 
+### Generic (uncompressed)
+Delegate that provides the following uncompressed formats:  *RGB8* *ARGB9* *RGB565*
+
+```ddswriter.delegates.GenericDelegate delegate=new ddswriter.delegates.GenericDelegate();```
+#### Gradle depencency
+None: included in dds writer
+
+
 ### LWJGL2 S3TC (DXT compression)
 Delegate that provides S3tc (DXT) compression, it requires graphical drivers that support such compression and works only in an LWJGL2 context.
 
-This delegate adds the formats S3TC_DXT1,S3TC_DXT2,S3TC_DXT5.
+This delegate adds the formats *S3TC_DXT1*,*S3TC_DXT2*,*S3TC_DXT5*.
+
+```java
+ddswriter.delegates.lwjgl2_s3tc.S3TC_LWJGL2CompressionDelegate delegate=new ddswriter.delegates.lwjgl2_s3tc.S3TC_LWJGL2CompressionDelegate();
+```
+
 #### Gradle depencency
 ```gradle
 compile 'com.github.riccardobl.DDSWriter:dds_writer__s3tc_lwjgl2_delegate:$version'
@@ -89,7 +103,11 @@ compile 'com.github.riccardobl.DDSWriter:dds_writer__s3tc_lwjgl2_delegate:$versi
 ### LWJGL2 RGTC (ATI compression)
 Delegate that provides RGTC (ATI) compression, it requires graphical drivers that support such compression and works only in an LWJGL2 context.
 
-This delegate adds the formats RGTC1,RGTC2.
+This delegate adds the formats *`RGTC1*,*RGTC2*.
+
+```java
+ddswriter.delegates.lwjgl2_rgtc.RGTC_LWJGL2CompressionDelegate delegate=new ddswriter.delegates.lwjgl2_rgtc.RGTC_LWJGL2CompressionDelegate();
+```
 #### Gradle depencency
 ```gradle
 compile 'com.github.riccardobl.DDSWriter:dds_writer__rgtc_lwjgl2_delegate:$version'
@@ -99,7 +117,7 @@ compile 'com.github.riccardobl.DDSWriter:dds_writer__rgtc_lwjgl2_delegate:$versi
 
 #### CLI with s3tc delegator
 ```
-java -cp "dds_writer__cli-fat-0.1.jar:dds_writer__s3tc_ati_lwjgl2_delegator-fat-0.1.jar"  ddswriter.cli.CLI109 --help
+java -cp "dds_writer__cli-fat-1.0.jar:dds_writer__s3tc_ati_lwjgl2_delegate-fat-1.0.jar"  ddswriter.cli.CLI109 --help
 ```
 
 
