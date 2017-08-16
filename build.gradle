@@ -1,13 +1,19 @@
 
 allprojects {
+	apply plugin: 'maven'		
 	apply plugin: 'java'
 	sourceCompatibility = 1.7
 	targetCompatibility =  1.7
 	
-	project.version = "git describe --always --dirty".execute().text.trim()
-	println("version : '${project.version}'")
-	version="0.1"
-	group = "wf.frk.dds"
+	
+	group="com.github.riccardobl.DDSWriter"
+
+	if (project.hasProperty("DEV_INSTALL")){
+	    version="dev"
+	    repositories {
+	        mavenLocal()
+	    }
+	}
 }
 
 
@@ -16,17 +22,14 @@ subprojects {
 	apply plugin: 'maven'		
 	apply plugin: 'eclipse'
 	
+	
 	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 		
 	repositories {
-	    mavenLocal()
 	  	mavenCentral()	
 		maven {  
 			url "https://jitpack.io" 
 		}
-	    maven {
-	         url "http://dl.bintray.com/jmonkeyengine/com.jme3" 
-	    }
 	}	
 		
 	
