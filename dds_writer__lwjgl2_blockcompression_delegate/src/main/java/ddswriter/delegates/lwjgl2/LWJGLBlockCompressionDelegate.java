@@ -30,11 +30,14 @@ import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL13.glGetCompressedTexImage;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
+
+import org.lwjgl.opengl.GL13;
 
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
@@ -93,7 +96,8 @@ public abstract class LWJGLBlockCompressionDelegate extends CommonBodyDelegate{
 
 		int out_size=glGetTexLevelParameteri(GL_TEXTURE_2D,0,GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB);
 		ByteBuffer out=BufferUtils.createByteBuffer(out_size);
-		glGetCompressedTexImageARB(GL_TEXTURE_2D,0,out);
+//		glGetCompressedTexImageARB(GL_TEXTURE_2D,0,out);
+		glGetCompressedTexImage(GL_TEXTURE_2D,0,out);
 		byte bytes[]=new byte[out_size];
 		out.rewind();
 		out.get(bytes);
