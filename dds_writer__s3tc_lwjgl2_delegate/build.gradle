@@ -26,4 +26,5 @@ task fatJar(type: Jar) {
     with jar
 }
 
-fatJar.shouldRunAfter(jar)
+
+jar.finalizedBy(fatJar)

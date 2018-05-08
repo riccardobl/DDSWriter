@@ -41,7 +41,7 @@ public class DDSOutputStream extends OutputStream{
 	
 	/**
 	 * 
-	 * @description 16bit
+	 *  16bit
 	 */
 	public void writeWord(int i) throws IOException {
 		DOS.writeShort(Short.reverseBytes((short)i));
@@ -50,7 +50,7 @@ public class DDSOutputStream extends OutputStream{
 	
 	/**
 	 * 
-	 * @description 16bit
+	 *  16bit
 	 */
 	public void writeWords(int... ws) throws IOException {
 		for(int w:ws)
@@ -59,7 +59,7 @@ public class DDSOutputStream extends OutputStream{
 
 	/**
 	 * 
-	 * @description 32bit
+	 *  32bit
 	 */
 	public void writeDWord(int i) throws IOException {
 		DOS.writeInt(Integer.reverseBytes(i));
@@ -67,7 +67,7 @@ public class DDSOutputStream extends OutputStream{
 
 	/**
 	 * 
-	 * @description 32bit
+	 *  32bit
 	 */
 	public void writeDWords(int... i) throws IOException {
 		for(int k:i){

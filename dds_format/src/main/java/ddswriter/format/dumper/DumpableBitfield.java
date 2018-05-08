@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author Riccardo Balbo
- * @description Used only for debug
+ *  Used only for debug
  *
  */
 public @interface DumpableBitfield {
