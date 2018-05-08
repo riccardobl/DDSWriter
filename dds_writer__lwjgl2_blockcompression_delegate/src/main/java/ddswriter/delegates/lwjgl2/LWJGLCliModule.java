@@ -18,6 +18,9 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package ddswriter.delegates.lwjgl2;
 
+
+
+import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Pbuffer;
 import org.lwjgl.opengl.PixelFormat;
 
@@ -37,7 +40,14 @@ public abstract class LWJGLCliModule implements CLI109Module{
 		if(pbuffer!=null) return true;
 		try{
 			NativeLibraryLoader.loadNativeLibrary("lwjgl",true);
-			pbuffer=new Pbuffer(8,8,new PixelFormat(),null,null);
+			
+			PixelFormat pixel_format = new PixelFormat(8,8,0);
+			
+			ContextAttribs attr = new ContextAttribs(3,2)
+			    .withForwardCompatible(false)
+			    .withProfileCore(true);
+			
+			pbuffer=new Pbuffer(8,8,pixel_format,null,null,attr);
 			pbuffer.makeCurrent();
 
 			if(pbuffer.isBufferLost()){
@@ -59,4 +69,5 @@ public abstract class LWJGLCliModule implements CLI109Module{
 		}
 
 	}
+	
 }
