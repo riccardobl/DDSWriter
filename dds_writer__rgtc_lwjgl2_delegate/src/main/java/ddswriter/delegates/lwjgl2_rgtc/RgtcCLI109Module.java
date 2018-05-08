@@ -47,9 +47,10 @@ public class RgtcCLI109Module  extends LWJGLCliModule{
 				i++;
 			}
 		}
-		help.add(i,"   --use_lwjgl: Enable hardware compression with lwjgl\n");
+		help.add(i,"   --use-lwjgl: Enable hardware compression with lwjgl\n");
 
 		String hwc=options.get("use_lwjgl");
+		if(hwc==null)options.get("use-lwjgl");
 		if(hwc==null||hwc.equals("false")) return;
 		i=0;
 		for(String s:help){
