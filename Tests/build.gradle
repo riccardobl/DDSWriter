@@ -2,13 +2,13 @@
 dependencies {
 	compileOnly "${jme_group}:jme3-core:${jme_version}"
 	
-	testCompile project(':dds_writer__cli')
-	testCompile project(':dds_writer__s3tc_lwjgl2_delegate')
-	testCompile project(':dds_writer__rgtc_lwjgl2_delegate')
-	testCompile project(':dds_writer__lwjgl2_blockcompression_delegate')
+	compile project(':dds_writer__cli')
+	compile project(':dds_writer__s3tc_lwjgl2_delegate')
+	compile project(':dds_writer__rgtc_lwjgl2_delegate')
+	compile project(':dds_writer__lwjgl2_blockcompression_delegate')
 	
-	testCompile "${jme_group}:jme3-core:${jme_version}"
-	testCompile "${jme_group}:jme3-desktop:${jme_version}"
+	compile "${jme_group}:jme3-core:${jme_version}"
+	compile "${jme_group}:jme3-desktop:${jme_version}"
 
 	    
 	testCompile 'junit:junit:4.12' 

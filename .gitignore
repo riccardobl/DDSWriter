@@ -8,3 +8,7 @@
 *.dll
 *.dylib
 **/hs_err_pid*.log
+**/.vscode
+.classpath
+.settings
+.project

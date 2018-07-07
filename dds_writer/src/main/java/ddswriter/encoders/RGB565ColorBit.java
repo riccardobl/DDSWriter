@@ -20,6 +20,7 @@ package ddswriter.encoders;
 
 import com.jme3.math.Vector4f;
 
+import ddswriter.Pixel;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 /**
@@ -27,28 +28,28 @@ import ddswriter.Texel.PixelFormat;
  * @author Riccardo Balbo
  */
 public class RGB565ColorBit implements ColorBit{
-	public static void convertTexel(Texel tx){
-		int w=tx.getWidth();
-		int h=tx.getHeight();
-		for(int x=0;x<w;x++){
-			for(int y=0;y<h;y++){
-				Vector4f c=tx.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
-				c=convertPixel(c);
-				tx.set(PixelFormat.INT_RGBA,x,y,c);
-			}
-		}		
+	// public static void convertTexel(Texel tx){
+	// 	int w=tx.getWidth();
+	// 	int h=tx.getHeight();
+	// 	for(int x=0;x<w;x++){
+	// 		for(int y=0;y<h;y++){
+	// 			Pixel c=tx.get(x,y);
+	// 			c=convertPixel(c);
+	// 			tx.set(x,y,c);
+	// 		}
+	// 	}		
+	// }
+	
+	public static Pixel convertPixel(Pixel float_color){
+		// Vector4f c=float_color.toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA);
+		float r = Math.round(31.0f *float_color.r(PixelFormat.FLOAT_NORMALIZED_RGBA));
+		float g=Math.round (63.0f * float_color.g(PixelFormat.FLOAT_NORMALIZED_RGBA));
+		float b =Math.round( 31.0f * float_color.b(PixelFormat.FLOAT_NORMALIZED_RGBA));
+		return new Pixel(PixelFormat.INT_RGBA,r,g,b,1.0f);
 	}
 	
-	public static Vector4f convertPixel(Vector4f float_color){
-		Vector4f c=float_color.clone();
-		c.x = Math.round(31.0f * c.x);
-		c.y =Math.round (63.0f * c.y);
-		c.z =Math.round( 31.0f * c.z);
-		return c;
-	}
-	
-	public static int packPixel(Vector4f c){
-		return (((int)c.x) << 11)| (((int)c.y) << 5) | ((int)c.z);
+	public static int packPixel(Pixel c){
+		return (((int)c.r(PixelFormat.INT_RGBA)) << 11)| (((int)c.g(PixelFormat.INT_RGBA)) << 5) | ((int)c.b(PixelFormat.INT_RGBA));
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public class RGB565ColorBit implements ColorBit{
 	}
 
 	@Override
-	public byte[] getBytes(Vector4f float_color) {
+	public byte[] getBytes(Pixel float_color) {
 		int c=packPixel(convertPixel(float_color));
 		byte out[]=new byte[3];
 		out[0]=getBPP();

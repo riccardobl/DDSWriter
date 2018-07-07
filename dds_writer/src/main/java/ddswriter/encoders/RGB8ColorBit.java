@@ -19,6 +19,9 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 package ddswriter.encoders;
 
 import com.jme3.math.Vector4f;
+
+import ddswriter.Pixel;
+import ddswriter.Texel.PixelFormat;
 /**
  * 
  * @author Riccardo Balbo
@@ -31,10 +34,10 @@ public class RGB8ColorBit implements ColorBit{
 	}
 
 	@Override
-	public byte[] getBytes(Vector4f float_color) {
-		byte r=(byte)Math.ceil(float_color.x*255f);
-		byte g=(byte)Math.ceil(float_color.y*255f);
-		byte b=(byte)Math.ceil(float_color.z*255f);
+	public byte[] getBytes(Pixel float_color) {
+		byte r=(byte)Math.ceil(float_color.r(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		byte g=(byte)Math.ceil(float_color.g(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		byte b=(byte)Math.ceil(float_color.b(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
 		return new byte[]{getBPP(),b,g,r};
 	}
 

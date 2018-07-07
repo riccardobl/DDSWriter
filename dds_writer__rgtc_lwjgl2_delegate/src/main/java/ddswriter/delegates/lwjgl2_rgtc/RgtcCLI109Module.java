@@ -38,21 +38,16 @@ public class RgtcCLI109Module  extends LWJGLCliModule{
 
 	@Override
 	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
-		if(!startGL()) return;
-		int i=0;
-		for(String s:help){
-			if(s.startsWith("Input formats")){
-				break;
-			}else{
-				i++;
-			}
-		}
-		help.add(i,"   --use-lwjgl: Enable hardware compression with lwjgl\n");
-
+		super.load(options,  help, delegates);
 		String hwc=options.get("use_lwjgl");
-		if(hwc==null)options.get("use-lwjgl");
+		if(hwc==null)hwc=options.get("use-lwjgl");
+		if(hwc==null)hwc=options.get("use-opengl");
+
 		if(hwc==null||hwc.equals("false")) return;
-		i=0;
+		
+		if(!startGL()) return;
+
+		int i=0;
 		for(String s:help){
 			if(s.startsWith("Output formats")){
 				break;

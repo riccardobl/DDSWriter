@@ -31,5 +31,12 @@ import ddswriter.format.DDS_HEADER;
  */
 public interface DDSDelegate{
 	public void body(Texture tx,Map<String,String>  options, DDS_HEADER header,DDS_BODY body)throws Exception ; 
-	public void header(Texture tx,Map<String,String>  options,DDS_HEADER header)throws Exception ; 
+
+	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception;
+	
+	/**
+	 * Since the same delegate can be used multiple times, this method is called after every succesful export and should 
+	 * reset the delegate to its original state.
+	 */
+	public void end();
 }

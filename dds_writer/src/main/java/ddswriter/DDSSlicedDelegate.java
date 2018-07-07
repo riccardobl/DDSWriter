@@ -41,6 +41,11 @@ public abstract class DDSSlicedDelegate implements DDSDelegate{
 		SKIP=true;
 	}
 
+	@Override
+	public void end() {
+		SKIP=false;
+	}
+
 	public abstract void body(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception;
 
 	public abstract void header(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header) throws Exception;
@@ -64,8 +69,8 @@ public abstract class DDSSlicedDelegate implements DDSDelegate{
 		if(is_header){
 			header(tx,ir,mipmap,slice,options,header);
 
-		}else{
-			body(tx,ir,mipmap,slice,options,header,body);
+		} else {
+			body(tx, ir, mipmap, slice, options, header, body);
 		}
 
 	}
@@ -74,12 +79,12 @@ public abstract class DDSSlicedDelegate implements DDSDelegate{
 
 		int mipmaps=!tx.getImage().hasMipmaps()?1:tx.getImage().getMipMapSizes().length;
 		//		boolean is_header=body==null;
-
 		if(tx instanceof Texture2D){
 			for(int mipmap=0;mipmap<mipmaps;mipmap++){
 				ImageRaster irr=ImageRaster.create(tx.getImage(),0,mipmap,false);
 				Texel ir=Texel.fromImageRaster(irr,new Vector2f(0,0),new Vector2f(irr.getWidth(),irr.getHeight()));
-				process_slice(tx,ir,mipmap,0,options,header,body); 
+				process_slice(tx,ir,mipmap,0,options,header,body);
+				
 			}
 		}else if(tx instanceof TextureCubeMap){
 			for(int slice=0;slice<6;slice++){

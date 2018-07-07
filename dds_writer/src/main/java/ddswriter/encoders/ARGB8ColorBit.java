@@ -19,6 +19,9 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 package ddswriter.encoders;
 
 import com.jme3.math.Vector4f;
+
+import ddswriter.Pixel;
+import ddswriter.Texel.PixelFormat;
 /**
  * 
  * @author Riccardo Balbo
@@ -31,11 +34,11 @@ public class ARGB8ColorBit implements ColorBit{
 	}
 
 	@Override
-	public byte[] getBytes(Vector4f float_color) {
-		int b=(int)(float_color.z*255f);
-		int g=(int)(float_color.y*255f);
-		int r=(int)(float_color.x*255f);
-		int a=(int)(float_color.w*255f);
+	public byte[] getBytes(Pixel float_color) {
+		int b=(int)(float_color.b(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int g=(int)(float_color.g(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int r=(int)(float_color.r(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int a=(int)(float_color.a(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
 		byte out[]=new byte[5];
 		out[0]=getBPP();
 		out[1]=(byte)b;

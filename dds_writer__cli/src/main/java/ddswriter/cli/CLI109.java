@@ -17,6 +17,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package ddswriter.cli;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -24,7 +27,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,13 +44,16 @@ import org.apache.logging.log4j.Logger;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
+import com.jme3.texture.Texture.Type;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.texture.plugins.TGALoader;
+import com.jme3.util.BufferUtils;
 
 import ddswriter.DDSDelegate;
 import ddswriter.DDSWriter;
 import ddswriter.cli.utils.ClassUtils;
 import ddswriter.delegates.GenericDelegate;
+import jme3tools.converters.ImageToAwt;
 
 /**
  * 
@@ -61,8 +69,16 @@ public class CLI109{
 		out.add("Options: \n");
 		out.add("   --in <FILE>: Input file\n");
 		out.add("   --out <FILE.dds>: Output file\n");
-		out.add("   --format: Output format. Default: ARGB8 (uncompressed)\n");
+		out.add("   --inlist <FILE1,FILE2,FILE3>: Csv list of multiple input files\n");
+		out.add("   --format: Output format. Default: ARGB8 (uncompressed). When --inlist is used, this params becomes a csv list.\n");
+		out.add("   --multires <:100%,low:50%,lowest:50%,solid:8px>: Output multiple images "+
+				"with given resolutions, the param is a csv list in which every resolution level is represent as  SUFFIX:SIZE"+
+				"where SUFFIX is a string that will be appended to the filename and can be empty, SIZE is a value that can be either percentage or pixels"
+				+"(the size of the previous level will be used to calculate the percentage). NOTE: Works only with 2d textures"
+				+" \n");
+		out.add("   --interpolation-method <V>: NEAREST, BILINEAR, BICUBIC (optional, default: BILINEAR) \n");
 		out.add("   --gen-mipmaps: Generate mipmaps\n");
+		out.add("   --interactive: Open interactive console\n");
 		out.add("   --exit: Exit interactive console\n");
 		out.add("   --debug: Show debug informations\n");
 		out.add("Input formats:\n");
@@ -94,9 +110,32 @@ public class CLI109{
 			}
 		}
 		
-
+		String interpolation=options.get("interpolation-method");
+		if(interpolation==null) interpolation="bilinear";
 		String in=options.get("in");
+		boolean in_as_list=false;
+		boolean out_as_list=false;
+		if(in==null){
+			in=options.get("inlist");
+			if(in!=null)in_as_list=true;
+		}
 		String out=options.get("out");
+		if(out==null){
+			out=options.get("outlist");
+			if(out!=null)out_as_list=true;
+		}
+		String _multires=options.get("multires");
+		List<String[]> multires=null;
+		if(_multires!=null){
+			multires=new ArrayList<String[]>();
+			String vls[]=_multires.split(",");
+			for(String v:vls){
+				String x[]=v.split(":");
+				String prefix=x.length==1?"":x[0];
+				String size=x[x.length-1];
+				multires.add(new String[]{prefix,size});
+			}
+		}
 		
 		ArrayList<CLI109Module> modules=new ArrayList<CLI109Module> ();
 		
@@ -120,41 +159,131 @@ public class CLI109{
 
 		Texture tx=null;
 
-		String ext=in.substring(in.lastIndexOf(".")+1);
 
-		switch(ext){
-			case "jpg":
-			case "jpeg":
-			case "bmp":
-			case "png":{
-				AWTLoader loader=new AWTLoader();
-				Image img=loader.load(ImageIO.read(new File(in)),false);
-				tx=new Texture2D(img);
-				break;
-			}
-			case "tga":{
-				InputStream is=new BufferedInputStream(new FileInputStream(new File(in)));
-				Image img=TGALoader.load(is,false);
-				tx=new Texture2D(img);
-				is.close();
-				break;
-			}
-			case "dds":{
-				InputStream is=new BufferedInputStream(new FileInputStream(new File(in)));
-				tx=DDSLoaderI.load(is);
-				is.close();
+		List<String> ins=new ArrayList<String>();
+		if(in_as_list){
+			ins.addAll(Arrays.asList(in.split(",")));
+		}else{
+			ins.add(in);
+		}
+
+		ArrayList<String> outs=new ArrayList<String>();
+		if(out_as_list){
+			outs.addAll(Arrays.asList(out.split(",")));
+
+		}else{
+			outs.add(out);
+		}
+	
+		if(in_as_list&&out_as_list){
+			if(ins.size()!=outs.size()){
+				System.err.println("--inlist and --outlist must have the same number of values");
 			}
 		}
 
-		if(tx==null){
-			System.err.println("Input format not supported: "+ext);
-			return 1;
-		}
+		String formats[]=options.containsKey("format")?options.get("format").split(","):null;
+		int i=0;
+		for(String xin:ins){
+			String xout=outs.get(out_as_list?i:0);
+			String ext=xin.substring(xin.lastIndexOf(".")+1);
+			if(formats!=null)	options.put("format",formats[i>=formats.length?formats.length-1:i]);
 
-		OutputStream fo=new BufferedOutputStream(new FileOutputStream(new File(out)));
-		DDSWriter.write(tx,options,delegates,fo);
-		fo.close();
+			switch(ext){
+				case "jpg":
+				case "jpeg":
+				case "bmp":
+				case "png":{
+					AWTLoader loader=new AWTLoader();
+					Image img=loader.load(ImageIO.read(new File(xin)),false);
+					tx=new Texture2D(img);
+					break;
+				}
+				case "tga":{
+					InputStream is=new BufferedInputStream(new FileInputStream(new File(xin)));
+					Image img=TGALoader.load(is,false);
+					tx=new Texture2D(img);
+					is.close();
+					break;
+				}
+				case "dds":{
+					InputStream is=new BufferedInputStream(new FileInputStream(new File(xin)));
+					tx=DDSLoaderI.load(is);
+					is.close();
+				}
+			}
+
+			if(tx==null){
+				System.err.println("Input format not supported: "+xin);
+				if(!in_as_list) return 1;
+				else continue;
+			}
+
+			if(multires!=null&&tx.getType()==Type.TwoDimensional){
+				BufferedImage img=null;
+				try{
+					img=ImageToAwt.convert(tx.getImage(), false, true, 0);
+				}catch(Exception e){
+					System.err.println("Can't scale image "+xin+": "+e);
+					// e.printStackTrace();
+				}
+				int size=tx.getImage().getWidth();
+				for(String[] res:multires){
+					String outres=xout;
+					File outf=new File(outres);
+
+					if(outf.isDirectory()){
+						File inf=new File(xin);
+						outf=new File(outf.getAbsolutePath(),inf.getName()+".dds");
+					}
+
+					outres=outf.getAbsolutePath();
+					int x=outres.lastIndexOf(".");				
+					outres=outres.substring(0,x)+res[0]+outres.substring(x);
+					outf=new File(outres);
+
+					OutputStream fo=new BufferedOutputStream(new FileOutputStream(outf));
+					
+					if(res[1].endsWith("px")){
+						size=Integer.parseInt(res[1].substring(0,res[1].length()-2));
+					}else if(res[1].endsWith("%")){
+						int pc=Integer.parseInt(res[1].substring(0,res[1].length()-1));
+						size=size*pc/100;
+					}else{
+						 size=tx.getImage().getWidth();
+					}
+
+					Texture resizedtx;
+					if(img!=null&&size<tx.getImage().getWidth()){
+						try{
+							BufferedImage resized=resizeTo(img,size,size,interpolation);
+							ByteBuffer byteBuffer = BufferUtils.createByteBuffer(resized.getWidth() * resized.getHeight() * (tx.getImage().getFormat().getBitsPerPixel()/8));
+							ImageToAwt.convert(resized, tx.getImage().getFormat(), byteBuffer);
+							Image resizedimg= new Image(tx.getImage().getFormat(), resized.getWidth(), resized.getHeight(), byteBuffer, com.jme3.texture.image.ColorSpace.Linear);
+							resizedtx=new Texture2D(resizedimg);
+						}catch(Exception e){
+							e.printStackTrace();
+							resizedtx=tx;
+						}
+					}else resizedtx=tx;
+					System.out.println("Convert  "+xin+" to "+xout+" resolution: "+size);
+					DDSWriter.write(resizedtx,options,delegates,fo);
+					fo.close();
+				}
+			}else{
+				File outf=new File(xout);
+				if(outf.isDirectory()){
+					File inf=new File(xin);
+					outf=new File(outf.getAbsolutePath(),inf.getName()+".dds");
+				}
+				OutputStream fo=new BufferedOutputStream(new FileOutputStream(outf));
+				System.out.println("Convert  "+xin+" to "+xout);
+				DDSWriter.write(tx,options,delegates,fo);
+				fo.close();
+			}
+			i++;
+		}
 		for(CLI109Module m:modules)m.unload(options,help,delegates);
+
 
 		return 0;
 	}
@@ -162,13 +291,32 @@ public class CLI109{
 	private static String toString(List<String> c) {
 		String out="";
 		for(String s:c){
-			out+=s; 
+			out+=s;
 		}
 		return out;
 	}
 
+	
+	
+	public static BufferedImage resizeTo(BufferedImage sourceImage, int width, int height,String interpolation) {
 
+        double scaleX = width / (double) sourceImage.getWidth();
+        double scaleY = height / (double) sourceImage.getHeight();
+		AffineTransform scaleTransform=AffineTransform.getScaleInstance(scaleX,scaleY);
+		int intr=AffineTransformOp.TYPE_BILINEAR;
+		if(interpolation.equalsIgnoreCase("nearest")){
+			intr=AffineTransformOp.TYPE_NEAREST_NEIGHBOR;
+		}else if(interpolation.equalsIgnoreCase("bicubic")){
+			intr=AffineTransformOp.TYPE_BICUBIC;
+		}
 
+        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, intr);
+
+		BufferedImage scaledImage=bilinearScaleOp.filter(sourceImage,new BufferedImage(width,height,sourceImage.getType()));
+		return scaledImage;
+	}
+
+	
 	public static void main(String[] _args) throws Exception {
 		boolean interactive=false;
 		for(int i=0;i<_args.length;i++){

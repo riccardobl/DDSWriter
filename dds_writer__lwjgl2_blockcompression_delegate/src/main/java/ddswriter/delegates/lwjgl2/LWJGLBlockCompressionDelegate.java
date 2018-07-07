@@ -43,6 +43,7 @@ import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 
+import ddswriter.Pixel;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 import ddswriter.delegates.CommonBodyDelegate;
@@ -79,16 +80,15 @@ public abstract class LWJGLBlockCompressionDelegate extends CommonBodyDelegate{
 		int id=intBuf1.get(0);
 
 		glBindTexture(GL_TEXTURE_2D,id);
-
-		Vector4f pixels[][]=ir.getPixels(PixelFormat.FLOAT_NORMALIZED_RGBA);
+		Pixel pixels[][]=ir.getPixels();
 
 		FloatBuffer bbf=BufferUtils.createFloatBuffer(pixels.length*pixels[0].length*4);
 		for(int y=0;y<pixels[0].length;y++){
 			for(int x=0;x<pixels.length;x++){
-				bbf.put(pixels[x][y].x);
-				bbf.put(pixels[x][y].y);
-				bbf.put(pixels[x][y].z);
-				bbf.put(pixels[x][y].w);
+				bbf.put(pixels[x][y].r(PixelFormat.FLOAT_NORMALIZED_RGBA));
+				bbf.put(pixels[x][y].g(PixelFormat.FLOAT_NORMALIZED_RGBA));
+				bbf.put(pixels[x][y].b(PixelFormat.FLOAT_NORMALIZED_RGBA));
+				bbf.put(pixels[x][y].a(PixelFormat.FLOAT_NORMALIZED_RGBA));
 			}
 		}
 		bbf.rewind();

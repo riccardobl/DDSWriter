@@ -11,15 +11,15 @@ dependencies {
 
 
 
-task fatJar(type: Jar) {
-	manifest {
-        attributes  'Main-Class':  "ddswriter.cli.CLI109"
-    }
-    baseName = project.name + '-fat'
-    from { 
-		(configurations.compile).collect { it.isDirectory() ? it : zipTree(it) }
-	}
-    with jar
-}
+// task fatJar(type: Jar) {
+// 	manifest {
+//         attributes  'Main-Class':  "ddswriter.cli.CLI109"
+//     }
+//     baseName = project.name + '-fat'
+//     from { 
+// 		(configurations.compile).collect { it.isDirectory() ? it : zipTree(it) }
+// 	}
+//     with jar
+// }
 
-jar.finalizedBy(fatJar)
+// jar.finalizedBy(fatJar)

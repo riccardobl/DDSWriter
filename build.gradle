@@ -7,6 +7,8 @@ allprojects {
 	
 	
 	group="com.github.riccardobl.DDSWriter"
+	
+	version= project.hasProperty('in_version') ? project.getProperty('in_version') : '-SNAPSHOT'
 
 	if (project.hasProperty("DEV_INSTALL")){
 	    version="dev"
@@ -17,6 +19,17 @@ allprojects {
 }
 
 
+task buildBundle( type: Jar, dependsOn: subprojects.tasks["build"] ) {
+ baseName = project.name +'-bundle'
+ manifest {
+        attributes  'Main-Class':  "ddswriter.cli.CLI109"
+    }
+    subprojects.each { subproject ->
+     from subproject.configurations.archives.allArtifacts.files.collect {
+            zipTree(it)
+        }
+    }
+}
 
 subprojects {
 	apply plugin: 'maven'		

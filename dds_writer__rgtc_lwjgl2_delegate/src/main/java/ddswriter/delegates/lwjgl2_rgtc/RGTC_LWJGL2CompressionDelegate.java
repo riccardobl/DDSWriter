@@ -54,10 +54,13 @@ public class RGTC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 	}
 
 	protected Format FORMAT;
-
+	@Override
+	public void end() {
+		super.end();
+		FORMAT=null;
+	}
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-
 		String format=((String)options.get("format"));
 		if(format==null){
 			skip();

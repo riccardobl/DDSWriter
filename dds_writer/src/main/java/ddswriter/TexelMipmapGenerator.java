@@ -24,18 +24,17 @@ import com.jme3.math.Vector4f;
 import ddswriter.Texel.PixelFormat;
 
 public class TexelMipmapGenerator{
+	private static Vector4f bottomLeft=new Vector4f();
+	private static Vector4f bottomRight=new Vector4f();
+	private	static Vector4f topLeft=new Vector4f();
+	private static Vector4f topRight=new Vector4f();
 
 	public static Texel scaleImage(Texel input, int outputWidth, int outputHeight) {
-		Texel output=new Texel(PixelFormat.FLOAT_NORMALIZED_RGBA,outputWidth,outputHeight);
+		Texel output=new Texel(outputWidth,outputHeight);
 
 		float xRatio=((float)(input.getWidth()-1))/output.getWidth();
 		float yRatio=((float)(input.getHeight()-1))/output.getHeight();
-
-		Vector4f outputColor=new Vector4f();
-		Vector4f bottomLeft=new Vector4f();
-		Vector4f bottomRight=new Vector4f();
-		Vector4f topLeft=new Vector4f();
-		Vector4f topRight=new Vector4f();
+	
 
 		for(int y=0;y<outputHeight;y++){
 			for(int x=0;x<outputWidth;x++){
@@ -48,19 +47,19 @@ public class TexelMipmapGenerator{
 				float xDiff=x2f-x2;
 				float yDiff=y2f-y2;
 
-				bottomLeft=input.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x2,y2);
-				bottomRight=input.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x2+1,y2);
-				topLeft=input.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x2,y2+1);
-				topRight=input.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x2+1,y2+1);
+				input.get(x2,y2).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,bottomLeft);
+				input.get(x2+1,y2).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,bottomRight);
+				input.get(x2,y2+1).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,topLeft);
+				input.get(x2+1,y2+1).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,topRight);
 
 				bottomLeft.multLocal((1f-xDiff)*(1f-yDiff));
 				bottomRight.multLocal((xDiff)*(1f-yDiff));
 				topLeft.multLocal((1f-xDiff)*(yDiff));
 				topRight.multLocal((xDiff)*(yDiff));
 
-				outputColor.set(bottomLeft).addLocal(bottomRight).addLocal(topLeft).addLocal(topRight);
-
-				output.set(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y,outputColor);
+				Pixel outpx=new Pixel(PixelFormat.FLOAT_NORMALIZED_RGBA,null);
+				outpx.getRawPixel().set(bottomLeft).addLocal(bottomRight).addLocal(topLeft).addLocal(topRight);
+				output.set(x,y,outpx);
 			}
 		}
 		return output;

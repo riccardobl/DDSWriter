@@ -20,13 +20,25 @@ package ddswriter.delegates.lwjgl2;
 
 
 
+import java.io.File;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Pbuffer;
 import org.lwjgl.opengl.PixelFormat;
 
 import com.jme3.system.NativeLibraryLoader;
 
+import ddswriter.DDSDelegate;
 import ddswriter.cli.CLI109Module;
+import ddswriter.cli.utils.FileUtils;
 /**
  * 
  * @author Riccardo Balbo
@@ -35,11 +47,29 @@ import ddswriter.cli.CLI109Module;
 public abstract class LWJGLCliModule implements CLI109Module{
 
 	public static Pbuffer pbuffer;
+	static boolean ADDED_TO_HELP=false;
+
+	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
+		if(ADDED_TO_HELP)return;
+		int i=0;
+		for(String s:help){
+			if(s.startsWith("Input formats")){
+				break;
+			}else{
+				i++;
+			}
+		}
+		help.add(i,"   --use-opengl: Enable hardware compression with opengl\n");
+		ADDED_TO_HELP=true;
+	}
 
 	public boolean startGL() {
 		if(pbuffer!=null) return true;
 		try{
+			String extf=System.getProperty("nativePath");
+			if(extf!=null)NativeLibraryLoader.setCustomExtractionFolder(extf);	  
 			NativeLibraryLoader.loadNativeLibrary("lwjgl",true);
+
 			
 			PixelFormat pixel_format = new PixelFormat(8,8,0);
 			

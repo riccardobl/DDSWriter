@@ -4,5 +4,15 @@ os:
 - linux
 notifications:
   email: true
+env:
+  - LINUX=1
+  - WINDOWS=1
 script:
-- ./gradlew build
+- ./build.sh travis
+deploy:
+  provider: releases
+  api_key: ""
+  file: "build/libs/dist/*"
+  skip_cleanup: true 
+  on:
+    tags: true

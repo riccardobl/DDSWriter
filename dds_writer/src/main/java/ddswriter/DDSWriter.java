@@ -59,6 +59,10 @@ public class DDSWriter{
 		
 		body.flush();
 		os.close();
+
+		for(DDSDelegate delegate:delegates){
+			delegate.end();
+		}
 	}
 
 

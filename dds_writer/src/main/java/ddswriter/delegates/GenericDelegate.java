@@ -27,6 +27,7 @@ import java.util.Map;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
 
+import ddswriter.Pixel;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
 import ddswriter.encoders.ARGB8ColorBit;
@@ -54,10 +55,16 @@ public class GenericDelegate extends CommonBodyDelegate{
 
 	}
 
+	
 	protected Format FORMAT;
-
+	@Override
+	public void end() {
+		super.end();
+		FORMAT=null;
+	}
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
+
 		String format=((String)options.get("format"));
 		
 		if(format==null){
@@ -104,10 +111,11 @@ public class GenericDelegate extends CommonBodyDelegate{
 		int h=ir.getHeight();
 		for(int y=0;y<h;y++){
 			for(int x=0;x<w;x++){
-				Vector4f c=ir.get(PixelFormat.FLOAT_NORMALIZED_RGBA,x,y);
+				Pixel c=ir.get(x,y);
 				body.writeColorBit(FORMAT.colorbit.getBytes(c));
 			}
 		}
+
 	}
 
 	@Override
