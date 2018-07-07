@@ -5,14 +5,17 @@ os:
 notifications:
   email: true
 env:
-  - LINUX=1
-  - WINDOWS=1
+- LINUX=1
+- WINDOWS=1
+before_script:
+- "chmod +x build.sh"
 script:
-- ./build.sh travis
+- "./build.sh travis"
 deploy:
   provider: releases
-  api_key: ""
-  file: "build/libs/dist/*"
   skip_cleanup: true 
+  api_key:
+    secure: AcElsRkeJFBNdOjfdn0YDLJjRp/FaEknVJdl9zs7lkdsIKXapeKtXrg9Q6brvkNtBNqFoUBlkqdGQoFUUaAl/lNob7kndluUwYFKPN30e909oY1kRzC4DohUd0hsN60nzZe+LtvOCT7MweAEMeyuBTSvEVegLeOEhOauwiY8oQeyMQ9vdVp+d8czoG9YJEi0R5Svtm4/O8/NRVrt4xyC4hbFKdoupV889PBNRr4wiMBqzPG2gOGqLEXC/SxcGgzgw+rnJsN0bmiIS0LT7lMy2moI9jYpsDjIwe0Euy5c7kq7ELForJxkryx/GHZVyeKwFYgWMxgNKRj7hy7jHUkvmkBIMI+H1H+6SWYCWmKSa06jwJ2mIaRxwDW56GXSZHSFioRi6wx1mA3k7Lr5kPuOpdDTlYux2pGULwsZ1NqJ3hl2oZ9P2Q+TPlMuz5pksovmJdXFgMJMRCPtC/phRGx/1YbQpg3hFVNabXUM/LoSsYboC0a2bsW1i5ivuKA8hvjk9hr4L0YUWYBa8nBmbpK4r+msA/5BPZcCV2Nh6Arbd9Re/3y45IGHAJVsoFs99w50M0EPelsxEVeaNK7d7ExHKdRiT5vSYlwMdK7FK/tLRniqhptuRkooVuq7Gj9uOjlKPTXLu/wNm4ugj7LBr3grcsR0jakzscxY5eaPnQydEXU=
+  file: "build/libs/dist/*"
   on:
-    tags: true
+    repo: riccardobl/DDSWriter
