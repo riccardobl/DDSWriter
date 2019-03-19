@@ -71,7 +71,6 @@ public class CLI109{
 		out.add("   --out <FILE.dds>: Output file\n");
 		out.add("   --inlist <FILE1,FILE2,FILE3>: Csv list of multiple input files\n");
 		out.add("   --format: Output format. Default: ARGB8 (uncompressed). When --inlist is used, this params becomes a csv list.\n");
-		out.add("   --interpolation-method <V>: NEAREST, BILINEAR, BICUBIC (optional, default: BILINEAR) \n");
 		out.add("   --gen-mipmaps: Generate mipmaps\n");
 		out.add("   --srgb: Treat input and output as srgb\n");
 		out.add("   --srgblist <true,false,false>: Treat input and output as srgb\n");
@@ -106,9 +105,6 @@ public class CLI109{
 				options.put(cmd,arg);
 			}
 		}
-		
-		String interpolation=options.get("interpolation-method");
-		if(interpolation==null) interpolation="bilinear";
 		String in=options.get("in");
 		boolean in_as_list=false;
 		boolean out_as_list=false;
@@ -250,24 +246,6 @@ public class CLI109{
 
 	
 	
-	public static BufferedImage resizeTo(BufferedImage sourceImage, int width, int height,String interpolation) {
-
-        double scaleX = width / (double) sourceImage.getWidth();
-        double scaleY = height / (double) sourceImage.getHeight();
-		AffineTransform scaleTransform=AffineTransform.getScaleInstance(scaleX,scaleY);
-		int intr=AffineTransformOp.TYPE_BILINEAR;
-		if(interpolation.equalsIgnoreCase("nearest")){
-			intr=AffineTransformOp.TYPE_NEAREST_NEIGHBOR;
-		}else if(interpolation.equalsIgnoreCase("bicubic")){
-			intr=AffineTransformOp.TYPE_BICUBIC;
-		}
-
-        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, intr);
-
-		BufferedImage scaledImage=bilinearScaleOp.filter(sourceImage,new BufferedImage(width,height,sourceImage.getType()));
-		return scaledImage;
-	}
-
 	
 	public static void main(String[] _args) throws Exception {
 		boolean interactive=false;
