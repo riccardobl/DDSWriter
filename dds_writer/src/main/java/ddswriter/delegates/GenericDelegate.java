@@ -30,6 +30,7 @@ import com.jme3.texture.Texture;
 import ddswriter.Pixel;
 import ddswriter.Texel;
 import ddswriter.Texel.PixelFormat;
+import ddswriter.encoders.RGBA8ColorBit;
 import ddswriter.encoders.ARGB8ColorBit;
 import ddswriter.encoders.ColorBit;
 import ddswriter.encoders.RGB565ColorBit;
@@ -43,8 +44,9 @@ import ddswriter.format.DDS_HEADER;
  */
 public class GenericDelegate extends CommonBodyDelegate{
 	public static enum Format{
-		ARGB8(new ARGB8ColorBit()),RGB8(new RGB8ColorBit()),
-
+		ARGB8(new ARGB8ColorBit()),
+		RGB8(new RGB8ColorBit()),
+		RGBA8(new RGBA8ColorBit()),
 		RGB565(new RGB565ColorBit());
 
 		public ColorBit colorbit;
@@ -79,7 +81,7 @@ public class GenericDelegate extends CommonBodyDelegate{
 		}
 
 		if(FORMAT==null){
-			System.out.println(this.getClass()+" does not support "+format+". skip");
+			// System.out.println(this.getClass()+" does not support "+format+". skip");
 			skip();
 			return;
 		}
