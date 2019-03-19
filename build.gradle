@@ -35,9 +35,8 @@ subprojects {
 	repositories {
 		mavenLocal()
 	  	mavenCentral()	
-		maven {  
-			url "https://jitpack.io" 
-		}
+		maven { url "https://jitpack.io" }
+		maven { url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine" }
 	}	
 		
 	
