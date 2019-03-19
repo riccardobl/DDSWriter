@@ -25,7 +25,12 @@ import static org.lwjgl.opengl.ARBTextureCompression.glGetCompressedTexImageARB;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D;
+
 import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGetInteger;
+
+
 import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetTexLevelParameteri;
@@ -79,7 +84,10 @@ public abstract class LWJGLBlockCompressionDelegate extends CommonBodyDelegate{
 		glGenTextures(intBuf1);
 		int id=intBuf1.get(0);
 
+		// Get higher texunit
+		int bound=glGetInteger(GL_TEXTURE_BINDING_2D);
 		glBindTexture(GL_TEXTURE_2D,id);
+		
 		Pixel pixels[][]=ir.getPixels();
 
 		FloatBuffer bbf=BufferUtils.createFloatBuffer(pixels.length*pixels[0].length*4);
@@ -92,6 +100,7 @@ public abstract class LWJGLBlockCompressionDelegate extends CommonBodyDelegate{
 			}
 		}
 		bbf.rewind();
+
 		glTexImage2D(GL_TEXTURE_2D,0,gl_format,pixels.length,pixels[0].length,0,GL_RGBA,GL_FLOAT,bbf);
 
 		int out_size=glGetTexLevelParameteri(GL_TEXTURE_2D,0,GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB);
@@ -105,7 +114,7 @@ public abstract class LWJGLBlockCompressionDelegate extends CommonBodyDelegate{
 		BufferUtils.destroyDirectBuffer(out);
 
 		BufferUtils.destroyDirectBuffer(bbf);
-		glBindTexture(GL_TEXTURE_2D,0);
+		glBindTexture(GL_TEXTURE_2D,bound);
 		glDeleteTextures(id);
 	}
 

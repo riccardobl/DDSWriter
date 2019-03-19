@@ -55,7 +55,10 @@ public class RgtcCLI109Module  extends LWJGLCliModule{
 				i++;
 			}
 		}
+		help.add(i+1,"  \n");
 		help.add(i+1,"   RGTC1 (Compatible with ATI1, BC4, 3DC+), RGTC2 (Compatible with ATI2, BC5, 3DC)\n");
+		help.add(i+1,"  \n");
+
 		delegates.add(new RGTC_LWJGL2CompressionDelegate());
 	}
 

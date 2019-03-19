@@ -76,52 +76,26 @@ public abstract class DDSSlicedDelegate implements DDSDelegate{
 	}
 
 	private void slice(Texture tx, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception {
-
 		int mipmaps=!tx.getImage().hasMipmaps()?1:tx.getImage().getMipMapSizes().length;
-		//		boolean is_header=body==null;
 		if(tx instanceof Texture2D){
 			for(int mipmap=0;mipmap<mipmaps;mipmap++){
-				ImageRaster irr=ImageRaster.create(tx.getImage(),0,mipmap,false);
-				Texel ir=Texel.fromImageRaster(irr,new Vector2f(0,0),new Vector2f(irr.getWidth(),irr.getHeight()));
-				process_slice(tx,ir,mipmap,0,options,header,body);
-				
+				Texel ir=Texel.fromImage(tx.getImage(),0,mipmap);
+				process_slice(tx,ir,mipmap,0,options,header,body);				
 			}
 		}else if(tx instanceof TextureCubeMap){
 			for(int slice=0;slice<6;slice++){
 				for(int mipmap=0;mipmap<mipmaps;mipmap++){
-					
-					ImageRaster irr=ImageRaster.create(tx.getImage(),slice,mipmap,false);
-					Texel ir=Texel.fromImageRaster(irr,new Vector2f(0,0),new Vector2f(irr.getWidth(),irr.getHeight()));
-//					Texel ir=Texel.fromImageRaster(
-//							ImageRaster.create(tx.getImage(),slice,mipmap,false),new Vector2f(0,0),new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()));
-					//					if(is_header){
-					//						header(tx,ir,mipmap,slice,options,header);
-					//
-					//					}else{
-					//						body(tx,ir,mipmap,slice,options,header,body);
-					//					}
+					Texel ir=Texel.fromImage(tx.getImage(),slice,mipmap);
 					process_slice(tx,ir,mipmap,0,options,header,body);
-
 				}
 			}
 		}else if(tx instanceof Texture3D){
 			for(int slice=0;slice<tx.getImage().getDepth();slice++){
-				for(int mipmap=0;mipmap<mipmaps;mipmap++){
-					
-					ImageRaster irr=ImageRaster.create(tx.getImage(),slice,mipmap,false);
-					Texel ir=Texel.fromImageRaster(irr,new Vector2f(0,0),new Vector2f(irr.getWidth(),irr.getHeight()));
-//					Texel ir=Texel.fromImageRaster(ImageRaster.create(tx.getImage(),slice,mipmap,false),new Vector2f(0,0),new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()));
-					//					if(is_header){
-					//						header(tx,ir,mipmap,slice,options,header);
-					//
-					//					}else{
-					//						body(tx,ir,mipmap,slice,options,header,body);
-					//					}
+				for(int mipmap=0;mipmap<mipmaps;mipmap++){					
+					Texel ir=Texel.fromImage(tx.getImage(),slice,mipmap);
 					process_slice(tx,ir,mipmap,0,options,header,body);
-
 				}
 			}
-
 		}
 
 	}

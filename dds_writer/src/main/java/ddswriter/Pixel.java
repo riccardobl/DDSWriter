@@ -12,7 +12,7 @@ public class Pixel{
     PixelFormat FORMAT;
 
     public Pixel(PixelFormat format,float r,float g,float b,float a){
-        this(format,null);
+        FORMAT=format;
         PIXEL.set(r,g,b,a);
     }
 

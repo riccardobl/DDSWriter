@@ -55,7 +55,10 @@ public class S3tcCLI109Module extends LWJGLCliModule{
 				i++;
 			}
 		}
-		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5(BC3)\n");
+		help.add(i+1,"  \n");
+		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5 (BC3)\n");
+		help.add(i+1,"  \n");
+
 		delegates.add(new S3TC_LWJGL2CompressionDelegate());
 	}
 

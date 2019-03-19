@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
+import com.jme3.texture.Image;
 import com.jme3.texture.image.ImageRaster;
 
 /**
@@ -51,28 +52,34 @@ public class Texel implements Cloneable{
 		return cloned;
 	}
 
-	public static Texel fromImageRaster(ImageRaster ir, Vector2f from, Vector2f to) {
-		Pixel pixels[][]=new Pixel[(int)(to.x-from.x)][(int)(to.y-from.y)];
-		for(int y=(int)from.y;y<to.y;y++){
-			for(int x=(int)from.x;x<to.x;x++){
-				int xl=(int)(x-from.x);
-				int yl=(int)(y-from.y);
 
+	public static Texel fromImage(Image img, int slice,int mipmap) {
+		ImageRaster ir=ImageRaster.create(img,slice,mipmap,false);
+		int width=ir.getWidth();
+		int height=ir.getHeight();
+
+		Pixel pixels[][]=new Pixel[width][height];
+		ColorRGBA tmp=new ColorRGBA();	
+		Vector4f tmp2=new Vector4f();
+
+		for(int y=0;y<height;y++){
+			for(int x=0;x<width;x++){				
 				Pixel c;
 				if(x>=ir.getWidth()||y>=ir.getHeight()||x<0||y<0){
-					LOGGER.warn("Invalid coordinates x{} y{} for image w{} h{}. Use padding color.",x,y,ir.getWidth(),ir.getHeight());
 					c=PADDINGPX_COLOR;
 				}else{
-					c=new Pixel(PixelFormat.FLOAT_NORMALIZED_RGBA,ir.getPixel(x,y).toVector4f());
+					ir.getPixel(x,y,tmp);
+					tmp2.x=tmp.r;
+					tmp2.y=tmp.g;
+					tmp2.z=tmp.b;
+					tmp2.w=tmp.a;
+					c=new Pixel(PixelFormat.FLOAT_NORMALIZED_RGBA,tmp2);
 				}
-
-				pixels[xl][yl]=c;
-			}
+				pixels[x][y]=c;
+			}		
 		}
 		Texel tx=new Texel(pixels);
-		tx.AREA=new Vector2f[]{from,to
-
-		};
+		tx.AREA=new Vector2f[]{new Vector2f(0,0),new Vector2f(width,height)};
 		return tx;
 	}
 
@@ -119,17 +126,6 @@ public class Texel implements Cloneable{
 	}
 
 
-	// public void convertFormat(PixelFormat format) {
-	// 	for(int x=0;x<getWidth();x++){
-	// 		for(int y=0;y<getHeight();y++){
-	// 			PIXELS[x][y]=convert(FORMAT,format,PIXELS[x][y]);// todo
-	// 		}
-	// 	}
-	// }
-
-	//	public void genPalette() {
-	//		TexelReducer.reduce(this);
-	//	}
 
 	public Pixel get(int x, int y) {
 		return PIXELS[x][y];
@@ -197,9 +193,9 @@ public class Texel implements Cloneable{
 
 	protected Texel[] MIPMAPS;
 
-	public Texel[] getMipMap(int n, boolean regen) {
+	public Texel[] getMipMap(int n, boolean regen,boolean srgb) {
 		if(MIPMAPS!=null&&n==MIPMAPS.length&&!regen) return MIPMAPS;
-		MIPMAPS=TexelMipmapGenerator.generateMipMaps(this,n);
+		MIPMAPS=TexelMipmapGenerator.generateMipMaps(this,n,srgb);
 		return MIPMAPS;
 	}
 
