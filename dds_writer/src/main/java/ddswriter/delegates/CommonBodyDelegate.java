@@ -30,6 +30,7 @@ import static ddswriter.format.DDS_HEADER.DDSCAPS_COMPLEX;
 import static ddswriter.format.DDS_HEADER.DDSCAPS_MIPMAP;
 import static ddswriter.format.DDS_HEADER.DDSD_DEPTH;
 import static ddswriter.format.DDS_HEADER.DDSD_MIPMAPCOUNT;
+import static ddswriter.format.DDS_HEADER.NSD_IS_LINEAR;
 
 import java.util.Map;
 
@@ -85,6 +86,17 @@ public abstract class CommonBodyDelegate extends DDSSlicedDelegate{
 		}else if(tx instanceof Texture3D){
 			header.dwCaps2|=DDSCAPS2_VOLUME;
 		}
+
+
+		String input_srgb=options.get("srgb");
+		boolean srgb=input_srgb!=null;
+		if(!srgb){
+			header.dwNonStandardFlags|=NSD_IS_LINEAR;
+			System.out.println("Saved as linear");
+		}else{
+			System.out.println("Saved as sRGB");
+		}
+
 		super.header(tx,options,header);
 
 	}

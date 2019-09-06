@@ -96,14 +96,7 @@ public class S3TC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
 
 		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
-		String input_srgb=options.get("srgb");
-		SRGB=input_srgb!=null;
-		if(!SRGB){
-			header.dwNonStandardFlags|=NSD_IS_LINEAR;
-			System.out.println("Saved as linear");
-		}else{
-			System.out.println("Saved as sRGB");
-		}
+		
 	}
 
 	@Override

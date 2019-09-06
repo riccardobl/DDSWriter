@@ -88,7 +88,7 @@ public class RGTC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
 
 		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
-		header.dwNonStandardFlags|=NSD_IS_LINEAR;
+		header.dwNonStandardFlags|=NSD_IS_LINEAR; // force linear always.
 		
 	}
 

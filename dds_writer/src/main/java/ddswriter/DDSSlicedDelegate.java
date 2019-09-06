@@ -20,12 +20,10 @@ package ddswriter;
 
 import java.util.Map;
 
-import com.jme3.math.Vector2f;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
-import com.jme3.texture.image.ImageRaster;
 
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
