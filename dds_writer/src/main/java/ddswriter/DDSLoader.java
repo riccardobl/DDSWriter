@@ -1,5 +1,3 @@
-package ddswriter.cli;
-
 /*
  * Copyright (c) 2009-2012 jMonkeyEngine
  * All rights reserved.
@@ -31,6 +29,7 @@ package ddswriter.cli;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package ddswriter;
 
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetLoader;
@@ -116,6 +115,10 @@ public class DDSLoader implements AssetLoader {
     private int redMask, greenMask, blueMask, alphaMask;
     private DataInput in;
 
+    private int nonStandardFlags,enableNonStandardFlags;
+	public static final int NSD_IS_LINEAR=1<<0;
+	public static final int NSD_CHECK=1<<1;
+
     public DDSLoader() {
     }
 
@@ -135,7 +138,11 @@ public class DDSLoader implements AssetLoader {
                 ((TextureKey) info.getKey()).setTextureTypeHint(Texture.Type.CubeMap);
             }
             ArrayList<ByteBuffer> data = readData(((TextureKey) info.getKey()).isFlipY());
-            return new Image(pixelFormat, width, height, depth, data, sizes, ColorSpace.sRGB);
+            boolean linear=( (nonStandardFlags&NSD_IS_LINEAR)==NSD_IS_LINEAR);
+            linear=linear && enableNonStandardFlags==77137;
+            logger.log(Level.FINE, "Load {0} as {1}",
+            new Object[]{info.getKey().getName(),(linear?"linear":"sRGB")});
+            return new Image(pixelFormat, width, height, depth, data, sizes,linear?ColorSpace.Linear:ColorSpace.sRGB);
         } finally {
             if (stream != null){
                 stream.close();
@@ -147,7 +154,11 @@ public class DDSLoader implements AssetLoader {
         in = new LittleEndien(stream);
         loadHeader();
         ArrayList<ByteBuffer> data = readData(false);
-        return new Image(pixelFormat, width, height, depth, data, sizes, ColorSpace.sRGB);
+        boolean linear=( (nonStandardFlags&NSD_IS_LINEAR)==NSD_IS_LINEAR);
+        linear=linear &&  enableNonStandardFlags==77137;
+
+        logger.log(Level.FINE, "Load as {0}", new Object[]{(linear?"linear":"sRGB")});
+        return new Image(pixelFormat, width, height, depth, data, sizes,linear?ColorSpace.Linear: ColorSpace.sRGB);
     }
 
     private void loadDX10Header() throws IOException {
@@ -195,7 +206,9 @@ public class DDSLoader implements AssetLoader {
         pitchOrSize = in.readInt();
         depth = in.readInt();
         mipMapCount = in.readInt();
-        in.skipBytes(44);
+        nonStandardFlags=in.readInt();
+        enableNonStandardFlags=in.readInt();
+        in.skipBytes(36);
         pixelFormat = null;
         directx10 = false;
         readPixelFormat();
@@ -206,7 +219,7 @@ public class DDSLoader implements AssetLoader {
 
         if (!directx10) {
             if (!is(caps1, DDSCAPS_TEXTURE)) {
-                throw new IOException("File is not a texture");
+                logger.warning("Texture is missing the DDSCAPS_TEXTURE-flag");
             }
 
             if (depth <= 0) {
@@ -256,9 +269,9 @@ public class DDSLoader implements AssetLoader {
         int pfFlags = in.readInt();
         normal = is(pfFlags, DDPF_NORMAL);
 
+        int fourcc = in.readInt();
         if (is(pfFlags, DDPF_FOURCC)) {
             compressed = true;
-            int fourcc = in.readInt();
             int swizzle = in.readInt();
             in.skipBytes(16);
 
@@ -282,16 +295,16 @@ public class DDSLoader implements AssetLoader {
                         normal = true;
                     }
                     break;
-                /*
+                
                 case PF_ATI1:
                     bpp = 4;
-                    pixelFormat = Image.Format.LTC;
+                    pixelFormat = Image.Format.RGTC1;
                     break;
                 case PF_ATI2:
                     bpp = 8;
-                    pixelFormat = Image.Format.LATC;
+                    pixelFormat = Image.Format.RGTC2;
                     break;
-                */
+                
                 case PF_DX10:
                     compressed = false;
                     directx10 = true;
@@ -303,6 +316,12 @@ public class DDSLoader implements AssetLoader {
                     compressed = false;
                     bpp = 64;
                     pixelFormat = Image.Format.RGBA16F;
+                    break;
+                case 111:
+                    compressed = false;
+                    bpp = 16;
+                    pixelFormat = Format.Luminance16F;
+                    grayscaleOrAlpha = true;
                     break;
                 default:
                     throw new IOException("Unknown fourcc: " + string(fourcc) + ", " + Integer.toHexString(fourcc));
@@ -323,9 +342,10 @@ public class DDSLoader implements AssetLoader {
             }
         } else {
             compressed = false;
+           
 
             // skip fourCC
-            in.readInt();
+            // in.readInt();
 
             bpp = in.readInt();
             redMask = in.readInt();

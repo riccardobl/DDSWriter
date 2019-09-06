@@ -35,27 +35,6 @@ public class DDSOutputStream extends OutputStream{
 		DOS=new DataOutputStream(os);
 	}
 
-	public void writeInt(int i) throws IOException{
-		DOS.writeInt(i);
-	}
-	
-	/**
-	 * 
-	 *  16bit
-	 */
-	public void writeWord(int i) throws IOException {
-		DOS.writeShort(Short.reverseBytes((short)i));
-
-	}
-	
-	/**
-	 * 
-	 *  16bit
-	 */
-	public void writeWords(int... ws) throws IOException {
-		for(int w:ws)
-			writeWord(w);
-	}
 
 	/**
 	 * 
@@ -75,19 +54,7 @@ public class DDSOutputStream extends OutputStream{
 		}
 
 	}
-	
-	public void writeByte(int b) throws IOException{
-		DOS.writeByte(b);
-	}
-	
-	public void writeBytes(byte ...bs){
-		for(byte b:bs){
-			writeBytes(b);
-		}
-	}
-	
-	
-	
+
 
 	protected Byte COLORBIT_ACCUMULATOR;
 	protected int COLORBIT_ACCUMULATEDN;

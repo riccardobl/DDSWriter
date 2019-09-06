@@ -16,55 +16,62 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package ddswriter.delegates.lwjgl2_s3tc;
+package ddswriter.encoders;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.jme3.math.Vector4f;
 
-import ddswriter.DDSDelegate;
-import ddswriter.delegates.lwjgl2.LWJGLCliModule;
-
+import ddswriter.Pixel;
+import ddswriter.Texel.PixelFormat;
 /**
  * 
  * @author Riccardo Balbo
  */
-public class S3tcCLI109Module extends LWJGLCliModule{
-	public S3tcCLI109Module(){
+public class RGBA8ColorBit implements ColorBit{
 
+	@Override
+	public byte getBPP() {
+		return 32;
 	}
 
 	@Override
-	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
-		super.load(options,  help, delegates);
+	public byte[] getBytes(Pixel float_color) {
+		int b=(int)(float_color.b(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int g=(int)(float_color.g(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int r=(int)(float_color.r(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		int a=(int)(float_color.a(PixelFormat.FLOAT_NORMALIZED_RGBA)*255f);
+		byte out[]=new byte[5];
+		out[0]=getBPP();
+		out[1]=(byte)a;
+		out[2]=(byte)b;
+		out[3]=(byte)g;
+		out[4]=(byte)r;
+		return out;
+	}
 
-		String hwc=options.get("use_lwjgl");
-		if(hwc==null)hwc=options.get("use-lwjgl");
-		if(hwc==null)hwc=options.get("use-opengl");
-		if(hwc==null||hwc.equals("false")) return;
-		
-		if(!startGL()) return;
 	
-
-		
-		int i=0;
-		for(String s:help){
-			if(s.startsWith("Output formats")){
-				break;
-			}else{
-				i++;
-			}
-		}
-		help.add(i+1,"  \n");
-		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5 (BC3)\n");
-		help.add(i+1,"  \n");
-
-		delegates.add(new S3TC_LWJGL2CompressionDelegate());
+	@Override
+	public int getAColorMask() {
+		return 0x000000FF;
 	}
 
 	@Override
-	public void unload(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
-		endGL();
-
+	public int getRColorMask() {
+		return 0xFF000000;
 	}
+
+	@Override
+	public int getGColorMask() {
+		return 0x00FF0000;
+	}
+
+	@Override
+	public int getBColorMask() {
+		return 0x0000FF00;
+	}
+
+	@Override
+	public boolean hasAlpha() {
+		return true;
+	}
+
 }

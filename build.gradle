@@ -10,12 +10,6 @@ allprojects {
 	
 	version= project.hasProperty('in_version') ? project.getProperty('in_version') : '-SNAPSHOT'
 
-	if (project.hasProperty("DEV_INSTALL")){
-	    version="dev"
-	    repositories {
-	        mavenLocal()
-	    }
-	}
 }
 
 
@@ -39,10 +33,10 @@ subprojects {
 	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 		
 	repositories {
+		mavenLocal()
 	  	mavenCentral()	
-		maven {  
-			url "https://jitpack.io" 
-		}
+		maven { url "https://jitpack.io" }
+		maven { url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine" }
 	}	
 		
 	
@@ -65,7 +59,7 @@ subprojects {
 	task writeNewPom << {
 		pom {
 			project {
-				inceptionYear '2017'
+				inceptionYear '2019'
 				description project.description
 				licenses {
 					license {

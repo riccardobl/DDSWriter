@@ -10,14 +10,24 @@ fi
 v="`ls ddswriter-bundle-*.jar`"
 v=${v%.*}
 v=${v##*-}
-wget https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-windows-amd64-image.zip -O win.zip
-hash="`sha256sum win.zip | cut -d ' ' -f 1`" 
-if [ "$hash" != "1b835601f4ae689b9271040713b01d6bdd186c6a57bb4a7c47e1f7244d5ac928" ];
+
+URL="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-windows-amd64-image.zip"
+CACHED_FILE="../../tmp/`echo \"$URL\" |  sha256sum | cut -d ' ' -f1`.zip"
+if [ ! -f "$CACHED_FILE" ];
 then
-    echo "Corrupted JRE"
-    exit 1
+    wget "$URL" -O "$CACHED_FILE"
+    hash="`sha256sum $CACHED_FILE | cut -d ' ' -f 1`" 
+    if [ "$hash" != "1b835601f4ae689b9271040713b01d6bdd186c6a57bb4a7c47e1f7244d5ac928" ];
+    then
+        echo "Corrupted JRE"
+        exit 1
+    fi
+else
+    echo "File cached $CACHED_FILE"
 fi
-unzip win.zip
+
+
+unzip "$CACHED_FILE"
 mkdir windows-bundle
 mv openjdk-*-windows-*-image windows-bundle/jre
 rm -Rf windows-bundle/jre/src.zip

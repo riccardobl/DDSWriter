@@ -20,7 +20,7 @@ package ddswriter.delegates.lwjgl2_s3tc;
 
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-
+import static org.lwjgl.opengl.EXTTextureSRGB.*;
 import java.util.Map;
 
 import com.jme3.texture.Texture;
@@ -29,6 +29,7 @@ import ddswriter.Texel;
 import ddswriter.delegates.lwjgl2.LWJGLBlockCompressionDelegate;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
+import static ddswriter.format.DDS_HEADER.NSD_IS_LINEAR;
 
 /**
  * 	
@@ -38,18 +39,20 @@ import ddswriter.format.DDS_HEADER;
 
 public class S3TC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegate{
 	protected Format FORMAT; 
-
+	protected boolean SRGB;
 	public static enum Format{		
-		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,"BC1","DXT1"),
-		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC2","DXT3"),
-		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,"BC3","DXT5");
+		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,"BC1","DXT1","S3TC_DXT1"),
+		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT,"BC2","DXT3","S3TC_DXT3"),
+		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,"BC3","DXT5","S3TC_DXT5");
 		public String internal_name;
 		public int gl,blocksize;
 		public String[] aliases;
-		private Format(String s,int blocksize,int gl,String... aliases){
+		public int gl_srgb;
+		private Format(String s,int blocksize,int gl,int glsrgb,String... aliases){
 			this.internal_name=s;
 			this.gl=gl;
 			this.blocksize=blocksize;
+			this.gl_srgb=glsrgb;
 			this.aliases=aliases;
 		}
 
@@ -87,21 +90,26 @@ public class S3TC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 		
 		if(FORMAT==null) {
 			skip();
-			System.out.println(this.getClass()+" does not support "+format+". skip");
 			return;
 		}
 		
 		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
 
 		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
-
-
+		String input_srgb=options.get("srgb");
+		SRGB=input_srgb!=null;
+		if(!SRGB){
+			header.dwNonStandardFlags|=NSD_IS_LINEAR;
+			System.out.println("Saved as linear");
+		}else{
+			System.out.println("Saved as sRGB");
+		}
 	}
 
 	@Override
 	public void body(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 		if(FORMAT==null) return;
-		super.lwjglBody(FORMAT.gl,tx,ir,mipmap,slice,options,header,body);
+		super.lwjglBody(SRGB?FORMAT.gl_srgb:FORMAT.gl,tx,ir,mipmap,slice,options,header,body);
 	}
 
 	@Override

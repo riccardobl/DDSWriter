@@ -29,6 +29,7 @@ import ddswriter.Texel;
 import ddswriter.delegates.lwjgl2.LWJGLBlockCompressionDelegate;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
+import static ddswriter.format.DDS_HEADER.NSD_IS_LINEAR;
 
 /**
  * 	
@@ -82,11 +83,13 @@ public class RGTC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 
 		if(FORMAT==null){
 			skip();
-			System.out.println(this.getClass()+" does not support "+format+". skip");
 			return;
 		}
-		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
+		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
 
+		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
+		header.dwNonStandardFlags|=NSD_IS_LINEAR;
+		
 	}
 
 	@Override

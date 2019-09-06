@@ -19,54 +19,111 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package ddswriter;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector4f;
 
 import ddswriter.Texel.PixelFormat;
 
 public class TexelMipmapGenerator{
-	private static Vector4f bottomLeft=new Vector4f();
-	private static Vector4f bottomRight=new Vector4f();
-	private	static Vector4f topLeft=new Vector4f();
-	private static Vector4f topRight=new Vector4f();
 
-	public static Texel scaleImage(Texel input, int outputWidth, int outputHeight) {
-		Texel output=new Texel(outputWidth,outputHeight);
 
-		float xRatio=((float)(input.getWidth()-1))/output.getWidth();
-		float yRatio=((float)(input.getHeight()-1))/output.getHeight();
 	
 
-		for(int y=0;y<outputHeight;y++){
-			for(int x=0;x<outputWidth;x++){
-				float x2f=x*xRatio;
-				float y2f=y*yRatio;
+	static float BSpline( float x )
+	{
+		float f = x;
+		if( f < 0.0f ) {
+			f = -f;
+		}
+	  
+		if( f >= 0.0f && f <= 1.0f ) {
+			return ( 2.0f / 3.0f ) + ( 0.5f ) * ( f* f * f ) - (f*f);
+		}
+		else if( f > 1.0f && f <= 2.0f ) {
+			return 1.0f / 6.0f * FastMath.pow( ( 2.0f - f  ), 3.0f );
+		}
+		return 1.0f;
+	}
+
+	public static float Triangular(float f) {
+		f=f/2.0f;
+		if(f<0.0f){
+			return (f+1.0f);
+		}else{
+			return (1.0f-f);
+		}
+	}
+
+	public static Texel scaleImage(Texel input, int outputWidth, int outputHeight, boolean srgb) {
+		Texel output=new Texel(outputWidth,outputHeight);
+
+		float xRatio=((float)(input.getWidth()))/output.getWidth();
+		float yRatio=((float)(input.getHeight()))/output.getHeight();
+
+		Vector4f tmp=new Vector4f();
+
+		for(int yi=0;yi<outputHeight;yi++){
+			for(int xi=0;xi<outputWidth;xi++){
+				float nSumX=0,nSumY=0,nSumZ=0,nSumW=0;
+				float nDenom=0;
+
+				float x2f=xi*xRatio;
+				float y2f=yi*yRatio;
 
 				int x2=(int)x2f;
 				int y2=(int)y2f;
 
-				float xDiff=x2f-x2;
-				float yDiff=y2f-y2;
 
-				input.get(x2,y2).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,bottomLeft);
-				input.get(x2+1,y2).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,bottomRight);
-				input.get(x2,y2+1).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,topLeft);
-				input.get(x2+1,y2+1).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,topRight);
+				for(int m=0;m<2;m++){
+					for(int n=0;n<2;n++){
+						int offsetX=x2+m;
+						int offsetY=y2+n;
 
-				bottomLeft.multLocal((1f-xDiff)*(1f-yDiff));
-				bottomRight.multLocal((xDiff)*(1f-yDiff));
-				topLeft.multLocal((1f-xDiff)*(yDiff));
-				topRight.multLocal((xDiff)*(yDiff));
+						if(offsetX>input.getWidth()-1) offsetX=input.getWidth()-1;
+						if(offsetY>input.getHeight()-1) offsetY=input.getHeight()-1;
+						if(offsetX<0) offsetX=0;
+						if(offsetY<0) offsetY=0;
 
-				Pixel outpx=new Pixel(PixelFormat.FLOAT_NORMALIZED_RGBA,null);
-				outpx.getRawPixel().set(bottomLeft).addLocal(bottomRight).addLocal(topLeft).addLocal(topRight);
-				output.set(x,y,outpx);
+						input.get(offsetX,offsetY).toVector4f(PixelFormat.FLOAT_NORMALIZED_RGBA,tmp);
+						if(srgb){
+							// linearize
+							tmp.x = (float)Math.pow(tmp.x, 2.2f);
+							tmp.y = (float)Math.pow(tmp.y, 2.2f);
+							tmp.z = (float)Math.pow(tmp.z, 2.2f);
+						}
+
+
+						nSumX+=tmp.x;
+						nSumY+=tmp.y;
+						nSumZ+=tmp.z;
+						nSumW+=tmp.w;
+
+						nDenom++;
+					}
+				}
+
+				nSumX/=nDenom;
+				nSumY/=nDenom;
+				nSumZ/=nDenom;
+				nSumW/=nDenom;
+
+				if(srgb){
+					// to srgb
+					nSumX= (float)Math.pow(nSumX, 1f/2.2f);
+					nSumY = (float)Math.pow(nSumY, 1f/2.2f);
+					nSumZ = (float)Math.pow(nSumZ, 1f/2.2f);
+					//
+				}
+				Pixel outpx=new Pixel(PixelFormat.FLOAT_NORMALIZED_RGBA,nSumX,nSumY,nSumZ,nSumW);
+				
+				output.set(xi,yi,outpx);
+
 			}
 		}
 		return output;
 	}
 
-	public static Texel[] generateMipMaps(Texel image, int n) {
-		//		System.out.println("Gen "+n+" mipmaps");
+	public static Texel[] generateMipMaps(Texel image, int n, boolean srgb) {
 		Texel mipmaps[]=new Texel[n];
 		int width=image.getWidth();
 		int height=image.getHeight();
@@ -76,11 +133,9 @@ public class TexelMipmapGenerator{
 
 			height/=2;
 			width/=2;
-			if(height<2)height=2;
+			if(height<2) height=2;
 			if(width<2) width=2;
-			//			}
-			//				System.out.println("Gen mipmap "+width+"x"+height);
-			current=scaleImage(current,width,height);
+			current=scaleImage(current,width,height,srgb);
 			mipmaps[i]=current;
 		}
 		return mipmaps;

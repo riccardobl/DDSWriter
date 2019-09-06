@@ -81,7 +81,11 @@ public class DDS_HEADER extends WritableStruct{
 	public static final int DDSCAPS2_CUBEMAP_NEGATIVEZ=0x8000;
 	//Required for a volume texture.
 	public static final int DDSCAPS2_VOLUME=0x200000;
-	
+
+	/****** NON STANDARD ******/
+	// Define image as linear
+	public static final int NSD_IS_LINEAR=1<<0;
+
 	public int dwMagic=0x20534444;
 	public int dwSize=124;
 	
@@ -93,7 +97,13 @@ public class DDS_HEADER extends WritableStruct{
 	public int dwPitchOrLinearSize;
 	public int dwDepth;
 	public int dwMipMapCount;
-	public final int dwReserved1[]=new int[11];
+
+	@DumpableBitfield(possible_values={"NSD_IS_LINEAR"})
+	public int dwNonStandardFlags;
+
+	public int enableNonStandardFlags=77137;
+
+	public final int dwReserved1[]=new int[9];
 	public final DDS_PIXELFORMAT ddspf=new DDS_PIXELFORMAT();
 	
 	@DumpableBitfield(possible_values={"DDSCAPS_COMPLEX","DDSCAPS_MIPMAP","DDSCAPS_TEXTURE"})
@@ -116,6 +126,8 @@ public class DDS_HEADER extends WritableStruct{
 		os.writeDWord(dwPitchOrLinearSize);
 		os.writeDWord(dwDepth); 
 		os.writeDWord(dwMipMapCount); 
+		os.writeDWord(dwNonStandardFlags); 
+		os.writeDWord(enableNonStandardFlags); 
 		os.writeDWords(dwReserved1); 
 		ddspf.write(os);
 		os.writeDWord(dwCaps);
@@ -124,6 +136,7 @@ public class DDS_HEADER extends WritableStruct{
 		os.writeDWord(dwCaps4);
 		os.writeDWord(dwReserved2); 
 	}
+
 	
 	protected void dumpField(Field f,Collection<Field> flags,StringBuilder sb) throws IllegalArgumentException, IllegalAccessException{
 		if(f.getName().equals("ddspf")){

@@ -6,14 +6,22 @@ fi
 v="`ls ddswriter-bundle-*.jar`"
 v=${v%.*}
 v=${v##*-}
-wget https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-linux-amd64-image.zip -O lin.zip
-hash="`sha256sum lin.zip | cut -d ' ' -f 1`" 
-if [ "$hash" != "b87beb73f07af5b89b35b8656439c70fb7f46afdaa36e4a9394ad854c3a0b23d" ];
+URL="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-linux-amd64-image.zip"
+CACHED_FILE="../../tmp/`echo \"$URL\" |  sha256sum | cut -d ' ' -f1`.zip"
+if [ ! -f "$CACHED_FILE" ];
 then
-    echo "Corrupted JRE"
-    exit 1
+    wget "$URL" -O "$CACHED_FILE"
+    hash="`sha256sum $CACHED_FILE | cut -d ' ' -f 1`" 
+    if [ "$hash" != "b87beb73f07af5b89b35b8656439c70fb7f46afdaa36e4a9394ad854c3a0b23d" ];
+    then
+        echo "Corrupted JRE"
+        exit 1
+    fi
+else 
+    echo "File cached $CACHED_FILE"
 fi
-unzip lin.zip 
+
+unzip "$CACHED_FILE"
 mv openjdk-*-linux-*-image linux-bundle
 rm -Rf linux-bundle/src.zip
 rm -Rf linux-bundle/man

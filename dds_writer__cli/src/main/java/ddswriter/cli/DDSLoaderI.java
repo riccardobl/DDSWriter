@@ -26,14 +26,14 @@ import com.jme3.asset.TextureKey;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.Type;
+
+import ddswriter.DDSLoader;
+
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture3D;
 import com.jme3.texture.TextureCubeMap;
 
-/**
- * 
- * @author Riccardo Balbo
- */
+
 public class DDSLoaderI{
 	public static Texture load(InputStream is) throws IOException {
 		return load(is,false);
@@ -64,7 +64,7 @@ public class DDSLoaderI{
 			}
 
 		};
-
+ 
 		DDSLoader loader=new DDSLoader();
 		Image img=(Image)loader.load(ai);
 

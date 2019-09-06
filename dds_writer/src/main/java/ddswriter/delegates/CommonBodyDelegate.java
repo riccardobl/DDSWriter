@@ -95,7 +95,9 @@ public abstract class CommonBodyDelegate extends DDSSlicedDelegate{
 		boolean gen_mipmaps=!tx.getImage().hasMipmaps()&&gen_mm.equals("true");
 		if(mipmap==0&&gen_mipmaps){
 			int n=numMipMaps(new Vector2f(tx.getImage().getWidth(),tx.getImage().getHeight()))-1/*first mipmap is the image*/;
-			Texel mipmaps[]=ir.getMipMap(n,false);
+			String input_srgb=options.get("srgb");
+
+			Texel mipmaps[]=ir.getMipMap(n,false,input_srgb!=null);
 			super.process_slice(tx,ir,mipmap,slice,options,header,body);
 			for(int i=0;i<n;i++){
 				Texel m=mipmaps[i];

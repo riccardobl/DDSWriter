@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+mkdir -p tmp
+
 ./gradlew clean
 if [ "$1" = "travis" ];
 then
@@ -14,6 +16,7 @@ then
 else 
     args=$@
 fi
+
 
 ./gradlew build buildBundle $args
 cd build/libs
