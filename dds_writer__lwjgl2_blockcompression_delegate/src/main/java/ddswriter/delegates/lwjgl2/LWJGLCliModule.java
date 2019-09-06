@@ -66,8 +66,7 @@ public abstract class LWJGLCliModule implements CLI109Module{
 	public boolean startGL() {
 		if(pbuffer!=null) return true;
 		try{
-			String extf=System.getProperty("nativePath");
-			if(extf!=null)NativeLibraryLoader.setCustomExtractionFolder(extf);	  
+			NativeLibraryLoader.setCustomExtractionFolder(FileUtils._TEMP_DIR);	  
 			NativeLibraryLoader.loadNativeLibrary("lwjgl",true);
 
 			
