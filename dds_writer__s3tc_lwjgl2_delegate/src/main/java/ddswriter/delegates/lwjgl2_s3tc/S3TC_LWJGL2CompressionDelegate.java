@@ -18,6 +18,7 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package ddswriter.delegates.lwjgl2_s3tc;
 
+import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 import static org.lwjgl.opengl.EXTTextureCompressionS3TC.GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 import static org.lwjgl.opengl.EXTTextureSRGB.*;
@@ -43,7 +44,7 @@ public class S3TC_LWJGL2CompressionDelegate extends LWJGLBlockCompressionDelegat
 	public static enum Format{		
 		S3TC_DXT1("DXT1",8,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,"BC1","DXT1","S3TC_DXT1"),
 		S3TC_DXT3("DXT3",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT,"BC2","DXT3","S3TC_DXT3"),
-		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,"BC3","DXT5","S3TC_DXT5");
+		S3TC_DXT5("DXT5",16,GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,"BC3","DXT5","S3TC_DXT5");
 		public String internal_name;
 		public int gl,blocksize;
 		public String[] aliases;
