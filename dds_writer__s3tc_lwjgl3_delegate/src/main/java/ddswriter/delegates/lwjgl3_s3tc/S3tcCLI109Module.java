@@ -16,20 +16,55 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package ddswriter.encoders;
+package ddswriter.delegates.lwjgl3_s3tc;
 
-import ddswriter.Pixel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import ddswriter.DDSDelegate;
+import ddswriter.delegates.lwjgl3.LWJGLCliModule;
+
 /**
  * 
  * @author Riccardo Balbo
  */
-public interface ColorBit{
-	public byte getBPP();
-	public  byte[] getBytes(Pixel float_color);
-	public int getAColorMask();
-	public int getRColorMask();
-	public int getGColorMask();
-	public int getBColorMask();
-	public boolean hasAlpha();
+public class S3tcCLI109Module extends LWJGLCliModule{
+	public S3tcCLI109Module(){
 
+	}
+
+	@Override
+	public void load(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
+		super.load(options,  help, delegates);
+
+		String hwc=options.get("use_lwjgl");
+		if(hwc==null)hwc=options.get("use-lwjgl");
+		if(hwc==null)hwc=options.get("use-opengl");
+		if(hwc==null||hwc.equals("false")) return;
+		
+		if(!startGL()) return;
+	
+
+		
+		int i=0;
+		for(String s:help){
+			if(s.startsWith("Output formats")){
+				break;
+			}else{
+				i++;
+			}
+		}
+		help.add(i+1,"  \n");
+		help.add(i+1,"   S3TC_DXT1 (BC1), S3TC_DXT3 (BC2), S3TC_DXT5 (BC3)\n");
+		help.add(i+1,"  \n");
+
+		delegates.add(new S3TC_LWJGL3CompressionDelegate());
+	}
+
+	@Override
+	public void unload(Map<String,String> options, List<String> help, ArrayList<DDSDelegate> delegates) {
+		endGL();
+
+	}
 }

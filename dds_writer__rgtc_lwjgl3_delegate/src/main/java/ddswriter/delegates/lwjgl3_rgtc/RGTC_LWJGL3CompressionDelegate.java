@@ -16,46 +16,44 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package ddswriter.delegates;
+package ddswriter.delegates.lwjgl3_rgtc;
 
-import static ddswriter.format.DDS_HEADER.DDSD_PITCH;
-import static ddswriter.format.DDS_PIXELFORMAT.DDPF_ALPHAPIXELS;
-import static ddswriter.format.DDS_PIXELFORMAT.DDPF_RGB;
+import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RED_RGTC1;
+import static org.lwjgl.opengl.GL30.GL_COMPRESSED_RG_RGTC2;
 
 import java.util.Map;
 
 import com.jme3.texture.Texture;
 
-import ddswriter.Pixel;
 import ddswriter.Texel;
-import ddswriter.encoders.ARGB8ColorBit;
-import ddswriter.encoders.ColorBit;
-import ddswriter.encoders.RGB565ColorBit;
-import ddswriter.encoders.RGB8ColorBit;
-import ddswriter.encoders.RGBA8ColorBit;
+import ddswriter.delegates.lwjgl3.LWJGLBlockCompressionDelegate;
 import ddswriter.format.DDS_BODY;
 import ddswriter.format.DDS_HEADER;
+import static ddswriter.format.DDS_HEADER.NSD_IS_LINEAR;
 
 /**
- * 
+ * 	
  * @author Riccardo Balbo
  */
-public class GenericDelegate extends CommonBodyDelegate{
+
+public class RGTC_LWJGL3CompressionDelegate extends LWJGLBlockCompressionDelegate{
+
 	public static enum Format{
-		ARGB8(new ARGB8ColorBit()),
-		RGB8(new RGB8ColorBit()),
-		RGBA8(new RGBA8ColorBit()),
-		RGB565(new RGB565ColorBit());
+		RGTC1("ATI1",8,GL_COMPRESSED_RED_RGTC1,"ATI1","ATI_3DC+","BC4","3DC+"),
+		RGTC2("ATI2",16,GL_COMPRESSED_RG_RGTC2,"ATI2","ATI_3DC","BC5","3DC");
+		public String internal_name;
+		public int gl,blocksize;
+		public String[] aliases;
 
-		public ColorBit colorbit;
-
-		private Format(ColorBit bc){
-			colorbit=bc;
+		private Format(String s,int blocksize,int gl,String... aliases){
+			this.internal_name=s;
+			this.gl=gl;
+			this.blocksize=blocksize;
+			this.aliases=aliases;
 		}
 
 	}
 
-	
 	protected Format FORMAT;
 	@Override
 	public void end() {
@@ -64,58 +62,40 @@ public class GenericDelegate extends CommonBodyDelegate{
 	}
 	@Override
 	public void header(Texture tx, Map<String,String> options, DDS_HEADER header) throws Exception {
-
 		String format=((String)options.get("format"));
-		
 		if(format==null){
-			format="ARGB8";
-
-		}else{
-			format=format.toUpperCase();
-		}
-
-		for(Format f:Format.values()){
-			if(f.toString().equals(format)) FORMAT=f;
-		}
-
-		if(FORMAT==null){
-			// System.out.println(this.getClass()+" does not support "+format+". skip");
 			skip();
 			return;
 		}
 
-		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
-		super.header(tx,options,header);
-
-		header.dwFlags|=DDSD_PITCH;
-		header.dwPitchOrLinearSize=(tx.getImage().getWidth()*FORMAT.colorbit.getBPP()+7)/8;
-
-		header.ddspf.dwRGBBitCount=FORMAT.colorbit.getBPP();
-
-		header.ddspf.dwRBitMask=FORMAT.colorbit.getRColorMask();
-		header.ddspf.dwGBitMask=FORMAT.colorbit.getGColorMask();
-		header.ddspf.dwBBitMask=FORMAT.colorbit.getBColorMask();
-		if(FORMAT.colorbit.hasAlpha()){
-			header.ddspf.dwFlags|=DDPF_ALPHAPIXELS;
-			header.ddspf.dwABitMask=FORMAT.colorbit.getAColorMask();
+		format=format.toUpperCase();
+		for(Format f:Format.values()){
+			if(f.name().equals(format)) FORMAT=f;
+			else{
+				for(String a:f.aliases){
+					if(format.equals(a)){
+						FORMAT=f;
+						break;
+					}
+				}
+			}
 		}
 
-		header.ddspf.dwFlags|=DDPF_RGB;
+		if(FORMAT==null){
+			skip();
+			return;
+		}
+		System.out.println("Use "+this.getClass()+"  with format "+format+". ");
 
+		super.lwjglHeader(FORMAT.internal_name,FORMAT.blocksize,tx,options,header);
+		header.dwNonStandardFlags|=NSD_IS_LINEAR; // force linear always.
+		
 	}
 
 	@Override
 	public void body(Texture tx, Texel ir, int mipmap, int slice, Map<String,String> options, DDS_HEADER header, DDS_BODY body) throws Exception {
 		if(FORMAT==null) return;
-		int w=ir.getWidth();
-		int h=ir.getHeight();
-		for(int y=0;y<h;y++){
-			for(int x=0;x<w;x++){
-				Pixel c=ir.get(x,y);
-				body.writeColorBit(FORMAT.colorbit.getBytes(c));
-			}
-		}
-
+		super.lwjglBody(FORMAT.gl,tx,ir,mipmap,slice,options,header,body);
 	}
 
 	@Override

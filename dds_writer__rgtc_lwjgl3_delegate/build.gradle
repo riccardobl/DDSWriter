@@ -1,0 +1,52 @@
+dependencies {
+	    compileOnly "${jme_group}:jme3-core:${jme_version}"
+	    compileOnly project(':dds_writer__cli')
+	    
+	    compile project(':dds_format')
+	   	compile project(':dds_writer__lwjgl3_blockcompression_delegate')
+	    compile project(':dds_writer')
+	    
+	    
+	    testCompile 'junit:junit:4.12' 
+		
+
+          compileOnly "org.lwjgl:lwjgl:${lwjglVersion}"
+          compileOnly "org.lwjgl:lwjgl-glfw:${lwjglVersion}"
+          compileOnly "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}"
+          compileOnly "org.lwjgl:lwjgl-openal:${lwjglVersion}"
+          compileOnly "org.lwjgl:lwjgl-opencl:${lwjglVersion}"
+          compileOnly "org.lwjgl:lwjgl-opengl:${lwjglVersion}"
+          
+          runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-windows"
+          runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-linux"
+          runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-macos"
+          runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-windows"
+          runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-linux"
+          runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-macos"
+          runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-windows"
+          runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-linux"
+          runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-macos"
+          runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-windows"
+          runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-linux"
+          runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-macos"
+          runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-windows"
+          runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-linux"
+          runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-macos"
+	    runtime ("${jme_group}:jme3-lwjgl3:${jme_version}"){
+          transitive = false
+		}
+
+}
+
+// task fatJar(type: Jar) {
+// 	manifest {
+//         attributes  'Main-Class':  "ddswriter.cli.CLI109"
+//     }
+//     baseName = project.name + '-fat'
+//     from { 
+// 		(configurations.runtime).collect { it.isDirectory() ? it : zipTree(it) }
+// 	}
+//     with jar
+// }
+
+// jar.finalizedBy(fatJar)

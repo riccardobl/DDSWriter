@@ -3,13 +3,19 @@ dependencies {
 	compileOnly "${jme_group}:jme3-core:${jme_version}"
 	
 	compile project(':dds_writer__cli')
-	compile project(':dds_writer__s3tc_lwjgl2_delegate')
-	compile project(':dds_writer__rgtc_lwjgl2_delegate')
-	compile project(':dds_writer__lwjgl2_blockcompression_delegate')
+	compile project(':dds_writer__s3tc_lwjgl3_delegate')
+	compile project(':dds_writer__rgtc_lwjgl3_delegate')
+	compile project(':dds_writer__lwjgl3_blockcompression_delegate')
 	
 	compile "${jme_group}:jme3-core:${jme_version}"
 	compile "${jme_group}:jme3-desktop:${jme_version}"
 
+    compileOnly "org.lwjgl:lwjgl:${lwjglVersion}"
+    compileOnly "org.lwjgl:lwjgl-glfw:${lwjglVersion}"
+    compileOnly "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}"
+    compileOnly "org.lwjgl:lwjgl-openal:${lwjglVersion}"
+    compileOnly "org.lwjgl:lwjgl-opencl:${lwjglVersion}"
+    compileOnly "org.lwjgl:lwjgl-opengl:${lwjglVersion}"
 	    
 	testCompile 'junit:junit:4.12' 
 }

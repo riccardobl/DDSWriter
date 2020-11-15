@@ -18,8 +18,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package ddswriter.encoders;
 
-import com.jme3.math.Vector4f;
-
 import ddswriter.Pixel;
 import ddswriter.Texel.PixelFormat;
 /**

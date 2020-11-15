@@ -1,6 +1,6 @@
 package tests;
+
 import ddswriter.cli.CLI109;
-import ddswriter.delegates.lwjgl2_s3tc.S3tcCLI109Module;
 
 public class InteractiveCLI{
 	public static void main(String[] args) throws Exception {

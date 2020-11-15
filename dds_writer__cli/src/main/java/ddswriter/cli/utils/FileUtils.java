@@ -129,7 +129,9 @@ public class FileUtils{
 	}
 
 	public static void listDirectory(File fl, String pref, String ext, ArrayList<File> out, boolean recursive) {
-		for(File file:fl.listFiles())
+		File files[]=fl.listFiles();
+		if(files==null)return;
+		for(File file:files)
 			if(recursive&&file.isDirectory()) listDirectory(file,pref,ext,out,recursive);
 			else if((ext.equals("*")||file.getPath().endsWith(ext))&&(pref.equals("*")||file.getName().startsWith(pref))) out.add(file);
 	}

@@ -1,0 +1,30 @@
+dependencies {
+	    compileOnly "${jme_group}:jme3-core:${jme_version}"
+	    compileOnly project(':dds_format')
+		compileOnly project(':dds_writer')
+		compileOnly project(':dds_writer__cli')
+		
+
+        compileOnly "org.lwjgl:lwjgl:${lwjglVersion}"
+        compileOnly "org.lwjgl:lwjgl-glfw:${lwjglVersion}"
+        compileOnly "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}"
+        compileOnly "org.lwjgl:lwjgl-openal:${lwjglVersion}"
+        compileOnly "org.lwjgl:lwjgl-opencl:${lwjglVersion}"
+        compileOnly "org.lwjgl:lwjgl-opengl:${lwjglVersion}"
+          
+        runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-windows"
+        runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-linux"
+        runtime "org.lwjgl:lwjgl:${lwjglVersion}:natives-macos"
+        runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-windows"
+        runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-linux"
+        runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:natives-macos"
+        runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-windows"
+        runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-linux"
+        runtime "org.lwjgl:lwjgl-jemalloc:${lwjglVersion}:natives-macos"
+        runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-windows"
+        runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-linux"
+        runtime "org.lwjgl:lwjgl-opengl:${lwjglVersion}:natives-macos"
+        runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-windows"
+        runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-linux"
+        runtime "org.lwjgl:lwjgl-openal:${lwjglVersion}:natives-macos"
+}

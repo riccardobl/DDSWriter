@@ -2,13 +2,10 @@
 allprojects {
 	apply plugin: 'maven'		
 	apply plugin: 'java'
-	sourceCompatibility = 1.7
-	targetCompatibility =  1.7
-	
+	sourceCompatibility = 1.8
+	targetCompatibility =  1.8
 	group="com.github.riccardobl.DDSWriter"
-	
 	version= project.hasProperty('in_version') ? project.getProperty('in_version') : '-SNAPSHOT'
-
 }
 
 
@@ -34,6 +31,7 @@ subprojects {
 	repositories {
 		mavenLocal()
 	  	mavenCentral()	
+		jcenter()
 		maven { url "https://jitpack.io" }
 		maven { url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine" }
 	}	
