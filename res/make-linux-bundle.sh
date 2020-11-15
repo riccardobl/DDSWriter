@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if [ "$DEBUG" != "" ];
 then
     export DEBUG="-DDEBUG"
@@ -6,13 +7,13 @@ fi
 v="`ls ddswriter-bundle-*.jar`"
 v=${v%.*}
 v=${v##*-}
-URL="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-linux-amd64-image.zip"
+URL="https://cdn.azul.com/zulu/bin/zulu8.50.0.51-ca-jre8.0.275-linux_x64.zip"
 CACHED_FILE="../../tmp/`echo \"$URL\" |  sha256sum | cut -d ' ' -f1`.zip"
 if [ ! -f "$CACHED_FILE" ];
 then
     wget "$URL" -O "$CACHED_FILE"
     hash="`sha256sum $CACHED_FILE | cut -d ' ' -f 1`" 
-    if [ "$hash" != "b87beb73f07af5b89b35b8656439c70fb7f46afdaa36e4a9394ad854c3a0b23d" ];
+    if [ "$hash" != "5603a48f67c6791d132a825815f49fa432709a1d352f114d025ef25452ffe7fa" ];
     then
         echo "Corrupted JRE"
         exit 1
@@ -22,7 +23,7 @@ else
 fi
 
 unzip "$CACHED_FILE"
-mv openjdk-*-linux-*-image linux-bundle
+mv zulu* linux-bundle
 rm -Rf linux-bundle/src.zip
 rm -Rf linux-bundle/man
 cp ddswriter-bundle-*.jar linux-bundle/ddswriter.jar

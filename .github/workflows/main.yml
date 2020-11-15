@@ -1,0 +1,59 @@
+name: Build
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+  
+jobs:
+  Build:  
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:          
+      - name: Clone the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          
+      - name: Setup the java environment
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+          architecture: x64
+
+      - name: Prepare
+        run: |
+          chmod +x build.sh
+          chmod +x res/*.sh
+          sudo apt-get install -y p7zip-full  ".*-mingw-w64-.*"
+      
+      - name: Build         
+        run: |
+          export VERSION="`if [[ $GITHUB_REF == refs\/tags* ]]; then echo ${GITHUB_REF//refs\/tags\//}; fi`"
+          if [ "$VERSION" = "" ];
+          then
+            branch="`if [[ $GITHUB_REF == refs\/heads* ]]; then echo ${GITHUB_REF//refs\/heads\//}; fi`"
+            export VERSION="$branch-SNAPSHOT"
+          fi
+          WINDOWS=1 LINUX=1 ./build.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: build/libs/dist
+
+      - name: Deploy to github release
+        if: github.event_name == 'release'
+        run: |
+          releaseId=$(jq --raw-output '.release.id' ${GITHUB_EVENT_PATH})
+          for filename in build/libs/dist/*;
+          do
+            echo "Upload $filename to release $releaseId"
+            url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$releaseId/assets?name=$(basename $filename)"
+            echo "Upload to $url"
+            curl -L \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @"$filename" \
+              "$url"
+          done

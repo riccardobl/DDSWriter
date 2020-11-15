@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # Win dependencies:
 #       choco install wget 7z 
 #       wget http://www.labtestproject.com/files/sha256sum/sha256sum.exe -O /bin/sha256sum.exe
@@ -11,13 +12,13 @@ v="`ls ddswriter-bundle-*.jar`"
 v=${v%.*}
 v=${v##*-}
 
-URL="https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.7.0-u80-unofficial-windows-amd64-image.zip"
+URL="https://cdn.azul.com/zulu/bin/zulu8.50.0.51-ca-jre8.0.275-win_x64.zip"
 CACHED_FILE="../../tmp/`echo \"$URL\" |  sha256sum | cut -d ' ' -f1`.zip"
 if [ ! -f "$CACHED_FILE" ];
 then
     wget "$URL" -O "$CACHED_FILE"
     hash="`sha256sum $CACHED_FILE | cut -d ' ' -f 1`" 
-    if [ "$hash" != "1b835601f4ae689b9271040713b01d6bdd186c6a57bb4a7c47e1f7244d5ac928" ];
+    if [ "$hash" != "65e08595f0b542712d84873da6f48ac1ec1d13aeadd50e86684fb1d9de691d84" ];
     then
         echo "Corrupted JRE"
         exit 1
@@ -29,7 +30,7 @@ fi
 
 unzip "$CACHED_FILE"
 mkdir windows-bundle
-mv openjdk-*-windows-*-image windows-bundle/jre
+mv zulu* windows-bundle/jre
 rm -Rf windows-bundle/jre/src.zip
 cp ddswriter-bundle-*.jar windows-bundle/ddswriter.jar
 

@@ -2,23 +2,9 @@
 set -e
 mkdir -p tmp
 
-./gradlew clean
-if [ "$1" = "travis" ];
-then
-    WINDOWS=1
-    LINUX=1
-    if [ "$TRAVIS_TAG" != "" ];
-    then
-        args="-Pin_version=$TRAVIS_TAG"
-    else
-        args="-Pin_version=$TRAVIS_COMMIT"
-    fi
-else 
-    args=$@
-fi
+gradle clean
 
-
-./gradlew build buildBundle $args
+gradle build buildBundle -Pin_version=$VERSION
 cd build/libs
 cp -Rvf ../../res/* .
 chmod +x *.sh
