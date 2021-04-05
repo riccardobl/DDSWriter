@@ -2,7 +2,7 @@
 set -e
 mkdir -p tmp
 
-./gradlew clean
+gradle clean
 if [ "$1" = "travis" ];
 then
     WINDOWS=1
@@ -18,7 +18,7 @@ else
 fi
 
 
-./gradlew build buildBundle $args
+gradle build buildBundle $args
 cd build/libs
 cp -Rvf ../../res/* .
 chmod +x *.sh

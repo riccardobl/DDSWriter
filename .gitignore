@@ -13,3 +13,6 @@
 .settings
 .project
 tmp/
+gradle
+gradlew
+gradlew.bat
